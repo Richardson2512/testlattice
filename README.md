@@ -1,0 +1,2 @@
+# testlattice
+Ai ghost tester
