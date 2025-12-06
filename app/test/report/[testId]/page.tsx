@@ -16,10 +16,10 @@ import { TestReportSummary } from '../../../../components/TestReportSummary'
 import { PerformanceMetricsDisplay } from '../../../../components/PerformanceMetricsDisplay'
 import { VisualBugReport } from '../../../../components/VisualBugReport'
 import { ReportExportControls } from '../../../../components/ReportExportControls'
-import { TestReportSummary } from '../../../../components/TestReportSummary'
-import { PerformanceMetricsDisplay } from '../../../../components/PerformanceMetricsDisplay'
-import { VisualBugReport } from '../../../../components/VisualBugReport'
-import { ReportExportControls } from '../../../../components/ReportExportControls'
+import { ContextualCTA } from '../../../../components/ContextualCTA'
+import { UrgencyTimer } from '../../../../components/UrgencyTimer'
+import { SocialProof } from '../../../../components/SocialProof'
+import { ShareButton } from '../../../../components/ShareButton'
 
 export default function TestReportPage() {
   const params = useParams()
@@ -251,14 +251,40 @@ export default function TestReportPage() {
         </Link>
       </div>
 
-      <h1 style={{ 
-        fontSize: '2rem', 
-        fontWeight: 'bold', 
-        marginBottom: theme.spacing.xl,
-        color: theme.text.primary,
-      }}>
-        Test Report: {testId.substring(0, 8)}...
-      </h1>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: theme.spacing.xl }}>
+        <h1 style={{ 
+          fontSize: '2rem', 
+          fontWeight: 'bold', 
+          margin: 0,
+          color: theme.text.primary,
+        }}>
+          Test Report: {testId.substring(0, 8)}...
+        </h1>
+        {testRun.guestSessionId && (
+          <ShareButton testId={testId} />
+        )}
+      </div>
+
+      {/* Guest Features */}
+      {testRun.guestSessionId && (
+        <>
+          {testRun.expiresAt && (
+            <UrgencyTimer expiresAt={testRun.expiresAt} />
+          )}
+          <SocialProof />
+        </>
+      )}
+
+      {/* Contextual CTA for Guest Runs */}
+      {testRun.guestSessionId && (
+        <ContextualCTA
+          testRun={testRun}
+          issuesFound={testRun.steps?.filter(s => !s.success).length || 0}
+          criticalIssues={testRun.steps?.filter(s => !s.success && s.error?.toLowerCase().includes('critical')).length || 0}
+          hitStepLimit={testRun.steps?.length >= (testRun.options?.maxSteps || 10)}
+          testCompleted={testRun.status === 'completed' || testRun.status === 'failed'}
+        />
+      )}
 
       {/* Export Controls */}
       <ReportExportControls testRun={testRun} />
@@ -284,18 +310,19 @@ export default function TestReportPage() {
         />
       )}
 
-      {/* Critical Path Results */}
+      {/* Note: CriticalPathResults, ResponsiveTestingResults, and ErrorHandlingResults components 
+          are not yet implemented. These sections are commented out until the components are created. */}
+      {/* 
       {testRun.diagnosis?.criticalPathResult && (
         <CriticalPathResults result={testRun.diagnosis.criticalPathResult} />
       )}
 
-      {/* Responsive & Mobile Testing */}
       {testRun.diagnosis?.comprehensiveTests?.visualIssues && (
         <ResponsiveTestingResults visualIssues={testRun.diagnosis.comprehensiveTests.visualIssues} />
       )}
 
-      {/* Error Handling Report */}
       <ErrorHandlingResults diagnosis={testRun.diagnosis} />
+      */}
 
       {/* Test Summary */}
       <div style={{

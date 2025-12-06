@@ -1,6 +1,8 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import { TryNowSection } from '@/components/TryNowSection'
+import { LandingHeader } from '@/components/LandingHeader'
 
 export default async function Home() {
   const supabase = await createClient()
@@ -13,10 +15,16 @@ export default async function Home() {
 
   return (
     <main style={{ minHeight: '100vh', background: 'var(--bg-primary)' }}>
+      {/* Header */}
+      <LandingHeader />
+      
       {/* Hero Section */}
-      <section style={{
-        padding: '6rem 2rem 4rem',
-        background: 'linear-gradient(135deg, var(--beige-50) 0%, var(--beige-100) 100%)',
+      <section 
+        id="hero"
+        style={{
+          padding: '6rem 2rem 4rem',
+          paddingTop: '8rem', // Extra space for fixed header
+          background: 'linear-gradient(135deg, var(--beige-50) 0%, var(--beige-100) 100%)',
         position: 'relative',
         overflow: 'hidden',
       }}>
@@ -65,6 +73,18 @@ export default async function Home() {
               Autonomous AI-driven test automation platform for web applications. 
               Let AI handle your testing while you focus on building.
             </p>
+            
+            {/* Quick Start - Try Now Section */}
+            <div style={{
+              maxWidth: '600px',
+              margin: '0 auto 2.5rem',
+              padding: '2rem',
+              background: 'rgba(255, 255, 255, 0.5)',
+              borderRadius: 'var(--radius-lg)',
+              border: '2px solid rgba(153, 27, 27, 0.1)',
+            }}>
+              <TryNowSection />
+            </div>
             
             <div style={{
               display: 'flex',
@@ -225,9 +245,11 @@ export default async function Home() {
       </section>
 
       {/* CTA Section */}
-      <section style={{
-        padding: '5rem 2rem',
-        background: 'linear-gradient(135deg, var(--maroon-800) 0%, var(--maroon-900) 100%)',
+      <section 
+        id="pricing"
+        style={{
+          padding: '5rem 2rem',
+          background: 'linear-gradient(135deg, var(--maroon-800) 0%, var(--maroon-900) 100%)',
         color: 'var(--text-inverse)',
         position: 'relative',
         overflow: 'hidden',

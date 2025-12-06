@@ -375,25 +375,32 @@ async function getAuthToken(): Promise<string | null> {
 }
 
 async function request<T>(endpoint: string, options?: RequestInit): Promise<T> {
+  const token = await getAuthToken()
+
+  // Use the Headers API so we can add/remove headers safely
+  const headers = new Headers(options?.headers)
+
+  const hasJsonBody = options?.body !== undefined && !(options.body instanceof FormData)
+  if (hasJsonBody && !headers.has('Content-Type')) {
+    headers.set('Content-Type', 'application/json')
+  }
+
+  if (token) {
+    headers.set('Authorization', `Bearer ${token}`)
+  }
+
+  // Add timeout to prevent hanging requests
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), 30000) // 30 second timeout
+  
   try {
-    const token = await getAuthToken()
-
-    // Use the Headers API so we can add/remove headers safely
-    const headers = new Headers(options?.headers)
-
-    const hasJsonBody = options?.body !== undefined && !(options.body instanceof FormData)
-    if (hasJsonBody && !headers.has('Content-Type')) {
-      headers.set('Content-Type', 'application/json')
-    }
-
-    if (token) {
-      headers.set('Authorization', `Bearer ${token}`)
-    }
-
     const response = await fetch(`${API_URL}${endpoint}`, {
       ...options,
       headers,
+      signal: controller.signal,
     })
+    
+    clearTimeout(timeoutId)
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({ error: 'Request failed' }))
@@ -402,6 +409,13 @@ async function request<T>(endpoint: string, options?: RequestInit): Promise<T> {
 
     return response.json()
   } catch (error: any) {
+    clearTimeout(timeoutId)
+    
+    // Handle timeout errors
+    if (error.name === 'AbortError' || error.message?.includes('aborted')) {
+      throw new Error(`Request timeout: API server at ${API_URL} did not respond within 30 seconds. The server may be overloaded or unresponsive.`)
+    }
+    
     // Handle network errors (API server not running, CORS, etc.)
     if (error.message === 'Failed to fetch' || error.message.includes('fetch')) {
       throw new Error(`Cannot connect to API server at ${API_URL}. Make sure the API server is running on port 3001.`)
@@ -414,6 +428,21 @@ export const api = {
   // Test Runs
   async createTestRun(data: CreateTestRunRequest): Promise<{ runId: string; testRun: TestRun }> {
     return request('/api/tests/run', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    })
+  },
+
+  async createGuestTestRun(data: { url: string; email?: string; profile?: any; options?: any }): Promise<{ 
+    runId: string; 
+    testRun: TestRun; 
+    isGuest: boolean; 
+    expiresAt?: string;
+    message?: string;
+    tier?: 'tier1' | 'tier2';
+    testsRemaining?: number;
+  }> {
+    return request('/api/tests/run/guest', {
       method: 'POST',
       body: JSON.stringify(data),
     })
@@ -444,6 +473,44 @@ export const api = {
     return request(`/api/tests/${runId}`, {
       method: 'DELETE',
     })
+  },
+
+  // Tier Information
+  async getTierInfo(): Promise<{
+    tier: 'guest' | 'starter' | 'indie' | 'pro' | 'agency'
+    limits: {
+      maxSteps: number
+      maxPages: number
+      maxScreenshots: number
+      maxDuration: number
+      browsers: Array<'chromium' | 'firefox' | 'webkit'>
+      mobileBrowsers: boolean
+      diagnosis: { enabled: boolean; maxSteps?: number }
+      godMode: boolean
+      videoRecording: boolean
+      traceRecording: boolean
+      selfHealingRetries: number
+      testSuggestions: number
+      comprehensiveTesting: {
+        performance: boolean
+        accessibility: boolean
+        security: boolean
+        seo: boolean
+        visualRegression: boolean
+      }
+      retentionDays: number
+    }
+    features: {
+      diagnosis: boolean
+      godMode: boolean
+      videoRecording: boolean
+      traceRecording: boolean
+      selfHealing: boolean
+      testSuggestions: number
+      comprehensiveTesting: any
+    }
+  }> {
+    return request('/api/tier/info')
   },
 
   // Projects
@@ -655,7 +722,22 @@ export const api = {
     return request(`/api/tests/${runId}/steps/${stepNumber}`)
   },
 
-  async injectManualAction(runId: string, action: { action: string; selector?: string; value?: string; description?: string }): Promise<{ success: boolean; message: string; action: any }> {
+  async injectManualAction(
+    runId: string, 
+    action: { 
+      action: string
+      selector?: string
+      target?: string
+      value?: string
+      description?: string
+      godMode?: {
+        clickX: number
+        clickY: number
+        extractSelector: boolean
+        originalAction?: any
+      }
+    }
+  ): Promise<{ success: boolean; message: string; action: any }> {
     return request(`/api/tests/${runId}/inject-action`, {
       method: 'POST',
       body: JSON.stringify(action),

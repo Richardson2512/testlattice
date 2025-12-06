@@ -39,52 +39,173 @@ export function LiveTestControl({ testRunId, onClose }: LiveTestControlProps) {
   const [actionType, setActionType] = useState<'click' | 'type' | 'scroll'>('click')
   const [inputValue, setInputValue] = useState('')
   const [injecting, setInjecting] = useState(false)
+  const [livePreviewUrl, setLivePreviewUrl] = useState<string | null>(null)
   const wsRef = useRef<WebSocket | null>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
-  // WebSocket connection
+  // WebSocket connection with reconnection logic
   useEffect(() => {
     const wsUrl = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:3001'
-    const ws = new WebSocket(`${wsUrl}/ws/test-control?runId=${testRunId}`)
-
-    ws.onopen = () => {
-      console.log('WebSocket connected')
-      setConnected(true)
-    }
-
-    ws.onmessage = (event) => {
+    let reconnectAttempts = 0
+    const maxReconnectAttempts = 5
+    const reconnectDelay = 3000 // 3 seconds
+    
+    const connectWebSocket = () => {
       try {
-        const message = JSON.parse(event.data)
-        handleWebSocketMessage(message)
+        const ws = new WebSocket(`${wsUrl}/ws/test-control?runId=${testRunId}`)
+        
+        // Connection timeout (10 seconds)
+        const connectionTimeout = setTimeout(() => {
+          if (ws.readyState !== WebSocket.OPEN) {
+            console.warn('[LiveTestControl] WebSocket connection timeout, closing and retrying...')
+            ws.close()
+            reconnectAttempts++
+            if (reconnectAttempts < maxReconnectAttempts) {
+              setTimeout(connectWebSocket, reconnectDelay)
+            } else {
+              console.error('[LiveTestControl] Max reconnection attempts reached')
+              setConnected(false)
+            }
+          }
+        }, 10000)
+
+        ws.onopen = () => {
+          clearTimeout(connectionTimeout)
+          console.log('[LiveTestControl] WebSocket connected')
+          setConnected(true)
+          reconnectAttempts = 0 // Reset on successful connection
+        }
+
+        ws.onmessage = (event) => {
+          try {
+            const message = JSON.parse(event.data)
+            handleWebSocketMessage(message)
+          } catch (error) {
+            console.error('[LiveTestControl] Failed to parse WebSocket message:', error)
+          }
+        }
+
+        ws.onerror = (error) => {
+          console.error('[LiveTestControl] WebSocket error:', error)
+          clearTimeout(connectionTimeout)
+          setConnected(false)
+        }
+
+        ws.onclose = (event) => {
+          clearTimeout(connectionTimeout)
+          console.log('[LiveTestControl] WebSocket disconnected', event.code, event.reason)
+          setConnected(false)
+          
+          // Reconnect if not a normal closure
+          if (event.code !== 1000 && reconnectAttempts < maxReconnectAttempts) {
+            reconnectAttempts++
+            console.log(`[LiveTestControl] Reconnecting in ${reconnectDelay/1000}s (attempt ${reconnectAttempts}/${maxReconnectAttempts})...`)
+            setTimeout(connectWebSocket, reconnectDelay)
+          }
+        }
+
+        wsRef.current = ws
+
+        // Ping every 30 seconds to keep connection alive
+        const pingInterval = setInterval(() => {
+          if (ws.readyState === WebSocket.OPEN) {
+            try {
+              ws.send(JSON.stringify({ type: 'ping' }))
+            } catch (error) {
+              console.error('[LiveTestControl] Failed to send ping:', error)
+              clearInterval(pingInterval)
+            }
+          } else {
+            clearInterval(pingInterval)
+          }
+        }, 30000)
+
+        return () => {
+          clearInterval(pingInterval)
+          clearTimeout(connectionTimeout)
+          if (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING) {
+            ws.close(1000, 'Component unmounting')
+          }
+          wsRef.current = null
+        }
       } catch (error) {
-        console.error('Failed to parse WebSocket message:', error)
+        console.error('[LiveTestControl] Failed to create WebSocket connection:', error)
+        reconnectAttempts++
+        if (reconnectAttempts < maxReconnectAttempts) {
+          setTimeout(connectWebSocket, reconnectDelay)
+        } else {
+          setConnected(false)
+        }
       }
     }
 
-    ws.onerror = (error) => {
-      console.error('WebSocket error:', error)
-      setConnected(false)
-    }
-
-    ws.onclose = () => {
-      console.log('WebSocket disconnected')
-      setConnected(false)
-    }
-
-    wsRef.current = ws
-
-    // Ping every 30 seconds to keep connection alive
-    const pingInterval = setInterval(() => {
-      if (ws.readyState === WebSocket.OPEN) {
-        ws.send(JSON.stringify({ type: 'ping' }))
-      }
-    }, 30000)
-
-    return () => {
-      clearInterval(pingInterval)
-      ws.close()
-    }
+    const cleanup = connectWebSocket()
+    return cleanup
   }, [testRunId])
+
+  // Message listener for God Mode clicks from iframe
+  useEffect(() => {
+    const handleMessage = async (event: MessageEvent) => {
+      // Security: Only accept messages from our API origin
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
+      const apiOrigin = new URL(apiUrl).origin
+      
+      if (event.origin !== apiOrigin && event.origin !== window.location.origin) {
+        return
+      }
+
+      if (event.data.type === 'god_mode_click') {
+        const { x, y } = event.data
+        console.log(`[God Mode] Click received from iframe at (${x}, ${y})`)
+        
+        setInjecting(true)
+        
+        try {
+          const controller = new AbortController()
+          const timeoutId = setTimeout(() => controller.abort(), 10000) // 10 second timeout
+          
+          const response = await fetch(`${apiUrl}/api/tests/${testRunId}/inject-action`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'click',
+              description: 'God Mode: User intervention',
+              godMode: {
+                clickX: x,
+                clickY: y,
+                extractSelector: true,
+                originalAction: null
+              }
+            }),
+            signal: controller.signal,
+          })
+          
+          clearTimeout(timeoutId)
+          
+          if (response.ok) {
+            setAiStuck(false)
+            setStuckMessage('')
+            setLivePreviewUrl(null)
+            console.log('[God Mode] Click captured, selector will be extracted by worker')
+          } else {
+            const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
+            throw new Error(errorData.error || `HTTP ${response.status}`)
+          }
+        } catch (error: any) {
+          if (error.name === 'AbortError') {
+            console.error('[God Mode] Request timeout - API server may be slow or unresponsive')
+          } else {
+            console.error('[God Mode] Failed to send click:', error)
+          }
+        } finally {
+          setInjecting(false)
+        }
+      }
+    }
+
+    window.addEventListener('message', handleMessage)
+    return () => window.removeEventListener('message', handleMessage)
+  }, [testRunId, aiStuck])
 
   const handleWebSocketMessage = (message: any) => {
     switch (message.type) {
@@ -107,12 +228,22 @@ export function LiveTestControl({ testRunId, onClose }: LiveTestControlProps) {
             elements: [],
           })
         }
+        // Load live preview when AI is stuck
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
+        setLivePreviewUrl(`${apiUrl}/api/tests/${testRunId}/live-preview?t=${Date.now()}`)
         break
       case 'action_queued':
+      case 'god_mode_click':
+      case 'manual_action_injected':
         console.log('Action queued:', message.action)
         setInjecting(false)
         setSelectedElement(null)
         setInputValue('')
+        // Clear AI stuck state when action is queued
+        if (message.action?.godMode) {
+          setAiStuck(false)
+          setStuckMessage('')
+        }
         break
       case 'pong':
         // Keep-alive response
@@ -172,7 +303,11 @@ export function LiveTestControl({ testRunId, onClose }: LiveTestControlProps) {
       setInjecting(true)
       
       try {
-        const response = await fetch(`/api/tests/${testRunId}/inject-action`, {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), 10000) // 10 second timeout
+        
+        const response = await fetch(`${apiUrl}/api/tests/${testRunId}/inject-action`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -184,16 +319,27 @@ export function LiveTestControl({ testRunId, onClose }: LiveTestControlProps) {
               extractSelector: true,
               originalAction: null  // Would come from stuck context
             }
-          })
+          }),
+          signal: controller.signal,
         })
+        
+        clearTimeout(timeoutId)
         
         if (response.ok) {
           setAiStuck(false)
           setStuckMessage('')
+          setLivePreviewUrl(null)
           console.log('[God Mode] Click captured, selector will be extracted by worker')
+        } else {
+          const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
+          throw new Error(errorData.error || `HTTP ${response.status}`)
         }
-      } catch (error) {
-        console.error('[God Mode] Failed to send click:', error)
+      } catch (error: any) {
+        if (error.name === 'AbortError') {
+          console.error('[God Mode] Request timeout - API server may be slow or unresponsive')
+        } else {
+          console.error('[God Mode] Failed to send click:', error)
+        }
       } finally {
         setInjecting(false)
       }
@@ -222,6 +368,9 @@ export function LiveTestControl({ testRunId, onClose }: LiveTestControlProps) {
 
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 10000) // 10 second timeout
+      
       const response = await fetch(`${apiUrl}/api/tests/${testRunId}/inject-action`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -231,16 +380,26 @@ export function LiveTestControl({ testRunId, onClose }: LiveTestControlProps) {
           value: actionType === 'type' ? inputValue : undefined,
           description: `Manual ${actionType} on ${selectedElement.text || selectedElement.selector}`,
         }),
+        signal: controller.signal,
       })
+      
+      clearTimeout(timeoutId)
 
       if (!response.ok) {
-        throw new Error(`Failed to inject action: ${response.statusText}`)
+        const errorData = await response.json().catch(() => ({ error: response.statusText }))
+        throw new Error(errorData.error || `HTTP ${response.status}`)
       }
 
       console.log('Action injected successfully')
+      setInjecting(false)
     } catch (error: any) {
-      console.error('Failed to inject action:', error)
-      alert(`Failed to inject action: ${error.message}`)
+      clearTimeout(timeoutId)
+      if (error.name === 'AbortError') {
+        alert('Request timeout: API server did not respond within 10 seconds. Please check your connection.')
+      } else {
+        console.error('Failed to inject action:', error)
+        alert(`Failed to inject action: ${error.message || 'Unknown error'}`)
+      }
       setInjecting(false)
     }
   }
@@ -370,7 +529,20 @@ export function LiveTestControl({ testRunId, onClose }: LiveTestControlProps) {
           justifyContent: 'center',
           padding: '1rem',
         }}>
-          {pageState ? (
+          {livePreviewUrl && aiStuck ? (
+            <iframe
+              src={livePreviewUrl}
+              style={{
+                width: '100%',
+                height: '100%',
+                border: 'none',
+                backgroundColor: '#fff',
+                minHeight: '500px',
+              }}
+              sandbox="allow-same-origin allow-scripts"
+              title="Live Browser Preview"
+            />
+          ) : pageState ? (
             <canvas
               ref={canvasRef}
               onClick={handleCanvasClick}

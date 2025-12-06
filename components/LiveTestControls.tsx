@@ -15,6 +15,7 @@ interface LiveTestControlsProps {
   isResuming: boolean
   isStopping: boolean
   isFullScreen: boolean
+  aiStuck?: boolean  // NEW: Indicates if AI is stuck
 }
 
 export function LiveTestControls({
@@ -31,7 +32,8 @@ export function LiveTestControls({
   isPausing,
   isResuming,
   isStopping,
-  isFullScreen
+  isFullScreen,
+  aiStuck = false  // Default to false
 }: LiveTestControlsProps) {
   const isRunning = status === 'running'
   const isDiagnosing = status === 'diagnosing'
@@ -83,20 +85,24 @@ export function LiveTestControls({
           </button>
         )}
         
-        {/* God Mode */}
-        {isRunning && paused && onGodMode && (
+        {/* God Mode - Show when AI is stuck OR when paused */}
+        {isRunning && (paused || aiStuck) && onGodMode && (
           <button
             onClick={onGodMode}
             className="btn"
             style={{ 
               minWidth: '120px',
-              background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+              background: aiStuck 
+                ? 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)'
+                : 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
               color: 'white',
               border: 'none',
-              fontWeight: '600'
+              fontWeight: '700',
+              boxShadow: aiStuck ? '0 4px 12px rgba(239, 68, 68, 0.4)' : 'none',
+              animation: aiStuck ? 'pulse 2s infinite' : 'none',
             }}
           >
-            🚨 God Mode
+            {aiStuck ? '🚨 God Mode (AI Stuck!)' : '🎮 God Mode'}
           </button>
         )}
       </div>

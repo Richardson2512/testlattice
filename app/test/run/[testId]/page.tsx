@@ -11,6 +11,9 @@ import { LiveTestControl } from '../../../../components/LiveTestControl'
 import { BrowserMatrixResults } from '../../../../components/BrowserMatrixResults'
 import { TestProgressIndicators } from '../../../../components/TestProgressIndicators'
 import { LiveTestControls } from '../../../../components/LiveTestControls'
+import { GuestProgressIndicator } from '../../../../components/GuestProgressIndicator'
+import { UrgencyTimer } from '../../../../components/UrgencyTimer'
+import { SocialProof } from '../../../../components/SocialProof'
 
 type DiagnosisEvent = {
   id: string
@@ -1183,6 +1186,9 @@ export default function TestRunPage() {
   const [isCancellingRun, setIsCancellingRun] = useState(false)
   const [isFullScreen, setIsFullScreen] = useState(false)
   const logsContainerRef = useRef<HTMLDivElement>(null)
+  const [aiStuck, setAiStuck] = useState(false)
+  const [stuckMessage, setStuckMessage] = useState('')
+  const wsRef = useRef<WebSocket | null>(null)
 
   // Compute derived values (must be before early returns per Rules of Hooks)
   const steps = testRun?.steps || []
@@ -1193,6 +1199,13 @@ export default function TestRunPage() {
   const isActiveRun = isDiagnosing || testRun?.status === 'running'
   const isWaitingApproval = testRun?.status === 'waiting_approval'
   const diagnosis = testRun?.diagnosis
+  
+  // Guest run detection
+  const isGuest = !!(testRun?.guestSessionId || testRun?.options?.isGuestRun)
+  const currentStep = steps.length
+  const maxSteps = testRun?.options?.maxSteps || 10
+  const hitStepLimit = currentStep >= maxSteps && testRun?.status === 'running'
+  
   const activeDiagnosisStageIndex = useMemo(() => {
     let idx = 0
     DIAGNOSIS_MILESTONES.forEach((stage, stageIdx) => {
@@ -1281,6 +1294,7 @@ export default function TestRunPage() {
       
       return () => clearInterval(interval)
     }
+    return undefined
   }, [testId, autoRefresh, testRun?.status, isDiagnosing])
 
   useEffect(() => {
@@ -1291,6 +1305,7 @@ export default function TestRunPage() {
     } else if (!isWaitingApproval) {
       diagnosisSoundPlayedRef.current = false
     }
+    return undefined
   }, [isWaitingApproval, playDiagnosisReadySound, triggerDiagnosisNotification])
 
   // Use real progress from backend if available
@@ -1313,6 +1328,7 @@ export default function TestRunPage() {
       // Not diagnosing, reset
       setDiagnosisProgress(0)
     }
+    return undefined
   }, [isDiagnosing, isWaitingApproval, testRun?.diagnosisProgress?.percent])
   useEffect(() => {
     if (isDiagnosing) {
@@ -1320,10 +1336,11 @@ export default function TestRunPage() {
       setDiagnosisEvents([])
       setIsDiagnosisModalDismissed(false)
     }
+    return undefined
   }, [isDiagnosing])
 
   useEffect(() => {
-    if (!isDiagnosing) return
+    if (!isDiagnosing) return undefined
     const newEvents: DiagnosisEvent[] = []
     diagnosisMilestonesRef.current.forEach((milestone) => {
       if (!milestone.triggered && diagnosisProgress >= milestone.threshold) {
@@ -1339,10 +1356,141 @@ export default function TestRunPage() {
     if (newEvents.length > 0) {
       setDiagnosisEvents((prev) => [...prev, ...newEvents])
     }
+    return undefined
   }, [diagnosisProgress, isDiagnosing])
 
+  // WebSocket connection for real-time updates (AI stuck, etc.)
   useEffect(() => {
-    if (typeof document === 'undefined') return
+    if (!testRun || testRun.status !== 'running') {
+      // Close WebSocket if test is not running
+      if (wsRef.current) {
+        wsRef.current.close()
+        wsRef.current = null
+      }
+      return undefined
+    }
+
+    const wsUrl = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:3001'
+    let reconnectAttempts = 0
+    const maxReconnectAttempts = 5
+    const reconnectDelay = 3000 // 3 seconds
+    
+    const connectWebSocket = () => {
+      try {
+        const ws = new WebSocket(`${wsUrl}/ws/test-control?runId=${testId}`)
+        
+        // Connection timeout (10 seconds)
+        const connectionTimeout = setTimeout(() => {
+          if (ws.readyState !== WebSocket.OPEN) {
+            console.warn('[WebSocket] Connection timeout, closing and retrying...')
+            ws.close()
+            reconnectAttempts++
+            if (reconnectAttempts < maxReconnectAttempts) {
+              setTimeout(connectWebSocket, reconnectDelay)
+            } else {
+              console.error('[WebSocket] Max reconnection attempts reached')
+            }
+          }
+        }, 10000)
+
+        ws.onopen = () => {
+          clearTimeout(connectionTimeout)
+          console.log('[WebSocket] Connected to test run:', testId)
+          reconnectAttempts = 0 // Reset on successful connection
+        }
+
+        ws.onmessage = (event) => {
+          try {
+            const message = JSON.parse(event.data)
+            
+            switch (message.type) {
+              case 'ai_stuck':
+                console.log('[WebSocket] AI is stuck:', message.context)
+                setAiStuck(true)
+                setStuckMessage(message.context.message || 'AI needs manual intervention')
+                // Automatically open God Mode UI when AI gets stuck
+                if (!showLiveControl) {
+                  setShowLiveControl(true)
+                }
+                break
+              case 'action_queued':
+              case 'god_mode_click':
+                // Action was queued, clear stuck state
+                if (message.action?.godMode) {
+                  setAiStuck(false)
+                  setStuckMessage('')
+                }
+                break
+              case 'test_status':
+                // Status updates
+                break
+              case 'pong':
+                // Keep-alive
+                break
+              default:
+                console.log('[WebSocket] Unknown message type:', message.type)
+            }
+          } catch (error) {
+            console.error('[WebSocket] Failed to parse message:', error)
+          }
+        }
+
+        ws.onerror = (error) => {
+          console.error('[WebSocket] Error:', error)
+          clearTimeout(connectionTimeout)
+        }
+
+        ws.onclose = (event) => {
+          clearTimeout(connectionTimeout)
+          console.log('[WebSocket] Disconnected', event.code, event.reason)
+          
+          // Only reconnect if test is still running and not a normal closure
+          if (testRun?.status === 'running' && event.code !== 1000 && reconnectAttempts < maxReconnectAttempts) {
+            reconnectAttempts++
+            console.log(`[WebSocket] Reconnecting in ${reconnectDelay/1000}s (attempt ${reconnectAttempts}/${maxReconnectAttempts})...`)
+            setTimeout(connectWebSocket, reconnectDelay)
+          }
+        }
+
+        wsRef.current = ws
+
+        // Ping every 30 seconds to keep connection alive
+        const pingInterval = setInterval(() => {
+          if (ws.readyState === WebSocket.OPEN) {
+            try {
+              ws.send(JSON.stringify({ type: 'ping' }))
+            } catch (error) {
+              console.error('[WebSocket] Failed to send ping:', error)
+              clearInterval(pingInterval)
+            }
+          } else {
+            clearInterval(pingInterval)
+          }
+        }, 30000)
+
+        return () => {
+          clearInterval(pingInterval)
+          clearTimeout(connectionTimeout)
+          if (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING) {
+            ws.close(1000, 'Component unmounting')
+          }
+          wsRef.current = null
+        }
+      } catch (error) {
+        console.error('[WebSocket] Failed to create connection:', error)
+        reconnectAttempts++
+        if (reconnectAttempts < maxReconnectAttempts) {
+          setTimeout(connectWebSocket, reconnectDelay)
+        }
+      }
+    }
+
+    const cleanup = connectWebSocket()
+    return cleanup
+  }, [testId, testRun?.status, showLiveControl])
+
+  useEffect(() => {
+    if (typeof document === 'undefined') return undefined
     if (isDiagnosing && !isDiagnosisModalDismissed) {
       const originalOverflow = document.body.style.overflow
       document.body.style.overflow = 'hidden'
@@ -1350,10 +1498,13 @@ export default function TestRunPage() {
         document.body.style.overflow = originalOverflow
       }
     }
+    return undefined
   }, [isDiagnosing, isDiagnosisModalDismissed])
 
   // Keyboard shortcuts (must be before early returns)
   useEffect(() => {
+    if (typeof window === 'undefined') return undefined
+    
     const handleKeyDown = (e: KeyboardEvent) => {
       // Space to pause/resume (only if not in input field)
       if (e.code === 'Space' && (e.target as HTMLElement).tagName !== 'INPUT' && (e.target as HTMLElement).tagName !== 'TEXTAREA') {
@@ -1371,6 +1522,29 @@ export default function TestRunPage() {
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [testRun])
+
+  // Listen for fullscreen changes (MUST be before early returns)
+  useEffect(() => {
+    const handleFullScreenChange = () => {
+      setIsFullScreen(!!document.fullscreenElement)
+    }
+    
+    if (typeof document !== 'undefined') {
+      document.addEventListener('fullscreenchange', handleFullScreenChange)
+      return () => document.removeEventListener('fullscreenchange', handleFullScreenChange)
+    }
+    return undefined
+  }, [])
+
+  // Auto-scroll logs to latest (MUST be before early returns)
+  useEffect(() => {
+    if (logsContainerRef.current && steps.length > 0 && isActiveRun) {
+      logsContainerRef.current.scrollTo({ 
+        top: logsContainerRef.current.scrollHeight, 
+        behavior: 'smooth' 
+      })
+    }
+  }, [steps.length, isActiveRun])
 
   async function loadData() {
     try {
@@ -1552,25 +1726,14 @@ export default function TestRunPage() {
     }
   }
 
-  // Listen for fullscreen changes
-  useEffect(() => {
-    const handleFullScreenChange = () => {
-      setIsFullScreen(!!document.fullscreenElement)
-    }
-    
-    document.addEventListener('fullscreenchange', handleFullScreenChange)
-    return () => document.removeEventListener('fullscreenchange', handleFullScreenChange)
-  }, [])
+  // Early returns AFTER all hooks
+  if (loading) {
+    return <div style={{ padding: '2rem', textAlign: 'center' }}>Loading...</div>
+  }
 
-  // Auto-scroll logs to latest
-  useEffect(() => {
-    if (logsContainerRef.current && steps.length > 0 && isActiveRun) {
-      logsContainerRef.current.scrollTo({ 
-        top: logsContainerRef.current.scrollHeight, 
-        behavior: 'smooth' 
-      })
-    }
-  }, [steps.length, isActiveRun])
+  if (!testRun) {
+    return <div style={{ padding: '2rem', textAlign: 'center' }}>Test run not found</div>
+  }
 
   return (
     <div style={{ 
@@ -1582,6 +1745,93 @@ export default function TestRunPage() {
       color: theme.text.primary,
     }}>
       <KeyboardShortcuts />
+      
+      {/* Guest Features */}
+      {isGuest && testRun && (
+        <>
+          <GuestProgressIndicator testRun={testRun} currentStep={currentStep} />
+          {testRun.expiresAt && (
+            <UrgencyTimer expiresAt={testRun.expiresAt} />
+          )}
+          <SocialProof />
+        </>
+      )}
+      
+      {/* AI Stuck Alert Banner */}
+      {aiStuck && testRun?.status === 'running' && (
+        <div style={{
+          marginBottom: theme.spacing.md,
+          padding: theme.spacing.md,
+          backgroundColor: '#fef3c7',
+          border: '2px solid #f59e0b',
+          borderRadius: theme.radius.lg,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          boxShadow: theme.shadows.lg,
+          animation: 'pulse 2s infinite',
+        }}>
+          <div style={{ flex: 1 }}>
+            <div style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: theme.spacing.sm,
+              marginBottom: theme.spacing.xs,
+            }}>
+              <span style={{ fontSize: '1.5rem' }}>🚨</span>
+              <strong style={{ color: '#92400e', fontSize: '1.125rem' }}>
+                AI is Stuck - God Mode Required
+              </strong>
+            </div>
+            <p style={{ 
+              color: '#92400e', 
+              margin: 0, 
+              fontSize: '0.875rem',
+              marginTop: theme.spacing.xs,
+            }}>
+              {stuckMessage || 'The AI needs your help to continue. Click on the element you want to interact with.'}
+            </p>
+          </div>
+          <div style={{ display: 'flex', gap: theme.spacing.sm }}>
+            <button
+              onClick={() => {
+                setShowLiveControl(true)
+                setAiStuck(false) // Will be set again by WebSocket if still stuck
+              }}
+              style={{
+                padding: `${theme.spacing.sm} ${theme.spacing.lg}`,
+                backgroundColor: '#ef4444',
+                color: '#fff',
+                border: 'none',
+                borderRadius: theme.radius.md,
+                cursor: 'pointer',
+                fontWeight: '600',
+                fontSize: '0.875rem',
+                boxShadow: theme.shadows.md,
+              }}
+            >
+              🎮 Open God Mode
+            </button>
+            <button
+              onClick={() => {
+                setAiStuck(false)
+                setStuckMessage('')
+              }}
+              style={{
+                padding: `${theme.spacing.sm} ${theme.spacing.md}`,
+                backgroundColor: 'transparent',
+                color: '#92400e',
+                border: '1px solid #f59e0b',
+                borderRadius: theme.radius.md,
+                cursor: 'pointer',
+                fontSize: '0.875rem',
+              }}
+            >
+              ✕ Dismiss
+            </button>
+          </div>
+        </div>
+      )}
       
       {/* Header */}
       <div style={{ marginBottom: theme.spacing.md, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -2125,7 +2375,7 @@ export default function TestRunPage() {
                   cursor: 'pointer',
                 }}
               >
-                {showLiveControl ? '✕ Close Control' : '🎮 Live Control'}
+                {showLiveControl ? '✕ Close Control' : aiStuck ? '🚨 God Mode (AI Stuck!)' : '🎮 Live Control'}
               </button>
             )}
           </div>
@@ -2527,6 +2777,27 @@ export default function TestRunPage() {
 
           {/* RIGHT: Context-aware actions */}
           <div style={{ display: 'flex', gap: theme.spacing.sm }}>
+            {/* God Mode Button - Show when AI is stuck */}
+            {aiStuck && (
+              <button
+                onClick={() => setShowLiveControl(true)}
+                style={{
+                  padding: `${theme.spacing.sm} ${theme.spacing.lg}`,
+                  background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: theme.radius.md,
+                  cursor: 'pointer',
+                  fontWeight: '700',
+                  fontSize: '1rem',
+                  boxShadow: '0 4px 12px rgba(239, 68, 68, 0.4)',
+                  animation: 'pulse 2s infinite',
+                }}
+              >
+                🎮 God Mode
+              </button>
+            )}
+            
             {testRun.paused ? (
               <button
                 onClick={handleResume}
