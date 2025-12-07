@@ -1,312 +1,173 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { TryNowSection } from '@/components/TryNowSection'
 import { LandingHeader } from '@/components/LandingHeader'
+import { FeaturesSection } from '@/components/FeaturesSection'
+import { GuestTestModalWrapper } from '@/components/GuestTestModalWrapper'
+import { SocialProofSection } from '@/components/SocialProofSection'
+import { HowItWorksSection } from '@/components/HowItWorksSection'
+import { ComparisonSection } from '@/components/ComparisonSection'
+import { FaqSection } from '@/components/FaqSection'
+import { CtaSection } from '@/components/CtaSection'
+import { FeatureCarousel } from '@/components/FeatureCarousel'
 
 export default async function Home() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  // Redirect authenticated users to dashboard
   if (user) {
     redirect('/dashboard')
   }
 
   return (
-    <main style={{ minHeight: '100vh', background: 'var(--bg-primary)' }}>
-      {/* Header */}
+    <main style={{ minHeight: '100vh', background: 'var(--bg-primary)', overflowX: 'hidden' }}>
       <LandingHeader />
-      
+
       {/* Hero Section */}
-      <section 
-        id="hero"
-        style={{
-          padding: '6rem 2rem 4rem',
-          paddingTop: '8rem', // Extra space for fixed header
-          background: 'linear-gradient(135deg, var(--beige-50) 0%, var(--beige-100) 100%)',
+      <section style={{
+        paddingTop: '140px',
+        paddingBottom: '80px',
         position: 'relative',
-        overflow: 'hidden',
+        overflow: 'hidden'
       }}>
-        <div className="container" style={{ position: 'relative', zIndex: 1 }}>
-          <div style={{
-            maxWidth: '800px',
-            margin: '0 auto',
-            textAlign: 'center',
-            animation: 'fadeIn 0.8s ease-out',
-          }}>
-            <div style={{
-              display: 'inline-block',
-              padding: '0.5rem 1.25rem',
-              background: 'rgba(153, 27, 27, 0.1)',
-              borderRadius: 'var(--radius-full)',
-              marginBottom: '1.5rem',
-              border: '1px solid rgba(153, 27, 27, 0.2)',
-            }}>
-              <span style={{ color: 'var(--maroon-800)', fontSize: '0.875rem', fontWeight: '500' }}>
-                ✨ AI-Powered Test Automation
-              </span>
-            </div>
-            
-            <h1 style={{
-              fontSize: 'clamp(2.5rem, 6vw, 4rem)',
-              fontWeight: '700',
-              marginBottom: '1.5rem',
-              background: 'linear-gradient(135deg, var(--maroon-800) 0%, var(--maroon-600) 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-              lineHeight: '1.1',
-              letterSpacing: '-0.03em',
-            }}>
-              TestLattice
-            </h1>
-            
-            <p style={{
-              fontSize: 'clamp(1.125rem, 2vw, 1.5rem)',
-              color: 'var(--text-secondary)',
-              marginBottom: '2.5rem',
-              lineHeight: '1.6',
-              maxWidth: '600px',
-              margin: '0 auto 2.5rem',
-            }}>
-              Autonomous AI-driven test automation platform for web applications. 
-              Let AI handle your testing while you focus on building.
-            </p>
-            
-            {/* Quick Start - Try Now Section */}
-            <div style={{
-              maxWidth: '600px',
-              margin: '0 auto 2.5rem',
-              padding: '2rem',
-              background: 'rgba(255, 255, 255, 0.5)',
-              borderRadius: 'var(--radius-lg)',
-              border: '2px solid rgba(153, 27, 27, 0.1)',
-            }}>
-              <TryNowSection />
-            </div>
-            
-            <div style={{
-              display: 'flex',
-              gap: '1rem',
-              justifyContent: 'center',
-              flexWrap: 'wrap',
-              marginBottom: '3rem',
-            }}>
-              <Link
-                href="/signup"
-                className="btn btn-primary"
-                style={{
-                  padding: '1rem 2rem',
-                  fontSize: '1.0625rem',
-                  boxShadow: 'var(--shadow-lg)',
-                }}
-              >
-                Get Started Free →
-              </Link>
-              <Link
-                href="/login"
-                className="btn btn-secondary"
-                style={{
-                  padding: '1rem 2rem',
-                  fontSize: '1.0625rem',
-                }}
-              >
-                Sign In
-              </Link>
-            </div>
-          </div>
-        </div>
-        
-        {/* Decorative Elements */}
+        {/* Background Gradients */}
         <div style={{
           position: 'absolute',
-          top: '-50%',
+          top: '-20%',
           right: '-10%',
+          width: '800px',
+          height: '800px',
+          background: 'radial-gradient(circle, rgba(153, 27, 27, 0.08) 0%, transparent 60%)',
+          borderRadius: '50%',
+          zIndex: 0,
+          filter: 'blur(60px)'
+        }} />
+        <div style={{
+          position: 'absolute',
+          bottom: '-10%',
+          left: '-5%',
           width: '600px',
           height: '600px',
-          background: 'radial-gradient(circle, rgba(153, 27, 27, 0.05) 0%, transparent 70%)',
+          background: 'radial-gradient(circle, rgba(220, 38, 38, 0.05) 0%, transparent 60%)',
           borderRadius: '50%',
           zIndex: 0,
+          filter: 'blur(60px)'
         }} />
-        <div style={{
-          position: 'absolute',
-          bottom: '-30%',
-          left: '-5%',
-          width: '400px',
-          height: '400px',
-          background: 'radial-gradient(circle, rgba(153, 27, 27, 0.03) 0%, transparent 70%)',
-          borderRadius: '50%',
-          zIndex: 0,
-        }} />
-      </section>
 
-      {/* Features Section */}
-      <section style={{
-        padding: '5rem 2rem',
-        background: 'var(--bg-secondary)',
-      }}>
-        <div className="container">
-          <div style={{
-            textAlign: 'center',
-            marginBottom: '4rem',
-          }}>
-            <h2 style={{
-              fontSize: 'clamp(2rem, 4vw, 2.75rem)',
-              fontWeight: '600',
-              marginBottom: '1rem',
-              color: 'var(--text-primary)',
-            }}>
-              Powerful Features
-            </h2>
-            <p style={{
-              fontSize: '1.125rem',
-              color: 'var(--text-secondary)',
-              maxWidth: '600px',
-              margin: '0 auto',
-            }}>
-              Everything you need for comprehensive test automation
-            </p>
-          </div>
-
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-            gap: '2rem',
-            maxWidth: '1200px',
-            margin: '0 auto',
-          }}>
-            {[
-              {
-                icon: '🤖',
-                title: 'AI-Driven Execution',
-                description: 'Autonomous test execution powered by advanced AI that learns and adapts to your application.',
-              },
-              {
-                icon: '🌐',
-                title: 'Web Application Testing',
-                description: 'Comprehensive testing for web applications with unified workflows and reporting.',
-              },
-              {
-                icon: '⚡',
-                title: 'Real-Time Monitoring',
-                description: 'Watch your tests run in real-time with live updates, screenshots, and detailed logs.',
-              },
-              {
-                icon: '📦',
-                title: 'Artifact Management',
-                description: 'Comprehensive storage and viewing of screenshots, videos, logs, and test reports.',
-              },
-              {
-                icon: '🔗',
-                title: 'CI/CD Integration',
-                description: 'Seamlessly integrate with your existing CI/CD pipelines and development workflows.',
-              },
-              {
-                icon: '📊',
-                title: 'Advanced Analytics',
-                description: 'Get insights into test coverage, performance metrics, and regression detection.',
-              },
-            ].map((feature, index) => (
-              <div
-                key={index}
-                className="card"
-                style={{
-                  padding: '2rem',
-                  textAlign: 'center',
-                  animation: `fadeIn 0.6s ease-out ${index * 0.1}s both`,
-                }}
-              >
-                <div style={{
-                  fontSize: '3rem',
-                  marginBottom: '1rem',
-                }}>
-                  {feature.icon}
-                </div>
-                <h3 style={{
-                  fontSize: '1.25rem',
-                  fontWeight: '600',
-                  marginBottom: '0.75rem',
-                  color: 'var(--text-primary)',
-                }}>
-                  {feature.title}
-                </h3>
-                <p style={{
-                  color: 'var(--text-secondary)',
-                  lineHeight: '1.6',
-                  fontSize: '0.9375rem',
-                }}>
-                  {feature.description}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section 
-        id="pricing"
-        style={{
-          padding: '5rem 2rem',
-          background: 'linear-gradient(135deg, var(--maroon-800) 0%, var(--maroon-900) 100%)',
-        color: 'var(--text-inverse)',
-        position: 'relative',
-        overflow: 'hidden',
-      }}>
         <div className="container" style={{ position: 'relative', zIndex: 1 }}>
           <div style={{
-            maxWidth: '700px',
-            margin: '0 auto',
-            textAlign: 'center',
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            gap: '3rem',
+            alignItems: 'center'
           }}>
-            <h2 style={{
-              fontSize: 'clamp(2rem, 4vw, 2.75rem)',
-              fontWeight: '600',
-              marginBottom: '1rem',
-              color: 'var(--text-inverse)',
-            }}>
-              Ready to Transform Your Testing?
-            </h2>
-            <p style={{
-              fontSize: '1.125rem',
-              marginBottom: '2.5rem',
-              opacity: 0.95,
-              lineHeight: '1.6',
-            }}>
-              Join thousands of developers who trust TestLattice for their test automation needs. 
-              Start testing smarter, not harder.
-            </p>
-            <Link
-              href="/signup"
-              className="btn"
-              style={{
-                background: 'var(--bg-secondary)',
-                color: 'var(--maroon-800)',
-                padding: '1rem 2.5rem',
-                fontSize: '1.0625rem',
-                fontWeight: '600',
-                boxShadow: 'var(--shadow-xl)',
-              }}
-            >
-              Start Free Trial →
-            </Link>
+            {/* Left Content */}
+            <div className="animate-enter">
+              <div style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                padding: '0.35rem 1rem',
+                background: 'rgba(153, 27, 27, 0.08)',
+                border: '1px solid rgba(153, 27, 27, 0.2)',
+                borderRadius: 'var(--radius-full)',
+                marginBottom: '1.5rem'
+              }}>
+                <span style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--maroon-800)' }}>
+                  New: Intelligent Retry Layer v2.0
+                </span>
+              </div>
+
+              <h1 style={{ marginBottom: '1.5rem', lineHeight: 1.1 }}>
+                Automate Tests with <br />
+                <span className="text-gradient">Human Intelligence</span>
+              </h1>
+
+              <p style={{
+                fontSize: '1.25rem',
+                color: 'var(--text-secondary)',
+                marginBottom: '2.5rem',
+                maxWidth: '540px',
+                lineHeight: 1.6
+              }}>
+                TestLattice uses advanced AI agents to navigate, verify, and heal your web tests automatically. Stop writing flaky scripts.
+              </p>
+
+              <GuestTestModalWrapper />
+
+              <div style={{ marginTop: '2rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
+                Trusted by engineering leaders worldwide
+              </div>
+            </div>
+
+            {/* Right Visual - Mock Terminal/Browser */}
+            <div className="animate-enter delay-200" style={{ position: 'relative' }}>
+              <FeatureCarousel />
+            </div>
           </div>
         </div>
-        
-        {/* Decorative Pattern */}
-        <div style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundImage: 'radial-gradient(circle at 2px 2px, rgba(255,255,255,0.05) 1px, transparent 0)',
-          backgroundSize: '40px 40px',
-          opacity: 0.5,
-        }} />
       </section>
+
+      {/* Social Proof */}
+      <SocialProofSection />
+
+      {/* How it Works */}
+      <HowItWorksSection />
+
+      {/* Features Grid */}
+      <section id="features" style={{ padding: '5rem 0', background: 'var(--bg-secondary)' }}>
+        <FeaturesSection />
+      </section>
+
+      {/* Comparison */}
+      <ComparisonSection />
+
+      {/* FAQ */}
+      <FaqSection />
+
+      {/* Final CTA */}
+      <CtaSection />
+
+      {/* Footer */}
+      <footer style={{ background: 'var(--beige-100)', padding: '4rem 0 2rem' }}>
+        <div className="container">
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '4rem', marginBottom: '4rem' }}>
+            <div style={{ gridColumn: 'span 1' }}>
+              <div style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <span>🧪</span> TestLattice
+              </div>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+                The intelligent test automation platform for modern engineering teams.
+              </p>
+            </div>
+            <div>
+              <h4 style={{ fontSize: '0.9rem', marginBottom: '1rem', color: 'var(--text-primary)' }}>Product</h4>
+              <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                <li><Link href="/features" style={{ color: 'var(--text-muted)' }}>Features</Link></li>
+                <li><Link href="#" style={{ color: 'var(--text-muted)' }}>Integrations</Link></li>
+                <li><Link href="/pricing" style={{ color: 'var(--text-muted)' }}>Pricing</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h4 style={{ fontSize: '0.9rem', marginBottom: '1rem', color: 'var(--text-primary)' }}>Company</h4>
+              <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                <li><Link href="#" style={{ color: 'var(--text-muted)' }}>About</Link></li>
+                <li><Link href="#" style={{ color: 'var(--text-muted)' }}>Blog</Link></li>
+                <li><Link href="/contact" style={{ color: 'var(--text-muted)' }}>Contact</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h4 style={{ fontSize: '0.9rem', marginBottom: '1rem', color: 'var(--text-primary)' }}>Legal</h4>
+              <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                <li><Link href="#" style={{ color: 'var(--text-muted)' }}>Privacy</Link></li>
+                <li><Link href="#" style={{ color: 'var(--text-muted)' }}>Terms</Link></li>
+              </ul>
+            </div>
+          </div>
+          <div style={{ borderTop: '1px solid var(--border-medium)', paddingTop: '2rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+            © {new Date().getFullYear()} TestLattice Inc. All rights reserved.
+          </div>
+        </div>
+      </footer>
     </main>
   )
 }
-

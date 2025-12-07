@@ -5,8 +5,29 @@ import { ErrorBoundary } from '../components/ErrorBoundary'
 import { createClient } from '@/lib/supabase/server'
 
 export const metadata: Metadata = {
-  title: 'TestLattice - AI-Powered Test Automation',
-  description: 'Autonomous AI-driven test automation platform',
+  title: {
+    template: '%s | TestLattice',
+    default: 'TestLattice - The Vibe Testing Platform',
+  },
+  description: 'The autonomous AI testing platform for Vibe Coding. Self-healing E2E tests, live browser control, and intelligent analytics.',
+  keywords: ['vibe testing', 'ai testing', 'autonomous testing', 'playwright alternative', 'selenium alternative', 'test automation', 'self-healing tests'],
+  authors: [{ name: 'TestLattice Team' }],
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: 'https://testlattice.dev',
+    title: 'TestLattice - The Vibe Testing Platform',
+    description: 'Stop writing flaky scripts. Start Vibe Testing with autonomous AI agents.',
+    siteName: 'TestLattice',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'TestLattice - The Vibe Testing Platform',
+    description: 'Stop writing flaky scripts. Start Vibe Testing with autonomous AI agents.',
+  },
+  alternates: {
+    canonical: 'https://testlattice.dev',
+  },
 }
 
 export default async function RootLayout({
@@ -28,6 +49,24 @@ export default async function RootLayout({
   return (
     <html lang="en" data-scroll-behavior="smooth">
       <body style={{ background: 'var(--bg-primary)' }}>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'SoftwareApplication',
+              name: 'TestLattice',
+              applicationCategory: 'DeveloperApplication',
+              operatingSystem: 'Any',
+              offers: {
+                '@type': 'Offer',
+                price: '0',
+                priceCurrency: 'USD',
+              },
+              description: 'Autonomous AI-driven test automation platform for modern web applications.',
+            }),
+          }}
+        />
         <ErrorBoundary>
           {isAuthenticated && <Navigation />}
           <main
