@@ -26,10 +26,10 @@ yarn-debug.log*
 yarn-error.log*
 
 # Local env files
-.env
+#.env
 .env.local
 .env*.local
-**/.env
+#**/.env
 **/.env.local
 **/.env*.local
 
@@ -58,11 +58,11 @@ worker/videos/
 *.tsbuildinfo
 
 # API specific
-api/.env
+#api/.env
 api/dist/
 
 # Worker specific
-worker/.env
+#worker/.env
 worker/dist/
 worker/videos/
 worker/traces/

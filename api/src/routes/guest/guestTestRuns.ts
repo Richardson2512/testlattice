@@ -20,9 +20,9 @@ export async function guestTestRunRoutes(fastify: FastifyInstance) {
       // Security: Validate URL (prevent SSRF attacks)
       const urlValidation = validateTestUrl(url)
       if (!urlValidation.valid) {
-        return reply.code(400).send({ 
+        return reply.code(400).send({
           error: 'Invalid URL',
-          message: urlValidation.error 
+          message: urlValidation.error
         })
       }
 
@@ -49,7 +49,7 @@ export async function guestTestRunRoutes(fastify: FastifyInstance) {
           tier: rateLimitResult.tier,
           retryAfter: rateLimitResult.retryAfter,
         }, request.user?.id, guestSessionId)
-        
+
         return reply.code(429).send({
           error: 'Rate limit exceeded',
           message: rateLimitResult.reason,
@@ -68,7 +68,10 @@ export async function guestTestRunRoutes(fastify: FastifyInstance) {
       const guestLimits = TIER_LIMITS[guestTier]
 
       // Validate guest tier limits
-      const validation = validateTierLimits(guestTier, options || {}, profile)
+      const validation = validateTierLimits(guestTier, {
+        ...(options || {}),
+        skipDiagnosis: true // Guests always skip diagnosis
+      }, profile)
       if (!validation.valid) {
         return reply.code(403).send({
           error: 'Guest tier limit exceeded',
@@ -132,14 +135,14 @@ export async function guestTestRunRoutes(fastify: FastifyInstance) {
           },
           options: restrictedOptions,
         })
-        
+
         // Update status to queued
         await Database.updateTestRun(testRun.id, {
           status: TestRunStatus.QUEUED,
         })
-        
+
         fastify.log.info(`Guest test run ${testRun.id} enqueued successfully`)
-        
+
         // Track analytics
         trackGuestTestStarted({
           url: sanitizedUrl,
@@ -153,14 +156,14 @@ export async function guestTestRunRoutes(fastify: FastifyInstance) {
           status: TestRunStatus.FAILED,
           error: `Failed to enqueue: ${queueError.message}`,
         })
-        return reply.code(500).send({ 
+        return reply.code(500).send({
           error: 'Failed to start test. Please try again later.',
-          details: queueError.message 
+          details: queueError.message
         })
       }
 
       const finalTestRun = await Database.getTestRun(testRun.id)
-      
+
       return reply.code(201).send({
         success: true,
         runId: testRun.id,
@@ -183,19 +186,19 @@ export async function guestTestRunRoutes(fastify: FastifyInstance) {
       // Optional: Add API key check for security
       const apiKey = request.headers['x-api-key']
       const expectedKey = process.env.CLEANUP_API_KEY || 'cleanup-secret-key'
-      
+
       if (apiKey !== expectedKey) {
         return reply.code(401).send({ error: 'Unauthorized' })
       }
 
       const deletedCount = await Database.cleanupExpiredGuestRuns()
-      
+
       fastify.log.info(`Cleaned up ${deletedCount} expired guest test runs`)
-      
-      return reply.send({ 
-        success: true, 
+
+      return reply.send({
+        success: true,
         deletedCount,
-        message: `Cleaned up ${deletedCount} expired guest test runs` 
+        message: `Cleaned up ${deletedCount} expired guest test runs`
       })
     } catch (error: any) {
       fastify.log.error('Cleanup error:', error)
