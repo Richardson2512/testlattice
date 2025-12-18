@@ -8,7 +8,7 @@ export class Database {
   static async createTestRun(data: Omit<TestRun, 'id' | 'createdAt' | 'updatedAt'>, userId?: string): Promise<TestRun> {
     const now = new Date().toISOString()
     const runId = randomUUID()
-    
+
     const { data: run, error } = await supabase
       .from('test_runs')
       .insert({
@@ -31,6 +31,7 @@ export class Database {
         diagnosis: data.diagnosis || null,
         paused: false,
         current_step: 0,
+        guest_session_id: data.guestSessionId || null,
         created_at: now,
         updated_at: now,
       })
@@ -131,7 +132,7 @@ export class Database {
   // Projects
   static async createProject(data: Omit<Project, 'id' | 'createdAt' | 'updatedAt'>, userId?: string): Promise<Project> {
     const now = new Date().toISOString()
-    
+
     // Use service role client to bypass RLS
     // Service role has full access per RLS policies
     const { data: project, error } = await supabase
@@ -206,7 +207,7 @@ export class Database {
   static async createArtifact(data: Omit<TestArtifact, 'id' | 'createdAt'>): Promise<TestArtifact> {
     const now = new Date().toISOString()
     const artifactId = randomUUID()
-    
+
     const { data: artifact, error } = await supabase
       .from('test_artifacts')
       .insert({
@@ -241,6 +242,53 @@ export class Database {
 
     return (data || []).map(this.mapArtifactFromDb)
   }
+  // Guest Project
+  static async getOrCreateGuestProject(): Promise<Project> {
+    const guestTeamId = 'team_default' // Use default team to ensure FK validity
+    const guestProjectName = 'Guest Tests'
+
+    // Try to find existing guest project
+    const { data: projects, error } = await supabase
+      .from('projects')
+      .select('*')
+      .eq('team_id', guestTeamId)
+      .eq('name', guestProjectName)
+      .limit(1)
+
+    if (error && error.code !== 'PGRST116') {
+      throw new Error(`Failed to find guest project: ${error.message}`)
+    }
+
+    if (projects && projects.length > 0) {
+      return this.mapProjectFromDb(projects[0])
+    }
+
+    // Create if not exists
+    return this.createProject({
+      name: guestProjectName,
+      description: 'Project container for guest test runs',
+      teamId: guestTeamId,
+    })
+  }
+
+  // Rate Limiting
+  static async getGuestTestCount(guestSessionId: string, windowMs: number): Promise<number> {
+    const windowStart = new Date(Date.now() - windowMs).toISOString()
+
+    // Use head: true to get count only
+    const { count, error } = await supabase
+      .from('test_runs')
+      .select('*', { count: 'exact', head: true })
+      .eq('guest_session_id', guestSessionId)
+      .gte('created_at', windowStart)
+
+    if (error) {
+      console.error('Failed to get guest test count:', error)
+      return 0 // Fail open
+    }
+
+    return count || 0
+  }
 
   // Helper methods to map database rows to TypeScript types
   private static mapTestRunFromDb(row: any): TestRun {
@@ -266,6 +314,7 @@ export class Database {
       diagnosisProgress: row.diagnosis_progress || null,
       paused: row.paused || false,
       currentStep: row.current_step || 0,
+      guestSessionId: row.guest_session_id,
     }
   }
 
@@ -297,7 +346,7 @@ export class Database {
     try {
       // Test connection
       const { error } = await supabase.from('projects').select('id').limit(1)
-      
+
       if (error) {
         console.warn('Database connection warning:', error.message)
         console.warn('Make sure Supabase tables are created. See SETUP.md for schema.')

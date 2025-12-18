@@ -1,6 +1,6 @@
 // Guest test run routes - for unauthenticated quick testing
 import { FastifyInstance } from 'fastify'
-import { CreateGuestTestRunRequest, TestRunStatus, DeviceProfile, BuildType } from '../../types'
+import { CreateGuestTestRunRequest, TestRunStatus, DeviceProfile, BuildType, GuestTestType, GuestCredentials } from '../../types'
 import { Database } from '../../lib/db'
 import { enqueueTestRun } from '../../lib/queue'
 import { AuthenticatedRequest, optionalAuth } from '../../middleware/auth'
@@ -9,13 +9,16 @@ import { checkGuestRateLimit } from '../../lib/rateLimiter'
 import { trackEvent, trackGuestTestStarted } from '../../lib/analytics'
 import { validateTierLimits, applyTierRestrictions, TIER_LIMITS } from '../../lib/tierSystem'
 
+// Allowed test types for guests
+const ALLOWED_TEST_TYPES = Object.values(GuestTestType)
+
 export async function guestTestRunRoutes(fastify: FastifyInstance) {
   // Create a guest test run (no authentication required, but rate limited)
   fastify.post<{ Body: CreateGuestTestRunRequest & { email?: string } }>('/run/guest', {
     preHandler: optionalAuth, // Optional auth - allows guest or authenticated users
   }, async (request: AuthenticatedRequest, reply: any) => {
     try {
-      const { url, build, profile, options, email } = request.body
+      const { url, testType, credentials, build, profile, options, email } = request.body
 
       // Security: Validate URL (prevent SSRF attacks)
       const urlValidation = validateTestUrl(url)
@@ -63,6 +66,24 @@ export async function guestTestRunRoutes(fastify: FastifyInstance) {
       // Get or create guest project
       const guestProject = await Database.getOrCreateGuestProject()
 
+      // Validate testType if provided
+      const effectiveTestType = testType || GuestTestType.VISUAL // Default to visual testing
+      if (!ALLOWED_TEST_TYPES.includes(effectiveTestType)) {
+        return reply.code(400).send({
+          error: 'Invalid test type',
+          message: `Test type must be one of: ${ALLOWED_TEST_TYPES.join(', ')}`,
+          allowedTypes: ALLOWED_TEST_TYPES
+        })
+      }
+
+      // Validate credentials for auth flows
+      if ((effectiveTestType === GuestTestType.LOGIN || effectiveTestType === GuestTestType.SIGNUP) && !credentials) {
+        return reply.code(400).send({
+          error: 'Credentials required',
+          message: `${effectiveTestType} flow requires credentials (username/email and password). Please use demo credentials only!`
+        })
+      }
+
       // Enforce guest tier limits
       const guestTier = 'guest'
       const guestLimits = TIER_LIMITS[guestTier]
@@ -82,30 +103,27 @@ export async function guestTestRunRoutes(fastify: FastifyInstance) {
         })
       }
 
-      // Apply guest tier restrictions
-      // applyTierRestrictions will automatically set maxSteps to 25 for guest tier
+      // Apply guest tier restrictions and include test type/credentials
       const restrictedOptions = applyTierRestrictions(guestTier, {
         ...options,
         skipDiagnosis: true, // Always skip diagnosis for guests
         approvalPolicy: { mode: 'auto' }, // Auto-approve for guests
         isGuestRun: true,
         guestSessionId,
-        testMode: 'single', // Only single-page for guests
+        testMode: 'guest', // Use new guest test mode (not monkey)
+        guestTestType: effectiveTestType, // Pass test type to worker
+        guestCredentials: credentials, // Pass credentials to worker
         userTier: guestTier, // Pass tier to worker
       })
 
       // Enforce Chrome only for guests
-      const guestProfile = profile || {
+      // Enforce Chrome only for guests - Override any requested device
+      const guestProfile = {
+        ...(profile || {}),
         device: DeviceProfile.CHROME_LATEST,
       }
-      if (guestProfile.device !== DeviceProfile.CHROME_LATEST) {
-        return reply.code(403).send({
-          error: 'Guest tier restriction',
-          message: 'Guest tier only supports Chrome desktop. Please sign up for Starter tier to use other browsers.',
-          tier: guestTier,
-          signupUrl: '/signup',
-        })
-      }
+
+      // Removed 403 check since we are enforcing the correct device now
 
       // Create test run with guest configuration
       const testRun = await Database.createTestRun({

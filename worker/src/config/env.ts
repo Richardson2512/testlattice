@@ -42,13 +42,13 @@ export const config = {
   redis: {
     url: requireEnv('REDIS_URL', 'Redis connection URL for job queue'),
   },
-  
+
   supabase: {
     url: requireEnv('SUPABASE_URL', 'Supabase project URL'),
     storageKey: requireEnv('SUPABASE_KEY', 'Supabase storage key') || optionalEnv('SUPABASE_STORAGE_KEY', ''),
     serviceRoleKey: requireEnv('SUPABASE_SERVICE_ROLE_KEY', 'Supabase service role key') || optionalEnv('SUPABASE_SERVICE_KEY', ''),
   },
-  
+
   // Unified Brain Service (replaces layered models, Llama, Qwen)
   // Using Together.ai for Qwen 2.5 models
   unifiedBrain: {
@@ -70,34 +70,34 @@ export const config = {
     fallbackConfidenceThreshold: parseFloat(optionalEnv('UNIFIED_BRAIN_FALLBACK_CONFIDENCE_THRESHOLD', '0.5')),
     fallbackOnComplex: process.env.UNIFIED_BRAIN_FALLBACK_ON_COMPLEX !== 'false',
   },
-  
+
   pinecone: {
     apiKey: optionalEnv('PINECONE_API_KEY', ''),
     indexName: optionalEnv('PINECONE_INDEX_NAME', 'testlattice'),
   },
-  
+
   testRunners: {
     playwrightGridUrl: optionalEnv('PLAYWRIGHT_GRID_URL', 'http://localhost:4444'),
     appiumUrl: optionalEnv('APPIUM_URL', 'http://localhost:4723'),
     appiumEnabled: process.env.ENABLE_APPIUM === 'true', // Disabled by default
   },
-  
+
   worker: {
     concurrency: parseInt(optionalEnv('WORKER_CONCURRENCY', '5'), 10),
     maxTestDurationMinutes: parseInt(optionalEnv('MAX_TEST_DURATION_MINUTES', '30'), 10),
     blockUnnecessaryResources: process.env.BLOCK_UNNECESSARY_RESOURCES === 'true',
   },
-  
+
   // Optional monitoring
   sentry: {
     dsn: optionalEnv('SENTRY_DSN', ''),
   },
-  
+
   api: {
     // Optional: Defaults to localhost API server
     url: optionalEnv('API_URL', 'http://localhost:3001'),
   },
-  
+
   logging: {
     level: optionalEnv('LOG_LEVEL', 'info'),
   },
@@ -130,8 +130,8 @@ export const config = {
 
   // WebRTC/LiveKit streaming (optional)
   streaming: {
-    enabled: process.env.ENABLE_STREAMING === 'true',
-    frameServerPort: parseInt(optionalEnv('FRAME_SERVER_PORT', '8080'), 10),
+    enabled: process.env.ENABLE_STREAMING !== 'false', // Default to true for Guest Vibe
+    frameServerPort: parseInt(optionalEnv('FRAME_SERVER_PORT', '0'), 10), // 0 = ephemeral (avoids EADDRINUSE)
     livekitUrl: optionalEnv('LIVEKIT_URL', ''),
     livekitApiKey: optionalEnv('LIVEKIT_API_KEY', ''),
     livekitApiSecret: optionalEnv('LIVEKIT_API_SECRET', ''),

@@ -51,3 +51,6 @@ next-env.d.ts
 # docker-compose.yml
 # start-dev.*
 # verify-setup.js
+
+# Playwright trace files (large runtime artifacts - disabled)
+worker/traces/

@@ -5,6 +5,7 @@ import { Page } from 'playwright'
 import { EventEmitter } from 'events'
 import { createServer, Server } from 'http'
 import { URL } from 'url'
+import Redis from 'ioredis'
 
 export interface StreamConfig {
   runId: string
@@ -37,11 +38,18 @@ export class WebRTCStreamer extends EventEmitter {
   private cdpSession: any = null
   private latestFrame: Buffer | null = null
   private frameCount: number = 0
+  private redis: Redis
+  private lastBroadcastTime: number = 0
 
   /**
    * Start streaming a Playwright page
    * MVP: HTTP-based frame streaming (upgradeable to WebRTC)
    */
+  constructor() {
+    super()
+    this.redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379')
+  }
+
   async startStream(config: StreamConfig): Promise<StreamStatus> {
     if (this.isStreaming) {
       throw new Error('Stream already active. Stop current stream before starting a new one.')
@@ -52,8 +60,9 @@ export class WebRTCStreamer extends EventEmitter {
 
     try {
       // Start HTTP frame server (MVP approach)
-      const port = config.frameServerPort || 8080
-      await this.startFrameServer(port)
+      // Use port 0 (random available port) to avoid EADDRINUSE errors with concurrent tests
+      const requestedPort = config.frameServerPort || 0
+      const assignedPort = await this.startFrameServer(requestedPort)
 
       // Start capturing frames from Playwright
       await this.startFrameCapture(config.page)
@@ -61,11 +70,11 @@ export class WebRTCStreamer extends EventEmitter {
       // Generate LiveKit token if configured (for future WebRTC upgrade)
       let token: string | undefined
       if (config.livekitApiKey && config.livekitApiSecret) {
-        token = this.generateAccessToken(config.runId, config.livekitApiKey, config.livekitApiSecret)
+        token = await this.generateAccessToken(config.runId, config.livekitApiKey, config.livekitApiSecret)
       }
 
       this.isStreaming = true
-      const streamUrl = `http://localhost:${port}/stream/${config.runId}`
+      const streamUrl = `http://localhost:${assignedPort}/stream/${config.runId}`
 
       this.emit('started', { roomName: this.roomName, streamUrl, token })
 
@@ -132,8 +141,9 @@ export class WebRTCStreamer extends EventEmitter {
   /**
    * Start HTTP server for frame streaming (MVP)
    * Serves latest frame as JPEG for frontend polling/SSE
+   * Returns the assigned port
    */
-  private async startFrameServer(port: number): Promise<void> {
+  private async startFrameServer(port: number): Promise<number> {
     return new Promise((resolve, reject) => {
       this.frameServer = createServer((req, res) => {
         const url = new URL(req.url || '/', `http://${req.headers.host}`)
@@ -142,7 +152,7 @@ export class WebRTCStreamer extends EventEmitter {
         // Stream endpoint: GET /stream/:runId
         if (path.startsWith('/stream/')) {
           const runId = path.split('/stream/')[1]
-          
+
           if (runId !== this.config?.runId) {
             res.writeHead(404)
             res.end('Stream not found')
@@ -192,8 +202,11 @@ export class WebRTCStreamer extends EventEmitter {
         if (err) {
           reject(err)
         } else {
-          console.log(`[WebRTC] Frame server started on port ${port}`)
-          resolve()
+          // Get assigned port
+          const address = this.frameServer?.address()
+          const assignedPort = typeof address === 'object' && address ? address.port : port
+          console.log(`[WebRTC] Frame server started on port ${assignedPort}`)
+          resolve(assignedPort)
         }
       })
     })
@@ -220,7 +233,7 @@ export class WebRTCStreamer extends EventEmitter {
       console.log('[WebRTC] CDP screencast started')
 
       // Listen for screencast frames
-      this.cdpSession.on('Page.screencastFrame', async ({ data, sessionId }) => {
+      this.cdpSession.on('Page.screencastFrame', async ({ data, sessionId }: { data: string; sessionId: string }) => {
         try {
           // Store latest frame
           this.latestFrame = Buffer.from(data, 'base64')
@@ -228,6 +241,9 @@ export class WebRTCStreamer extends EventEmitter {
 
           // Emit frame event for potential WebRTC upgrade
           this.emit('frame', this.latestFrame)
+          if (this.config) {
+            this.broadcastFrame(this.config.runId, this.latestFrame)
+          }
 
           // Acknowledge frame to CDP
           await this.cdpSession.send('Page.screencastFrameAck', { sessionId })
@@ -246,12 +262,14 @@ export class WebRTCStreamer extends EventEmitter {
             const screenshot = await page.screenshot({
               type: 'jpeg',
               quality: 80,
-              encoding: 'base64',
             })
 
-            this.latestFrame = Buffer.from(screenshot as string, 'base64')
+            this.latestFrame = screenshot
             this.frameCount++
             this.emit('frame', this.latestFrame)
+            if (this.config) {
+              this.broadcastFrame(this.config.runId, this.latestFrame)
+            }
           }
         } catch (error: any) {
           // Ignore errors in fallback
@@ -279,12 +297,12 @@ export class WebRTCStreamer extends EventEmitter {
           const screenshot = await page.screenshot({
             type: 'jpeg',
             quality: 80,
-            encoding: 'base64',
           })
 
-          this.latestFrame = Buffer.from(screenshot as string, 'base64')
+          this.latestFrame = screenshot
           this.frameCount++
           this.emit('frame', this.latestFrame)
+          this.broadcastFrame(this.config!.runId, this.latestFrame)
         } catch (error: any) {
           console.error('[WebRTC] Screenshot capture error:', error.message)
         }
@@ -300,7 +318,7 @@ export class WebRTCStreamer extends EventEmitter {
   /**
    * Generate LiveKit access token for frontend
    */
-  private generateAccessToken(runId: string, apiKey: string, apiSecret: string): string {
+  private async generateAccessToken(runId: string, apiKey: string, apiSecret: string): Promise<string> {
     const token = new AccessToken(apiKey, apiSecret, {
       identity: `viewer-${runId}-${Date.now()}`,
       name: `Test Run Viewer ${runId}`,
@@ -313,7 +331,7 @@ export class WebRTCStreamer extends EventEmitter {
       canSubscribe: true, // Viewers subscribe to stream
     })
 
-    return token.toJwt()
+    return await token.toJwt()
   }
 
   /**
@@ -330,7 +348,7 @@ export class WebRTCStreamer extends EventEmitter {
   /**
    * Generate access token for frontend to connect (if LiveKit configured)
    */
-  generateViewerToken(userId?: string): string | null {
+  async generateViewerToken(userId?: string): Promise<string | null> {
     if (!this.config || !this.config.livekitApiKey || !this.config.livekitApiSecret) {
       return null
     }
@@ -339,5 +357,49 @@ export class WebRTCStreamer extends EventEmitter {
       this.config.livekitApiKey,
       this.config.livekitApiSecret
     )
+  }
+
+  /**
+   * Broadcast frame to Redis (for WebSocket relay)
+   */
+  private async broadcastFrame(runId: string, frame: Buffer) {
+    const now = Date.now()
+    // Throttle to 10 FPS (100ms) to avoid overloading Redis
+    if (now - this.lastBroadcastTime < 100) {
+      return
+    }
+    this.lastBroadcastTime = now
+
+    // DEBUG LOG removed
+
+    try {
+      // Strip runId suffix (e.g., "-chromium") to get base runId if needed
+      // But here we want the exact runId that the frontend listens to.
+      // Frontend listens to testId. TestProcessor starts stream with `${runId}-${browserType}` or just `${runId}`?
+      // TestProcessor line 2044: runId: `${runId}-${browserType}`.
+      // BUT frontend listens to `runId`.
+      // We should broadcast to the BASE runId channel if possible, OR frontend needs to listen to specific browser channel.
+      // For Guest (Single Browser), we should broadcast to the base runId.
+      // Let's parse it.
+      const baseRunId = runId.includes('-chromium') ? runId.split('-chromium')[0] :
+        runId.includes('-firefox') ? runId.split('-firefox')[0] :
+          runId.includes('-webkit') ? runId.split('-webkit')[0] : runId
+
+      const payload = {
+        type: 'page_state',
+        state: {
+          screenshot: frame.toString('base64'),
+          url: '', // We don't have URL here easily without passing it, but screenshot is key
+          elements: []
+        }
+      }
+      await this.redis.publish('ws:broadcast', JSON.stringify({
+        runId: baseRunId,
+        payload,
+        serverId: 'worker-streamer'
+      }))
+    } catch (e) {
+      // Ignore broadcast errors
+    }
   }
 }

@@ -29,6 +29,23 @@ export enum DeviceProfile {
   IOS_SIMULATOR = 'ios-simulator', // @deprecated - Mobile testing disabled, set ENABLE_APPIUM=true to enable
 }
 
+// Guest Test Types - predefined test flows for guest users
+export enum GuestTestType {
+  LOGIN = 'login',           // Tests login functionality with provided credentials
+  SIGNUP = 'signup',         // Tests registration/signup flow with demo data
+  VISUAL = 'visual',         // Visual UI exploration and screenshot capture
+  NAVIGATION = 'navigation', // Tests link clicking and page navigation
+  FORM = 'form',             // Tests form inputs, validation, and submission
+  ACCESSIBILITY = 'accessibility', // Basic accessibility audit (alt tags, aria, contrast)
+}
+
+// Credentials for login/signup test flows (demo data only!)
+export interface GuestCredentials {
+  username?: string;
+  email?: string;
+  password?: string;
+}
+
 export interface Build {
   type: BuildType;
   url?: string;
@@ -78,6 +95,16 @@ export interface CreateTestRunRequest {
   options?: TestOptions;
 }
 
+// Guest test run request - simplified for quick anonymous testing
+export interface CreateGuestTestRunRequest {
+  url: string;                        // Target URL to test
+  testType?: GuestTestType;           // Type of test to run (defaults to 'visual')
+  credentials?: GuestCredentials;     // Optional credentials for login/signup flows
+  build?: Partial<Build>;             // Optional build config
+  profile?: Partial<TestProfile>;     // Optional profile config
+  options?: Partial<TestOptions>;     // Optional test options
+}
+
 export interface TestRun {
   id: string;
   projectId: string;
@@ -100,6 +127,7 @@ export interface TestRun {
   currentStep?: number;
   diagnosis?: DiagnosisResult;
   diagnosisProgress?: DiagnosisProgress;
+  guestSessionId?: string;
 }
 
 export interface DiagnosisComponentInsight {

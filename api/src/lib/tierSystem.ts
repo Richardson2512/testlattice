@@ -10,11 +10,11 @@ export interface TierLimits {
   maxPages: number
   maxScreenshots: number
   maxDuration: number // in minutes
-  
+
   // Browser support
   browsers: Array<'chromium' | 'firefox' | 'webkit'>
   mobileBrowsers: boolean
-  
+
   // Features
   diagnosis: {
     enabled: boolean
@@ -23,13 +23,13 @@ export interface TierLimits {
   godMode: boolean
   videoRecording: boolean
   traceRecording: boolean
-  
+
   // Self-healing
   selfHealingRetries: number
-  
+
   // Test suggestions
   testSuggestions: number
-  
+
   // Comprehensive testing
   comprehensiveTesting: {
     performance: boolean
@@ -38,7 +38,7 @@ export interface TierLimits {
     seo: boolean
     visualRegression: boolean
   }
-  
+
   // Result retention
   retentionDays: number
 }
@@ -288,13 +288,13 @@ export function applyTierRestrictions(
   options: any
 ): any {
   const limits = TIER_LIMITS[tier]
-  
+
   return {
     ...options,
     // Enforce max steps only if tier has a finite limit
     // Guest: 25 steps max
     // Starter+: Unlimited (dynamic based on diagnosis)
-    maxSteps: limits.maxSteps === Infinity 
+    maxSteps: limits.maxSteps === Infinity
       ? options.maxSteps  // Keep user's requested steps (will be dynamic based on diagnosis)
       : (options.maxSteps ? Math.min(options.maxSteps, limits.maxSteps) : limits.maxSteps),
     // Screenshots: Unlimited for all tiers (determined by steps/diagnosis)

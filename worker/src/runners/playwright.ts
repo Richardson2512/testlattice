@@ -52,9 +52,9 @@ export class PlaywrightRunner {
    */
   async reserveSession(profile: TestProfile): Promise<RunnerSession> {
     console.log('Playwright: Reserving session for profile:', profile.device)
-    
+
     const sessionId = `playwright_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-    
+
     // Determine browser type from device profile
     let browserType = chromium // Default to Chromium
     if (profile.device === DeviceProfile.FIREFOX_LATEST) {
@@ -62,12 +62,12 @@ export class PlaywrightRunner {
     } else if (profile.device === DeviceProfile.SAFARI_LATEST) {
       browserType = webkit
     }
-    
+
     // Launch browser (headless by default for automation)
     const browser = await browserType.launch({
       headless: true,
     })
-    
+
     // Create browser context with viewport settings, video recording, and trace
     const contextOptions: any = {
       viewport: profile.viewport || { width: 1280, height: 720 },
@@ -76,12 +76,14 @@ export class PlaywrightRunner {
         size: profile.viewport || { width: 1280, height: 720 },
       },
     }
-    
+
     const context = await browser.newContext(contextOptions)
-    
+
     // Start trace recording (Time-Travel Debugger feature)
-    // This records all actions, network requests, console logs, and DOM snapshots
+    // DISABLED: Tracing disabled to prevent large file generation until we have blob storage
     let tracingStarted = false
+    // Tracing disabled - uncomment below when storage is ready
+    /*
     try {
       await context.tracing.start({
         screenshots: true,
@@ -95,9 +97,10 @@ export class PlaywrightRunner {
       // Continue without tracing - don't fail session creation
       // Tracing is optional for test execution
     }
-    
+    */
+
     const page = await context.newPage()
-    
+
     // Inject visual cursor and click indicator script for video recording
     await page.addInitScript(() => {
       // Create cursor element
@@ -117,7 +120,7 @@ export class PlaywrightRunner {
         transition: opacity 0.2s;
       `
       document.body.appendChild(cursor)
-      
+
       // Create click ripple effect element
       const ripple = document.createElement('div')
       ripple.id = '__playwright_ripple__'
@@ -134,64 +137,64 @@ export class PlaywrightRunner {
         opacity: 0.8;
       `
       document.body.appendChild(ripple)
-      
+
       // Store current cursor position for smooth animations
       let currentX = 0
       let currentY = 0
-      
-      // Expose functions to show cursor and click
-      ;(window as any).__playwrightShowCursor = (x: number, y: number, smooth: boolean = false) => {
-        currentX = x
-        currentY = y
-        
-        if (smooth && cursor.style.display !== 'none') {
-          // Phase 3: Cubic-Bezier easing for human-like movement
-          cursor.style.transition = 'left 0.3s cubic-bezier(0.4, 0, 0.2, 1), top 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-        } else {
-          cursor.style.transition = 'opacity 0.2s'
+
+        // Expose functions to show cursor and click
+        ; (window as any).__playwrightShowCursor = (x: number, y: number, smooth: boolean = false) => {
+          currentX = x
+          currentY = y
+
+          if (smooth && cursor.style.display !== 'none') {
+            // Phase 3: Cubic-Bezier easing for human-like movement
+            cursor.style.transition = 'left 0.3s cubic-bezier(0.4, 0, 0.2, 1), top 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+          } else {
+            cursor.style.transition = 'opacity 0.2s'
+          }
+
+          cursor.style.left = x + 'px'
+          cursor.style.top = y + 'px'
+          cursor.style.display = 'block'
+          cursor.style.opacity = '1'
         }
-        
-        cursor.style.left = x + 'px'
-        cursor.style.top = y + 'px'
-        cursor.style.display = 'block'
-        cursor.style.opacity = '1'
-      }
-      
-      ;(window as any).__playwrightHideCursor = () => {
-        cursor.style.transition = 'opacity 0.2s'
-        cursor.style.opacity = '0'
-        setTimeout(() => {
-          cursor.style.display = 'none'
-        }, 200)
-      }
-      
-      ;(window as any).__playwrightShowClick = (x: number, y: number) => {
-        ripple.style.left = x + 'px'
-        ripple.style.top = y + 'px'
-        ripple.style.display = 'block'
-        ripple.style.width = '40px'
-        ripple.style.height = '40px'
-        ripple.style.opacity = '0.8'
-        ripple.style.transition = 'all 0.4s ease-out'
-        
-        // Animate ripple expansion
-        requestAnimationFrame(() => {
-          ripple.style.width = '80px'
-          ripple.style.height = '80px'
-          ripple.style.opacity = '0'
-        })
-        
-        setTimeout(() => {
-          ripple.style.display = 'none'
-        }, 400)
-      }
-      
-      // Expose function to get current cursor position
-      ;(window as any).__playwrightGetCursorPosition = () => {
-        return { x: currentX, y: currentY }
-      }
+
+        ; (window as any).__playwrightHideCursor = () => {
+          cursor.style.transition = 'opacity 0.2s'
+          cursor.style.opacity = '0'
+          setTimeout(() => {
+            cursor.style.display = 'none'
+          }, 200)
+        }
+
+        ; (window as any).__playwrightShowClick = (x: number, y: number) => {
+          ripple.style.left = x + 'px'
+          ripple.style.top = y + 'px'
+          ripple.style.display = 'block'
+          ripple.style.width = '40px'
+          ripple.style.height = '40px'
+          ripple.style.opacity = '0.8'
+          ripple.style.transition = 'all 0.4s ease-out'
+
+          // Animate ripple expansion
+          requestAnimationFrame(() => {
+            ripple.style.width = '80px'
+            ripple.style.height = '80px'
+            ripple.style.opacity = '0'
+          })
+
+          setTimeout(() => {
+            ripple.style.display = 'none'
+          }, 400)
+        }
+
+        // Expose function to get current cursor position
+        ; (window as any).__playwrightGetCursorPosition = () => {
+          return { x: currentX, y: currentY }
+        }
     })
-    
+
     // SECURITY: Network-layer request interception to prevent SSRF via redirects/DNS rebinding
     // This catches attacks that bypass initial URL validation:
     // 1. HTTP redirects (301/302) to localhost/private IPs
@@ -201,21 +204,21 @@ export class PlaywrightRunner {
       const request = route.request()
       const requestUrl = request.url()
       const resourceType = request.resourceType()
-      
+
       try {
         // Re-validate EVERY request at network layer (not just initial navigation)
         const { safe, reason } = await import('../utils/urlValidator').then(m => m.isUrlSafe(requestUrl))
-        
+
         if (!safe) {
           console.warn(`[SECURITY] Blocked dangerous request to: ${requestUrl}`)
           console.warn(`[SECURITY] Reason: ${reason}`)
           console.warn(`[SECURITY] Type: ${resourceType}, Method: ${request.method()}`)
-          
+
           // Abort the request to prevent SSRF
           await route.abort('blockedbyclient')
           return
         }
-        
+
         // OPTIMIZATION: Block unnecessary resources to speed up tests (optional)
         // This reduces bandwidth and improves test performance
         const { config } = await import('../config/env')
@@ -226,7 +229,7 @@ export class PlaywrightRunner {
             'media',      // Audio/video
             'stylesheet', // CSS (we're testing functionality, not styling)
           ]
-          
+
           // Block analytics and ads by domain pattern
           const adDomains = [
             'google-analytics.com',
@@ -238,13 +241,13 @@ export class PlaywrightRunner {
             'segment.com',
             'amplitude.com',
           ]
-          
+
           if (blockList.includes(resourceType) || adDomains.some(domain => requestUrl.includes(domain))) {
             await route.abort('blockedbyclient')
             return
           }
         }
-        
+
         // Allow safe requests to continue
         await route.continue()
       } catch (error: any) {
@@ -253,10 +256,10 @@ export class PlaywrightRunner {
         await route.abort('failed')
       }
     })
-    
+
     // Note: Video path will be available after context closes
     // We'll store the session ID to retrieve it later
-    
+
     const session: RunnerSession = {
       id: sessionId,
       profile,
@@ -266,12 +269,12 @@ export class PlaywrightRunner {
       page,
       tracingStarted,
     }
-    
+
     this.sessions.set(sessionId, session)
-    
+
     console.log('Playwright: Session reserved:', sessionId, 'Browser:', profile.device)
     console.log('Playwright: Network-layer SSRF protection enabled for session:', sessionId)
-    
+
     return session
   }
 
@@ -284,9 +287,9 @@ export class PlaywrightRunner {
     if (!session) {
       throw new Error(`Session ${sessionId} not found`)
     }
-    
+
     console.log('Playwright: Capturing screenshot for session:', sessionId, fullPage ? '(full page)' : '(viewport)')
-    
+
     try {
       // Capture screenshot as base64
       const screenshot = await session.page.screenshot({
@@ -294,7 +297,7 @@ export class PlaywrightRunner {
         encoding: 'base64',
         fullPage: fullPage,
       })
-      
+
       return screenshot as string
     } catch (error: any) {
       console.error('Playwright: Failed to capture screenshot:', error.message)
@@ -310,7 +313,7 @@ export class PlaywrightRunner {
     if (!session) {
       throw new Error(`Session ${sessionId} not found`)
     }
-    
+
     try {
       const dimensions = await session.page.evaluate(() => {
         return {
@@ -324,7 +327,7 @@ export class PlaywrightRunner {
           ),
         }
       })
-      
+
       return dimensions
     } catch (error: any) {
       console.error('Playwright: Failed to get page dimensions:', error.message)
@@ -340,12 +343,12 @@ export class PlaywrightRunner {
     if (!session) {
       throw new Error(`Session ${sessionId} not found`)
     }
-    
+
     try {
       await session.page.evaluate((scrollY) => {
         window.scrollTo(0, scrollY)
       }, y)
-      
+
       // Wait for scroll to complete and any lazy-loaded content
       await session.page.waitForTimeout(500)
     } catch (error: any) {
@@ -370,11 +373,11 @@ export class PlaywrightRunner {
     if (!session) {
       throw new Error(`Session ${sessionId} not found`)
     }
-    
+
     console.log('Playwright: Executing action:', action.action, action.target)
-    
+
     const { page } = session
-    
+
     try {
       let healingMeta: SelfHealingInfo | null = null
       switch (action.action) {
@@ -382,12 +385,12 @@ export class PlaywrightRunner {
           if (!action.selector) {
             throw new Error('Selector required for click action')
           }
-          
+
           // Check for and dismiss popups/cookie banners before clicking
           await this.resolveBlockingOverlays(page)
-          
+
           console.log('Playwright: Clicking element:', action.selector)
-          
+
           try {
             healingMeta = await this.tryClick(page, action)
           } catch (clickError: any) {
@@ -411,36 +414,36 @@ export class PlaywrightRunner {
             }
           }
           break
-          
+
         case 'type':
           if (!action.selector || !action.value) {
             throw new Error('Selector and value required for type action')
           }
-          
+
           // Check for and dismiss popups/cookie banners before typing
           await this.resolveBlockingOverlays(page)
-          
+
           console.log('Playwright: Typing into element:', action.selector, 'value:', action.value)
-          
+
           try {
             // Use locator API for better selector support
             const locator = page.locator(action.selector)
             await locator.waitFor({ state: 'visible', timeout: 10000 })
-            
+
             // Show cursor at input field before typing
             try {
               const boundingBox = await locator.boundingBox()
               if (boundingBox) {
                 const centerX = boundingBox.x + boundingBox.width / 2
                 const centerY = boundingBox.y + boundingBox.height / 2
-                
+
                 // Show cursor at element center
                 await page.evaluate((x, y) => {
                   if ((window as any).__playwrightShowCursor) {
                     (window as any).__playwrightShowCursor(x, y)
                   }
                 }, centerX, centerY)
-                
+
                 // Wait a bit to show cursor movement
                 await page.waitForTimeout(200)
               }
@@ -448,9 +451,9 @@ export class PlaywrightRunner {
               // If showing indicators fails, continue with typing anyway
               console.warn('Failed to show type indicator:', indicatorError)
             }
-            
+
             await locator.fill(action.value, { timeout: 10000 })
-            
+
             // Hide cursor after typing
             try {
               await page.evaluate(() => {
@@ -469,7 +472,7 @@ export class PlaywrightRunner {
                 await page.waitForTimeout(500)
                 const locator = page.locator(action.selector)
                 await locator.waitFor({ state: 'visible', timeout: 10000 })
-                
+
                 // Show cursor at input field before typing (retry)
                 try {
                   const boundingBox = await locator.boundingBox()
@@ -486,9 +489,9 @@ export class PlaywrightRunner {
                 } catch (indicatorError) {
                   // Ignore indicator errors
                 }
-                
+
                 await locator.fill(action.value, { timeout: 10000 })
-                
+
                 // Hide cursor after typing
                 try {
                   await page.evaluate(() => {
@@ -511,7 +514,7 @@ export class PlaywrightRunner {
             }
           }
           break
-          
+
         case 'scroll':
           console.log('Playwright: Scrolling')
           await page.evaluate(() => {
@@ -519,48 +522,48 @@ export class PlaywrightRunner {
           })
           await page.waitForTimeout(500) // Wait for scroll to complete
           break
-          
+
         case 'navigate':
           if (!action.value) {
             throw new Error('URL required for navigate action')
           }
-          
+
           // SECURITY: Validate URL to prevent SSRF attacks
           // Block localhost, private IPs, and cloud metadata endpoints
           validateUrlOrThrow(action.value)
-          
+
           console.log('Playwright: Navigating to:', action.value)
           await page.goto(action.value, { waitUntil: 'networkidle', timeout: 30000 })
-          
+
           // Note: Cookie banner detection is handled in testProcessor after navigation
           // Don't detect here to avoid duplicate detection
           // Just wait for page to load
           await page.waitForTimeout(500)
           break
-          
+
         case 'wait':
           console.log('Playwright: Waiting')
           await page.waitForTimeout(1000)
           break
-          
+
         case 'assert':
           // Enhanced assert action with multiple assertion types
           if (!action.selector) {
             throw new Error('Selector required for assert action')
           }
-          
+
           // Parse assertion type and expected value from action.value
           // Format: "type:expected" or just "type"
           const assertionParts = action.value?.split(':') || []
           const assertionType = assertionParts[0] || 'exists'
           const expectedValue = assertionParts.slice(1).join(':') || null
-          
+
           console.log(`Playwright: Asserting ${assertionType} for element:`, action.selector, expectedValue ? `(expected: ${expectedValue})` : '')
-          
+
           try {
             const locator = page.locator(action.selector)
             await locator.waitFor({ state: 'attached', timeout: 10000 })
-            
+
             switch (assertionType) {
               case 'exists':
                 // Verify element exists (already done by waitFor above)
@@ -570,7 +573,7 @@ export class PlaywrightRunner {
                 }
                 console.log('Playwright: Assertion passed - element exists')
                 break
-                
+
               case 'visible':
                 const isVisible = await locator.first().isVisible()
                 if (!isVisible) {
@@ -578,7 +581,7 @@ export class PlaywrightRunner {
                 }
                 console.log('Playwright: Assertion passed - element is visible')
                 break
-                
+
               case 'value':
                 if (!expectedValue) {
                   throw new Error('Expected value required for value assertion')
@@ -594,28 +597,28 @@ export class PlaywrightRunner {
                 }
                 console.log(`Playwright: Assertion passed - value matches: "${expectedValue}"`)
                 break
-                
+
               case 'error':
                 // Look for error messages - check for common error patterns
                 const errorFound = await page.evaluate((selector) => {
                   const el = document.querySelector(selector)
                   if (!el) return false
-                  
+
                   // Check if element itself contains error text
                   const text = el.textContent?.toLowerCase() || ''
-                  const hasErrorKeywords = text.includes('error') || 
-                                          text.includes('invalid') || 
-                                          text.includes('required') ||
-                                          text.includes('incorrect') ||
-                                          text.includes('failed')
-                  
+                  const hasErrorKeywords = text.includes('error') ||
+                    text.includes('invalid') ||
+                    text.includes('required') ||
+                    text.includes('incorrect') ||
+                    text.includes('failed')
+
                   // Check for error classes
                   const hasErrorClass = el.classList.toString().toLowerCase().includes('error') ||
-                                      el.classList.toString().toLowerCase().includes('invalid')
-                  
+                    el.classList.toString().toLowerCase().includes('invalid')
+
                   // Check aria-invalid
                   const ariaInvalid = el.getAttribute('aria-invalid') === 'true'
-                  
+
                   // Check for nearby error messages (common pattern: error message after input)
                   const parent = el.parentElement
                   if (parent) {
@@ -624,20 +627,20 @@ export class PlaywrightRunner {
                       const sibText = sib.textContent?.toLowerCase() || ''
                       const sibClass = sib.classList.toString().toLowerCase()
                       return (sibText.includes('error') || sibText.includes('invalid') || sibText.includes('required')) ||
-                             (sibClass.includes('error') || sibClass.includes('invalid'))
+                        (sibClass.includes('error') || sibClass.includes('invalid'))
                     })
                     if (errorSibling) return true
                   }
-                  
+
                   return hasErrorKeywords || hasErrorClass || ariaInvalid
                 }, action.selector)
-                
+
                 if (!errorFound) {
                   throw new Error(`Error assertion failed: No error message found for ${action.selector}`)
                 }
                 console.log('Playwright: Assertion passed - error message detected')
                 break
-                
+
               case 'state':
                 if (!expectedValue) {
                   throw new Error('Expected state required (e.g., "checked" or "unchecked")')
@@ -653,7 +656,7 @@ export class PlaywrightRunner {
                 }
                 console.log(`Playwright: Assertion passed - state is "${expectedValue}"`)
                 break
-                
+
               case 'selected':
                 if (!expectedValue) {
                   throw new Error('Expected option value required for selected assertion')
@@ -669,7 +672,7 @@ export class PlaywrightRunner {
                 }
                 console.log(`Playwright: Assertion passed - option "${expectedValue}" is selected`)
                 break
-                
+
               case 'text':
                 if (!expectedValue) {
                   throw new Error('Expected text required for text assertion')
@@ -680,21 +683,21 @@ export class PlaywrightRunner {
                 }
                 console.log(`Playwright: Assertion passed - text contains "${expectedValue}"`)
                 break
-                
+
               default:
                 // Fallback to basic existence check
                 const elementInfo = await locator.first().evaluate((el) => {
                   const rect = el.getBoundingClientRect()
                   const style = window.getComputedStyle(el)
                   const tagName = el.tagName.toLowerCase()
-                  
+
                   let value: string | null = null
                   if (tagName === 'input' || tagName === 'textarea' || tagName === 'select') {
                     value = (el as HTMLInputElement).value || null
                   } else {
                     value = el.textContent?.trim() || null
                   }
-                  
+
                   return {
                     exists: true,
                     tagName,
@@ -703,13 +706,13 @@ export class PlaywrightRunner {
                     isVisible: style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0',
                   }
                 }).catch(() => ({ exists: false }))
-                
+
                 if (!elementInfo.exists) {
                   throw new Error(`Element ${action.selector} does not exist in DOM`)
                 }
                 console.log('Playwright: Assertion passed - element info:', JSON.stringify(elementInfo, null, 2))
             }
-            
+
           } catch (error: any) {
             console.error('Playwright: Assertion failed:', error.message)
             const { formatErrorForStep } = await import('../utils/errorFormatter')
@@ -717,98 +720,98 @@ export class PlaywrightRunner {
             throw new Error(`Assertion failed for ${action.selector}: ${formattedError}`)
           }
           break
-          
+
         case 'setViewport':
           // Set viewport to specific dimensions
           // Value format: "widthxheight" (e.g., "390x844")
           if (!action.value) {
             throw new Error('Viewport dimensions required for setViewport action (format: "widthxheight")')
           }
-          
+
           const viewportMatch = action.value.match(/(\d+)x(\d+)/)
           if (!viewportMatch) {
             throw new Error(`Invalid viewport format: ${action.value}. Expected format: "widthxheight" (e.g., "390x844")`)
           }
-          
+
           const width = parseInt(viewportMatch[1], 10)
           const height = parseInt(viewportMatch[2], 10)
-          
+
           if (width <= 0 || height <= 0 || width > 10000 || height > 10000) {
             throw new Error(`Invalid viewport dimensions: ${width}x${height}. Dimensions must be between 1 and 10000`)
           }
-          
+
           console.log(`Playwright: Setting viewport to ${width}x${height}`)
           await page.setViewportSize({ width, height })
-          
+
           // Wait for layout to stabilize after viewport change
           await page.waitForLoadState('networkidle')
           await page.waitForTimeout(500) // Additional wait for CSS transitions
           break
-          
+
         case 'setDevice':
           // Set viewport using device alias (e.g., "mobile", "tablet", "desktop")
           if (!action.value) {
             throw new Error('Device alias required for setDevice action (e.g., "mobile", "tablet", "desktop")')
           }
-          
+
           const deviceAlias = action.value.toLowerCase().trim()
           const deviceDimensions = DEVICE_ALIASES[deviceAlias]
-          
+
           if (!deviceDimensions) {
             const availableAliases = Object.keys(DEVICE_ALIASES).join(', ')
             throw new Error(`Unknown device alias: "${deviceAlias}". Available aliases: ${availableAliases}`)
           }
-          
+
           console.log(`Playwright: Setting device to ${deviceAlias} (${deviceDimensions.width}x${deviceDimensions.height})`)
           await page.setViewportSize(deviceDimensions)
-          
+
           // Wait for layout to stabilize after viewport change
           await page.waitForLoadState('networkidle')
           await page.waitForTimeout(500) // Additional wait for CSS transitions
           break
-          
+
         case 'setOrientation':
           // Change orientation by swapping width and height
           // Value should be "portrait" or "landscape"
           if (!action.value) {
             throw new Error('Orientation required for setOrientation action ("portrait" or "landscape")')
           }
-          
+
           const orientation = action.value.toLowerCase().trim()
           if (orientation !== 'portrait' && orientation !== 'landscape') {
             throw new Error(`Invalid orientation: "${orientation}". Must be "portrait" or "landscape"`)
           }
-          
+
           // Get current viewport size
           const currentViewport = page.viewportSize()
           if (!currentViewport) {
             throw new Error('Cannot change orientation: viewport size not available')
           }
-          
+
           const currentWidth = currentViewport.width
           const currentHeight = currentViewport.height
-          
+
           // Determine if we need to swap dimensions
           const isCurrentlyPortrait = currentHeight > currentWidth
           const shouldBePortrait = orientation === 'portrait'
-          
+
           let newWidth = currentWidth
           let newHeight = currentHeight
-          
+
           // Swap dimensions if orientation change is needed
           if (isCurrentlyPortrait !== shouldBePortrait) {
             newWidth = currentHeight
             newHeight = currentWidth
           }
-          
+
           console.log(`Playwright: Setting orientation to ${orientation} (${newWidth}x${newHeight})`)
           await page.setViewportSize({ width: newWidth, height: newHeight })
-          
+
           // Wait for layout to stabilize after orientation change
           await page.waitForLoadState('networkidle')
           await page.waitForTimeout(500) // Additional wait for CSS transitions
           break
-          
+
         default:
           console.warn('Playwright: Unknown action:', action.action)
       }
@@ -833,7 +836,7 @@ export class PlaywrightRunner {
     if (!session) {
       throw new Error(`Session ${sessionId} not found`)
     }
-    
+
     return session.page.url()
   }
 
@@ -880,15 +883,15 @@ export class PlaywrightRunner {
 
   private async performClick(page: Page, selector: string, options: { fromHealing?: boolean } = {}): Promise<void> {
     const locator = page.locator(selector)
-    
+
     await locator.waitFor({ state: 'attached', timeout: 10000 }).catch(() => {
       throw new Error(`Element ${selector} not found in DOM`)
     })
-    
+
     const ensureVisible = async () => {
       const visible = await locator.isVisible().catch(() => false)
       if (visible) return
-      
+
       // Try to scroll element into view
       try {
         await locator.scrollIntoViewIfNeeded({ timeout: 5000 })
@@ -911,7 +914,7 @@ export class PlaywrightRunner {
           // Ignore manual scroll errors
         }
       }
-      
+
       // Check visibility again after scroll
       const visibleAfterScroll = await locator.isVisible().catch(() => false)
       if (!visibleAfterScroll) {
@@ -931,22 +934,22 @@ export class PlaywrightRunner {
             id: el.id || ''
           }
         }, selector).catch(() => ({ exists: false, visible: false, enabled: false }))
-        
+
         console.log('Playwright: Click failed. Element info:', JSON.stringify(elementInfo))
         throw new Error(`Element ${selector} is not visible (may be hidden or off-screen)`)
       }
     }
     await ensureVisible()
-    
+
     await locator.waitFor({ state: 'visible', timeout: 10000 })
-    
+
     // Show cursor movement and click indicator before clicking
     try {
       const boundingBox = await locator.boundingBox()
       if (boundingBox) {
         const centerX = boundingBox.x + boundingBox.width / 2
         const centerY = boundingBox.y + boundingBox.height / 2
-        
+
         // Get current cursor position (if any) for smooth animation
         const currentCursor = await page.evaluate(() => {
           const cursor = document.getElementById('__playwright_cursor__')
@@ -957,26 +960,26 @@ export class PlaywrightRunner {
           }
           return null
         })
-        
+
         // Phase 3: Animate cursor movement with Cubic-Bezier easing (human-like)
         if (currentCursor) {
           // Calculate distance for variable duration
           const distance = Math.sqrt(
-            Math.pow(centerX - currentCursor.x, 2) + 
+            Math.pow(centerX - currentCursor.x, 2) +
             Math.pow(centerY - currentCursor.y, 2)
           )
           const duration = Math.min(300 + (distance * 0.1), 800) // 300-800ms based on distance
-          
+
           // Phase 3: Smooth cursor movement with Cubic-Bezier easing
           await page.evaluate((from, to, dur) => {
             const cursor = document.getElementById('__playwright_cursor__')
             if (!cursor || !(window as any).__playwrightShowCursor) return
-            
+
             // Phase 3: Use Cubic-Bezier easing (ease-in-out for natural movement)
             cursor.style.transition = `left ${dur}ms cubic-bezier(0.4, 0, 0.2, 1), top ${dur}ms cubic-bezier(0.4, 0, 0.2, 1)`
-            ;(window as any).__playwrightShowCursor(to.x, to.y, true)
+              ; (window as any).__playwrightShowCursor(to.x, to.y, true)
           }, currentCursor, { x: centerX, y: centerY }, duration)
-          
+
           // Wait for animation to complete
           await page.waitForTimeout(duration + 50)
         } else {
@@ -986,18 +989,18 @@ export class PlaywrightRunner {
               (window as any).__playwrightShowCursor(x, y)
             }
           }, centerX, centerY)
-          
+
           // Wait a bit to show cursor
           await page.waitForTimeout(200)
         }
-        
+
         // Show click ripple effect
         await page.evaluate((x, y) => {
           if ((window as any).__playwrightShowClick) {
             (window as any).__playwrightShowClick(x, y)
           }
         }, centerX, centerY)
-        
+
         // Wait for click animation
         await page.waitForTimeout(100)
       }
@@ -1005,12 +1008,12 @@ export class PlaywrightRunner {
       // If showing indicators fails, continue with click anyway
       console.warn('Failed to show click indicator:', indicatorError)
     }
-    
+
     // Perform the actual click
     const beforeUrl = page.url()
     try {
       await locator.click({ timeout: 10000, force: false })
-      
+
       // Hide cursor after click
       try {
         await page.evaluate(() => {
@@ -1035,20 +1038,20 @@ export class PlaywrightRunner {
         throw error
       }
     }
-    await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {})
+    await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => { })
     const afterUrl = page.url()
-    
+
     // Hide cursor after successful click
     try {
       await page.evaluate(() => {
         if ((window as any).__playwrightHideCursor) {
-          ;(window as any).__playwrightHideCursor()
+          ; (window as any).__playwrightHideCursor()
         }
       })
     } catch (hideError) {
       // Ignore hide errors
     }
-    
+
     if (!options.fromHealing && beforeUrl === afterUrl) {
       await this.logLinkExpectation(locator)
     }
@@ -1066,7 +1069,7 @@ export class PlaywrightRunner {
 
   private async resolveBlockingOverlays(page: Page): Promise<boolean> {
     let dismissed = false
-    
+
     // Step 1: Find cookie banner by looking for cookie-related text
     // Then find the banner container by traversing up the DOM
     try {
@@ -1075,9 +1078,9 @@ export class PlaywrightRunner {
         ':has-text("Accept All Cookies")',
         ':has-text("This website uses cookies")',
       ]
-      
+
       let cookieBannerContainer: any = null
-      
+
       for (const textSelector of cookieTextSelectors) {
         try {
           const textElement = page.locator(textSelector).first()
@@ -1088,7 +1091,7 @@ export class PlaywrightRunner {
               // Find the banner container using XPath (most reliable)
               // Look for parent elements that are likely the banner container
               cookieBannerContainer = textElement.locator('xpath=ancestor::*[contains(@class, "cookie") or contains(@id, "cookie") or contains(@class, "consent") or contains(@id, "consent") or contains(@class, "banner") or contains(@style, "position: fixed") or contains(@style, "position:absolute") or contains(@style, "position: fixed") or contains(@style, "position:absolute")][1]').first()
-              
+
               // If XPath didn't work, try finding by evaluating the DOM
               const containerCount = await cookieBannerContainer.count().catch(() => 0)
               if (containerCount === 0) {
@@ -1097,28 +1100,28 @@ export class PlaywrightRunner {
                   let current: any = el
                   let bestContainer: any = null
                   let maxScore = 0
-                  
+
                   for (let i = 0; i < 15 && current && current !== document.body; i++) {
                     const style = window.getComputedStyle(current)
                     const rect = current.getBoundingClientRect()
                     const classes = String(current.className || '').toLowerCase()
                     const id = String(current.id || '').toLowerCase()
-                    
+
                     let score = 0
                     if (style.position === 'fixed' || style.position === 'absolute') score += 10
                     if (classes.includes('cookie') || classes.includes('consent') || classes.includes('banner')) score += 20
                     if (id.includes('cookie') || id.includes('consent')) score += 20
                     if (rect.bottom > window.innerHeight * 0.7) score += 10
                     if (rect.width > window.innerWidth * 0.3 && rect.height > 50) score += 10
-                    
+
                     if (score > maxScore) {
                       maxScore = score
                       bestContainer = current
                     }
-                    
+
                     current = current.parentElement
                   }
-                  
+
                   if (bestContainer) {
                     // Mark it with a data attribute
                     const uniqueMarker = `cookie-banner-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
@@ -1127,7 +1130,7 @@ export class PlaywrightRunner {
                   }
                   return null
                 }).catch(() => null)
-                
+
                 if (marker) {
                   cookieBannerContainer = page.locator(`[data-cookie-banner-marker="${marker}"]`).first()
                   const markerCount = await cookieBannerContainer.count().catch(() => 0)
@@ -1138,7 +1141,7 @@ export class PlaywrightRunner {
               } else {
                 console.log('Playwright: Found cookie banner container (XPath method)')
               }
-              
+
               if (cookieBannerContainer && (await cookieBannerContainer.count().catch(() => 0)) > 0) {
                 break
               }
@@ -1148,36 +1151,36 @@ export class PlaywrightRunner {
           continue
         }
       }
-      
+
       // Step 2: If we found the banner container, find ALL buttons within it and try clicking them
       if (cookieBannerContainer && (await cookieBannerContainer.count().catch(() => 0)) > 0) {
         const isVisible = await cookieBannerContainer.isVisible().catch(() => false)
         if (isVisible) {
           console.log('Playwright: Cookie banner visible, searching for buttons inside...')
-          
+
           // Get ALL clickable elements within the banner
           const allClickableElements = cookieBannerContainer.locator('button, [role="button"], a, [onclick], [data-action], [data-dismiss]')
           const elementCount = await allClickableElements.count().catch(() => 0)
-          
+
           console.log(`Playwright: Found ${elementCount} clickable elements in cookie banner`)
-          
+
           // Try each element
           for (let i = 0; i < elementCount; i++) {
             try {
               const element = allClickableElements.nth(i)
               const isElementVisible = await element.isVisible().catch(() => false)
               if (!isElementVisible) continue
-              
+
               // Get element text and attributes
               const elementText = await element.textContent().catch(() => '')
               const elementTag = await element.evaluate((el: any) => el.tagName.toLowerCase()).catch(() => '')
               const elementRole = await element.getAttribute('role').catch(() => '')
               const elementOnClick = await element.getAttribute('onclick').catch(() => '')
-              
+
               const normalizedText = (elementText || '').trim().toLowerCase()
-              
+
               // Check if this looks like an accept/close button
-              const isAcceptButton = 
+              const isAcceptButton =
                 normalizedText.includes('accept all cookies') ||
                 normalizedText.includes('accept all') ||
                 normalizedText.includes('accept cookies') ||
@@ -1193,29 +1196,29 @@ export class PlaywrightRunner {
                 elementOnClick?.toLowerCase().includes('accept') ||
                 elementOnClick?.toLowerCase().includes('close') ||
                 elementOnClick?.toLowerCase().includes('dismiss')
-              
+
               if (isAcceptButton) {
                 console.log(`Playwright: Found potential accept button: tag="${elementTag}", text="${elementText}", role="${elementRole}"`)
-                
+
                 // Verify element is actionable
                 const isActionable = await element.evaluate((el: any) => {
                   const style = window.getComputedStyle(el)
-                  return style.pointerEvents !== 'none' && 
-                         style.opacity !== '0' && 
-                         !el.disabled &&
-                         el.offsetWidth > 0 &&
-                         el.offsetHeight > 0
+                  return style.pointerEvents !== 'none' &&
+                    style.opacity !== '0' &&
+                    !el.disabled &&
+                    el.offsetWidth > 0 &&
+                    el.offsetHeight > 0
                 }).catch(() => true)
-                
+
                 if (!isActionable) {
                   console.log(`Playwright: Element is not actionable, skipping`)
                   continue
                 }
-                
+
                 // Scroll into view and wait
-                await element.scrollIntoViewIfNeeded({ timeout: 2000 }).catch(() => {})
+                await element.scrollIntoViewIfNeeded({ timeout: 2000 }).catch(() => { })
                 await page.waitForTimeout(500)
-                
+
                 // Try clicking
                 try {
                   console.log(`Playwright: Attempting to click: "${elementText}"`)
@@ -1224,14 +1227,14 @@ export class PlaywrightRunner {
                   console.log(`Playwright: Normal click failed, trying force: ${clickError.message}`)
                   await element.click({ timeout: 3000, force: true })
                 }
-                
+
                 // Wait for dismissal
                 await page.waitForTimeout(2000)
-                
+
                 // Verify dismissal
                 const bannerStillVisible = await cookieBannerContainer.isVisible({ timeout: 1000 }).catch(() => true)
                 const cookieTextVisible = await page.locator(':has-text("THIS WEBSITE USES COOKIES")').count().catch(() => 0)
-                
+
                 if (!bannerStillVisible || cookieTextVisible === 0) {
                   console.log(`Playwright: ✅ Successfully dismissed cookie banner using: "${elementText}"`)
                   return true
@@ -1244,11 +1247,11 @@ export class PlaywrightRunner {
               continue
             }
           }
-          
+
           console.log('Playwright: No working buttons found in banner container')
         }
       }
-      
+
       // Step 3: Fallback - try finding buttons at page level with cookie-related text
       console.log('Playwright: Trying page-level button search...')
       const pageLevelButtons = [
@@ -1257,7 +1260,7 @@ export class PlaywrightRunner {
         '[role="button"]:has-text("Accept All Cookies")',
         'a:has-text("Accept All Cookies")',
       ]
-      
+
       for (const buttonSelector of pageLevelButtons) {
         try {
           const button = page.locator(buttonSelector).first()
@@ -1266,17 +1269,17 @@ export class PlaywrightRunner {
             const isVisible = await button.isVisible().catch(() => false)
             if (isVisible) {
               console.log(`Playwright: Found page-level button: ${buttonSelector}`)
-              await button.scrollIntoViewIfNeeded().catch(() => {})
+              await button.scrollIntoViewIfNeeded().catch(() => { })
               await page.waitForTimeout(500)
-              
+
               try {
                 await button.click({ timeout: 3000, force: false })
               } catch {
                 await button.click({ timeout: 3000, force: true })
               }
-              
+
               await page.waitForTimeout(2000)
-              
+
               const cookieTextVisible = await page.locator(':has-text("THIS WEBSITE USES COOKIES")').count().catch(() => 0)
               if (cookieTextVisible === 0) {
                 console.log(`Playwright: ✅ Successfully dismissed cookie banner using page-level button`)
@@ -1291,7 +1294,7 @@ export class PlaywrightRunner {
     } catch (error: any) {
       console.warn('Playwright: Cookie banner detection failed:', error.message)
     }
-    
+
     // Expanded overlay selectors including cookie banners
     const overlaySelectors = [
       // Standard modals
@@ -1406,53 +1409,53 @@ export class PlaywrightRunner {
       try {
         const overlays = page.locator(selector)
         const count = await overlays.count()
-        
+
         if (count === 0) continue
-        
+
         // Check each overlay instance
         for (let i = 0; i < count; i++) {
           const overlay = overlays.nth(i)
-          
+
           try {
             // Check if visible
             const isVisible = await overlay.isVisible().catch(() => false)
             if (!isVisible) continue
-            
+
             // Check z-index to see if it's on top (blocking)
             const zIndex = await overlay.evaluate((el) => {
               const style = window.getComputedStyle(el)
               return parseInt(style.zIndex) || 0
             }).catch(() => 0)
-            
+
             // Check if it covers significant portion of viewport
             const boundingBox = await overlay.boundingBox().catch(() => null)
             if (!boundingBox) continue
-            
+
             const viewportSize = page.viewportSize()
             if (!viewportSize) continue
-            
+
             const coverage = (boundingBox.width * boundingBox.height) / (viewportSize.width * viewportSize.height)
-            
+
             // Only dismiss if it's blocking (high z-index or covers >15% of screen)
             // Cookie banners are often at bottom but still blocking
             // Also check if element is at bottom of page (common for cookie banners)
             const isAtBottom = boundingBox.y + boundingBox.height > viewportSize.height * 0.7
-            const isCookieRelated = selector.toLowerCase().includes('cookie') || 
-                                   selector.toLowerCase().includes('consent') ||
-                                   selector.toLowerCase().includes('gdpr') ||
-                                   selector.toLowerCase().includes('privacy')
-            const isBlocking = zIndex >= 1000 || 
-                              coverage > 0.15 || 
-                              isCookieRelated ||
-                              (isAtBottom && (zIndex > 0 || coverage > 0.05)) // Lower threshold for bottom banners
-            
+            const isCookieRelated = selector.toLowerCase().includes('cookie') ||
+              selector.toLowerCase().includes('consent') ||
+              selector.toLowerCase().includes('gdpr') ||
+              selector.toLowerCase().includes('privacy')
+            const isBlocking = zIndex >= 1000 ||
+              coverage > 0.15 ||
+              isCookieRelated ||
+              (isAtBottom && (zIndex > 0 || coverage > 0.05)) // Lower threshold for bottom banners
+
             if (!isBlocking) continue
-            
+
             console.log(`Playwright: Detected blocking overlay (${selector}, z-index: ${zIndex}, coverage: ${(coverage * 100).toFixed(1)}%, at bottom: ${isAtBottom}). Attempting to dismiss...`)
-            
+
             // Try close buttons first (prioritize cookie accept buttons for cookie-related overlays)
             let buttonDismissed = false
-            
+
             // For cookie-related overlays, prioritize accept buttons
             if (isCookieRelated) {
               const cookieAcceptButtons = [
@@ -1464,14 +1467,14 @@ export class PlaywrightRunner {
                 'a:has-text("Accept All")',
                 'button:has-text("Accept")',
               ]
-              
+
               for (const acceptSelector of cookieAcceptButtons) {
                 try {
                   const acceptButton = overlay.locator(acceptSelector).first()
                   if ((await acceptButton.count()) > 0 && (await acceptButton.isVisible())) {
                     await acceptButton.click({ timeout: 2000, force: true })
                     await page.waitForTimeout(1000) // Wait longer for cookie banners to disappear
-                    
+
                     // Verify it was dismissed
                     const stillVisible = await overlay.isVisible().catch(() => false)
                     if (!stillVisible) {
@@ -1486,7 +1489,7 @@ export class PlaywrightRunner {
                 }
               }
             }
-            
+
             // If cookie-specific buttons didn't work, try all close buttons
             if (!buttonDismissed) {
               for (const closeSelector of closeButtonSelectors) {
@@ -1495,7 +1498,7 @@ export class PlaywrightRunner {
                   if ((await closeButton.count()) > 0 && (await closeButton.isVisible())) {
                     await closeButton.click({ timeout: 2000, force: true })
                     await page.waitForTimeout(800) // Wait longer for cookie banners to disappear
-                    
+
                     // Verify it was dismissed
                     const stillVisible = await overlay.isVisible().catch(() => false)
                     if (!stillVisible) {
@@ -1511,7 +1514,7 @@ export class PlaywrightRunner {
                 }
               }
             }
-            
+
             // If close button didn't work, try clicking overlay itself (for cookie banners at bottom)
             if (!buttonDismissed) {
               try {
@@ -1519,15 +1522,15 @@ export class PlaywrightRunner {
                 const box = await overlay.boundingBox()
                 if (box) {
                   // Try clicking near bottom-right (where accept buttons often are)
-                  await overlay.click({ 
-                    position: { 
-                      x: Math.max(box.width - 50, box.width * 0.8), 
-                      y: Math.max(box.height - 30, box.height * 0.8) 
-                    }, 
-                    timeout: 1000 
+                  await overlay.click({
+                    position: {
+                      x: Math.max(box.width - 50, box.width * 0.8),
+                      y: Math.max(box.height - 30, box.height * 0.8)
+                    },
+                    timeout: 1000
                   })
                   await page.waitForTimeout(800)
-                  
+
                   const stillVisible = await overlay.isVisible().catch(() => false)
                   if (!stillVisible) {
                     console.log(`Playwright: Successfully dismissed overlay by clicking it`)
@@ -1540,7 +1543,7 @@ export class PlaywrightRunner {
                 try {
                   await overlay.click({ position: { x: 5, y: 5 }, timeout: 1000 })
                   await page.waitForTimeout(800)
-                  
+
                   const stillVisible = await overlay.isVisible().catch(() => false)
                   if (!stillVisible) {
                     console.log(`Playwright: Successfully dismissed overlay by clicking corner`)
@@ -1568,7 +1571,7 @@ export class PlaywrightRunner {
       try {
         await page.keyboard.press('Escape')
         await page.waitForTimeout(800)
-        
+
         // Verify something was dismissed by checking if any overlays disappeared
         const hasOverlays = await page.locator('[role="dialog"], [aria-modal="true"], .modal, [id*="cookie" i], [class*="cookie" i]').count()
         if (hasOverlays === 0) {
@@ -1587,7 +1590,7 @@ export class PlaywrightRunner {
     const originalSelector = action.selector
     const candidates = this.buildHealingCandidates(action)
     const tried = new Set<string>()
-    
+
     for (const candidate of candidates) {
       if (!candidate.selector || tried.has(candidate.selector)) {
         continue
@@ -1606,19 +1609,19 @@ export class PlaywrightRunner {
         continue
       }
     }
-    
+
     return null
   }
 
   private buildHealingCandidates(action: LLMAction): HealingCandidate[] {
     const selector = action.selector || ''
     const candidates: HealingCandidate[] = []
-    
+
     candidates.push(...this.getLocatorFallbacks(selector))
     candidates.push(...this.buildTextHeuristics(action))
     candidates.push(...this.buildAttributeHeuristics(selector))
     candidates.push(...this.buildStructuralHeuristics(selector))
-    
+
     return candidates
   }
 
@@ -1660,10 +1663,10 @@ export class PlaywrightRunner {
   private buildAttributeHeuristics(selector: string): HealingCandidate[] {
     const candidates: HealingCandidate[] = []
     if (!selector) return candidates
-    
+
     const tagMatch = selector.match(/^[a-zA-Z]+/)
     const tag = tagMatch ? tagMatch[0] : ''
-    
+
     const idMatch = selector.match(/#([\w-]+)/)
     if (idMatch) {
       const rawId = idMatch[1]
@@ -1677,7 +1680,7 @@ export class PlaywrightRunner {
         })
       }
     }
-    
+
     const dataAttrMatch = selector.match(/\[(data-[^\]=]+)=["']?([^"' \]]+)["']?\]/)
     if (dataAttrMatch) {
       const attrName = dataAttrMatch[1]
@@ -1691,7 +1694,7 @@ export class PlaywrightRunner {
         })
       }
     }
-    
+
     return candidates
   }
 
@@ -1702,11 +1705,11 @@ export class PlaywrightRunner {
       .replace(/\[data-[^\]]+\]/g, '')
       .replace(/\s+/g, ' ')
       .trim()
-    
+
     if (!stripped || stripped === selector) {
       return []
     }
-    
+
     return [{
       selector: stripped,
       strategy: 'position',
@@ -1720,14 +1723,14 @@ export class PlaywrightRunner {
       this.extractQuotedText(action.description || ''),
       action.description,
     ].filter(Boolean) as string[]
-    
+
     for (const candidate of candidates) {
       const cleaned = candidate.trim()
       if (cleaned && cleaned.length <= 60) {
         return cleaned
       }
     }
-    
+
     return null
   }
 
@@ -1781,9 +1784,9 @@ export class PlaywrightRunner {
     if (!session) {
       throw new Error(`Session ${sessionId} not found`)
     }
-    
+
     console.log('Playwright: Getting DOM snapshot for session:', sessionId)
-    
+
     try {
       // Get the full HTML content of the page
       const html = await session.page.content()
@@ -1814,18 +1817,18 @@ export class PlaywrightRunner {
       console.warn('Playwright: Session not found:', sessionId)
       return { videoPath: null, tracePath: null }
     }
-    
+
     console.log('Playwright: Releasing session:', sessionId)
-    
+
     try {
       // Get video object before closing
       const video = session.page.video()
-      
+
       // Stop and save trace (Time-Travel Debugger)
       const tracePath = `./traces/trace_${sessionId}_${Date.now()}.zip`
       let traceSuccess = false
       let finalTracePath = tracePath
-      
+
       // Only attempt to save trace if tracing was started and context is still valid
       if (session.tracingStarted && !session.context._closed) {
         try {
@@ -1833,46 +1836,46 @@ export class PlaywrightRunner {
           const path = require('path')
           const zlib = require('zlib')
           const { pipeline } = require('stream/promises')
-          
+
           // Ensure traces directory exists
           const tracesDir = path.dirname(tracePath)
           if (!fs.existsSync(tracesDir)) {
             fs.mkdirSync(tracesDir, { recursive: true })
           }
-          
+
           // Save trace - tracing.stop() is async and writes the file
           await session.context.tracing.stop({ path: tracePath })
-          
+
           // Wait a bit for file to be written (tracing.stop() is async)
           let retries = 10
           while (retries > 0 && !fs.existsSync(tracePath)) {
             await new Promise(resolve => setTimeout(resolve, 100))
             retries--
           }
-          
+
           if (fs.existsSync(tracePath)) {
             // Additional compression with gzip (level 9)
             // Playwright's trace.zip is already compressed, but gzip can reduce it further
             const compressedPath = `${tracePath}.gz`
-            
+
             try {
               const gzip = zlib.createGzip({ level: 9 })
               const source = fs.createReadStream(tracePath)
               const destination = fs.createWriteStream(compressedPath)
-              
+
               await pipeline(source, gzip, destination)
-              
+
               // Verify compressed file exists
               if (fs.existsSync(compressedPath)) {
                 const originalSize = fs.statSync(tracePath).size
                 const compressedSize = fs.statSync(compressedPath).size
                 const savings = ((1 - compressedSize / originalSize) * 100).toFixed(1)
-                
+
                 console.log(`Playwright: Trace compressed: ${(originalSize / 1024 / 1024).toFixed(2)}MB → ${(compressedSize / 1024 / 1024).toFixed(2)}MB (${savings}% reduction)`)
-                
+
                 // Delete original uncompressed file
                 fs.unlinkSync(tracePath)
-                
+
                 finalTracePath = compressedPath
                 traceSuccess = true
               }
@@ -1883,7 +1886,7 @@ export class PlaywrightRunner {
               finalTracePath = tracePath
             }
           }
-          
+
           if (traceSuccess) {
             console.log('Playwright: Trace saved:', finalTracePath)
           } else {
@@ -1911,13 +1914,13 @@ export class PlaywrightRunner {
         }
         traceSuccess = false
       }
-      
+
       // Close page first
-      await session.page.close().catch(() => {})
-      
+      await session.page.close().catch(() => { })
+
       // Close context - this finalizes the video
-      await session.context.close().catch(() => {})
-      
+      await session.context.close().catch(() => { })
+
       // Get video path after context closes (video is finalized)
       let videoPath: string | null = null
       if (video) {
@@ -1928,17 +1931,17 @@ export class PlaywrightRunner {
           console.error('Playwright: Failed to get video path:', error.message)
         }
       }
-      
+
       // Close browser
-      await session.browser.close().catch(() => {})
-      
+      await session.browser.close().catch(() => { })
+
       this.sessions.delete(sessionId)
       console.log('Playwright: Session released:', sessionId)
-      
+
       // Return video and trace paths if available
-      return { 
-        videoPath, 
-        tracePath: traceSuccess ? finalTracePath : null 
+      return {
+        videoPath,
+        tracePath: traceSuccess ? finalTracePath : null
       }
     } catch (error: any) {
       console.error('Playwright: Error releasing session:', error.message)
@@ -1997,11 +2000,11 @@ export class PlaywrightRunner {
         for (let configIdx = 0; configIdx < elementConfigs.length; configIdx++) {
           const config = elementConfigs[configIdx]
           const elements = document.querySelectorAll(config.selector)
-          
+
           for (let i = 0; i < elements.length; i++) {
             const el = elements[i]
             const rect = el.getBoundingClientRect()
-            
+
             if (rect.width > 0 && rect.height > 0) {
               // Fully inlined selector generation (no function calls)
               let selector = ''

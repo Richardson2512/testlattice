@@ -35,10 +35,12 @@ initializeSentry()
 import Fastify from 'fastify'
 import cors from '@fastify/cors'
 import helmet from '@fastify/helmet'
+import cookie from '@fastify/cookie'
 import * as Sentry from '@sentry/node'
 import { config } from './config/env'
 import { Database } from './lib/db'
 import { testRoutes } from './routes/tests'
+import { guestTestRunRoutes } from './routes/guest/guestTestRuns'
 import { projectRoutes } from './routes/projects'
 import { integrationRoutes } from './routes/integrations'
 import { billingRoutes } from './routes/billing'
@@ -54,26 +56,26 @@ const fastify = Fastify({
 async function registerPlugins() {
   // Build allowed origins from environment variables
   const allowedOrigins: string[] = []
-  
+
   // Add APP_URL if configured
   if (config.appUrl && config.appUrl !== 'http://localhost:3000') {
     allowedOrigins.push(config.appUrl)
   }
-  
+
   // Add NEXT_PUBLIC_APP_URL from environment if set
   const frontendUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL
   if (frontendUrl && !allowedOrigins.includes(frontendUrl)) {
     allowedOrigins.push(frontendUrl)
   }
-  
+
   // In development, allow localhost origins
   if (config.nodeEnv === 'development') {
     allowedOrigins.push('http://localhost:3000', 'http://127.0.0.1:3000')
   }
-  
+
   // Fallback to allow all if no origins configured (development only)
   const corsOrigins = allowedOrigins.length > 0 ? allowedOrigins : (config.nodeEnv === 'development' ? ['http://localhost:3000', 'http://127.0.0.1:3000'] : [config.appUrl || '*'])
-  
+
   await fastify.register(cors, {
     origin: corsOrigins,
     credentials: true,
@@ -81,9 +83,15 @@ async function registerPlugins() {
     allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   })
-  
+
   await fastify.register(helmet, {
     contentSecurityPolicy: false, // Allow inline styles for development
+  })
+
+  await fastify.register(cookie, {
+    secret: process.env.COOKIE_SECRET || 'testlattice-cookie-secret-key-change-in-prod', // for cookies signature
+    hook: 'onRequest', // set to false to disable cookie parsing in onRequest hook
+    parseOptions: {}  // options for parsing cookies
   })
 }
 
@@ -117,7 +125,7 @@ async function registerRoutes() {
     try {
       const { getCleanupStats } = await import('./jobs/cleanupArtifacts')
       const stats = await getCleanupStats()
-      
+
       if (!stats) {
         return reply.code(500).send({ error: 'Failed to fetch cleanup stats' })
       }
@@ -146,13 +154,16 @@ async function registerRoutes() {
   fastify.register(async function (fastify) {
     // Test routes
     await fastify.register(testRoutes, { prefix: '/api/tests' })
-    
+
+    // Guest test routes (no authentication required)
+    await fastify.register(guestTestRunRoutes, { prefix: '/api/tests' })
+
     // Project routes
     await fastify.register(projectRoutes, { prefix: '/api/projects' })
-    
+
     // Integration routes
     await fastify.register(integrationRoutes, { prefix: '/api/integrations' })
-    
+
     // Billing routes
     await fastify.register(billingRoutes, { prefix: '/api/billing' })
   }, { prefix: '' })
@@ -192,7 +203,7 @@ async function start() {
   try {
     await registerPlugins()
     await registerRoutes()
-    
+
     // Initialize database with sample data (non-blocking)
     // Wait a bit to ensure env vars are fully loaded
     setTimeout(() => {
@@ -200,17 +211,17 @@ async function start() {
         fastify.log.warn('Database initialization warning:', err.message)
       })
     }, 1000)
-    
+
     const port = config.port || 3001
     const host = config.host || '0.0.0.0'
-    
+
     await fastify.listen({ port, host })
     fastify.log.info(`Server listening on http://${host}:${port}`)
-    
+
     // Initialize WebSocket server for real-time test control (God Mode)
     // Use Redis-backed WebSocket for horizontal scaling
     const useRedis = process.env.USE_REDIS_WEBSOCKET !== 'false' // Default to true
-    
+
     if (useRedis && process.env.REDIS_URL) {
       testControlWS = new RedisWebSocketManager(fastify.server, process.env.REDIS_URL)
       fastify.log.info('✅ Redis-backed WebSocket initialized (scalable across multiple servers)')
@@ -218,7 +229,7 @@ async function start() {
       testControlWS = new TestControlWebSocket(fastify.server)
       fastify.log.warn('⚠️  Using in-memory WebSocket (not scalable - set REDIS_URL for production)')
     }
-    
+
     // Start artifact cleanup scheduler
     if (process.env.ENABLE_ARTIFACT_CLEANUP !== 'false') {
       startCleanupScheduler()

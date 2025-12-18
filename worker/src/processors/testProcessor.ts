@@ -43,6 +43,7 @@ import { AnnotatedScreenshotService } from '../services/annotatedScreenshot'
 import { RiskAnalysisService } from '../services/riskAnalysis'
 import { TestDataStore } from '../services/testDataStore'
 import { LearningService } from '../services/learningService'
+import Redis from 'ioredis'
 
 class DiagnosisCancelledError extends Error {
   constructor(message = 'Diagnosis cancelled by user') {
@@ -60,7 +61,7 @@ export interface BrowserMatrixResult {
   executionTime: number
 }
 
-type ProcessResult = { 
+type ProcessResult = {
   success: boolean
   steps: TestStep[]
   artifacts: string[]
@@ -80,6 +81,7 @@ export class TestProcessor {
   private pineconeService: PineconeService | null
   private playwrightRunner: PlaywrightRunner
   private appiumRunner: AppiumRunner | null
+  private redis: Redis
   private apiUrl: string
   private comprehensiveTesting: ComprehensiveTestingService
   private testingStrategy: TestingStrategyService
@@ -113,12 +115,13 @@ export class TestProcessor {
     this.pineconeService = pineconeService
     this.playwrightRunner = playwrightRunner
     this.appiumRunner = appiumRunner
+    this.visionValidator = visionValidator || null
+    this.visionValidatorInterval = visionValidatorInterval
+    this.redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379')
     this.apiUrl = config.api.url || process.env.API_URL || 'http://localhost:3001'
     this.comprehensiveTesting = new ComprehensiveTestingService()
     this.testingStrategy = new TestingStrategyService()
-    this.visionValidator = visionValidator
-    this.visionValidatorInterval = visionValidatorInterval
-    
+
     // Initialize Intelligent Retry Layer (IRL) with UnifiedBrainService
     this.retryLayer = new IntelligentRetryLayer(
       unifiedBrain,
@@ -138,7 +141,7 @@ export class TestProcessor {
     this.contextSynthesizer = new ContextSynthesizer(unifiedBrain, this.comprehensiveTesting)
     this.testExecutor = new TestExecutor(playwrightRunner, appiumRunner, this.retryLayer)
     this.visualDiffService = new VisualDiffService(0.1) // 0.1 threshold for pixel comparison
-    
+
     // Initialize new enhanced services
     this.accessibilityMapService = new AccessibilityMapService()
     this.verificationService = new VerificationService()
@@ -178,7 +181,7 @@ export class TestProcessor {
     // Get page dimensions to determine how many screenshots we need
     const dimensions = await this.playwrightRunner.getPageDimensions(params.sessionId)
     const { viewportHeight, documentHeight } = dimensions
-    
+
     console.log(`[${params.runId}] Page dimensions: viewport=${viewportHeight}px, document=${documentHeight}px`)
 
     // Scroll to top first
@@ -186,21 +189,21 @@ export class TestProcessor {
     await this.delay(300)
 
     // Calculate number of scroll positions needed
-    // We'll capture screenshots with 80% overlap to ensure we don't miss content
-    const scrollIncrement = Math.floor(viewportHeight * 0.2) // 20% of viewport = 80% overlap
+    // We'll capture screenshots with 20% overlap to ensure we don't miss content
+    const scrollIncrement = Math.floor(viewportHeight * 0.8) // 80% of viewport = 20% overlap
     const totalScrollPositions = Math.max(1, Math.ceil((documentHeight - viewportHeight) / scrollIncrement) + 1)
-    
+
     console.log(`[${params.runId}] Will capture ${totalScrollPositions} screenshots to cover entire page`)
 
     // Capture screenshots at different scroll positions
     const screenshots: Array<{ position: number; screenshot: string }> = []
-    
+
     for (let i = 0; i < totalScrollPositions; i++) {
       await this.ensureDiagnosisActive(params.runId)
-      
+
       const scrollY = Math.min(i * scrollIncrement, Math.max(0, documentHeight - viewportHeight))
       await this.playwrightRunner.scrollToPosition(params.sessionId, scrollY)
-      
+
       // Update progress if callback provided
       if (params.onProgress) {
         params.onProgress({
@@ -213,7 +216,7 @@ export class TestProcessor {
       // Capture screenshot at this position
       const screenshot = await this.playwrightRunner.captureScreenshot(params.sessionId, false)
       screenshots.push({ position: scrollY, screenshot })
-      
+
       console.log(`[${params.runId}] Captured screenshot ${i + 1}/${totalScrollPositions} at position ${scrollY}px`)
     }
 
@@ -224,26 +227,26 @@ export class TestProcessor {
     // Get full DOM snapshot (only need to do this once as DOM is the same regardless of scroll position)
     // The DOM contains all elements from the entire page, not just the viewport
     const domSnapshot = await this.playwrightRunner.getDOMSnapshot(params.sessionId)
-    
+
     // Get page from session for accessibility map creation
     const session = this.playwrightRunner.getSession(params.sessionId)
     if (!session) {
       throw new Error(`Session ${params.sessionId} not found`)
     }
     const { page } = session
-    
+
     // STEP 1: Create Accessibility Map (interactive elements only with position data)
     console.log(`[${params.runId}] Creating accessibility map...`)
     const accessibilityMap = await this.accessibilityMapService.createAccessibilityMap(page)
     console.log(`[${params.runId}] Accessibility map created: ${accessibilityMap.totalInteractive} interactive elements`)
-    
+
     // STEP 2: Create annotated screenshot with numbered markers [1], [2], [3]
     console.log(`[${params.runId}] Creating annotated screenshot...`)
     const annotatedScreenshotData = await this.annotatedScreenshotService.createAnnotatedScreenshotWithMap(
       page,
       accessibilityMap
     )
-    
+
     // Convert accessibility map to VisionContext format for compatibility
     const visionElements = this.accessibilityMapService.convertToVisionElements(accessibilityMap)
     const context: VisionContext = {
@@ -255,14 +258,20 @@ export class TestProcessor {
         pageTitle: await page.title(),
       },
     }
-    
+
     // Analyze the DOM snapshot (this extracts all elements from the full page)
     // We use the accessibility map context instead of full DOM analysis for better efficiency
-    const fullContext = await this.unifiedBrain.analyzeScreenshot(
-      screenshots[0]?.screenshot || '', // Use first screenshot for analysis
-      domSnapshot,
-      'Diagnosis'
-    )
+    let fullContext = { elements: [] }
+    try {
+      fullContext = await this.unifiedBrain.analyzeScreenshot(
+        screenshots[0]?.screenshot || '', // Use first screenshot for analysis
+        domSnapshot,
+        'Diagnosis'
+      )
+    } catch (err: any) {
+      console.warn(`[${params.runId}] UnifiedBrain analysis failed (non-fatal):`, err.message)
+      // Continue with empty fullContext
+    }
 
     // Merge accessibility map elements with full context (accessibility map has position data)
     context.elements = visionElements.map((ve, idx) => {
@@ -299,8 +308,19 @@ export class TestProcessor {
 
     // STEP 3: Semantic Understanding - Analyze page type and flows
     console.log(`[${params.runId}] Performing semantic analysis...`)
-    const semanticAnalysis = await this.unifiedBrain.analyzePageTestability(context)
-    
+    let semanticAnalysis: any = {
+      testableComponents: [],
+      nonTestableComponents: [],
+      recommendedTests: [],
+      summary: 'Semantic analysis skipped due to AI service unavailability.'
+    }
+
+    try {
+      semanticAnalysis = await this.unifiedBrain.analyzePageTestability(context)
+    } catch (err: any) {
+      console.warn(`[${params.runId}] Semantic analysis failed (non-fatal):`, err.message)
+    }
+
     // STEP 4: Enhanced Testability Assessment with detailed checks
     console.log(`[${params.runId}] Running enhanced testability assessment...`)
     // Convert testable components to flow format for assessment
@@ -309,7 +329,7 @@ export class TestProcessor {
       const elementIndices = accessibilityMap.elements
         .map((el, elIdx) => (el.bestSelector === comp.selector ? elIdx : -1))
         .filter((idx) => idx >= 0)
-      
+
       return {
         name: comp.name || `flow_${idx + 1}`,
         description: comp.description,
@@ -317,14 +337,14 @@ export class TestProcessor {
         priority: comp.testability === 'high' ? 'high' : comp.testability === 'medium' ? 'medium' : 'low' as 'high' | 'medium' | 'low',
       }
     })
-    
+
     // Phase 1: Get test data store for this run
     const testDataStore = this.getTestDataStore(params.runId)
-    
+
     // Phase 1: Low confidence callback for hard stop (ENHANCED with rich notifications)
     const onLowConfidence = async (flow: any) => {
       console.error(`[${params.runId}] HARD STOP: Flow "${flow.name}" has confidence ${flow.confidence.toFixed(2)} < 0.4`)
-      
+
       // Capture screenshot for rich notification
       let screenshotBase64: string | undefined
       try {
@@ -333,7 +353,7 @@ export class TestProcessor {
       } catch (err) {
         console.warn('Failed to capture screenshot for notification:', err)
       }
-      
+
       // Build rich notification payload
       const rootCause = flow.rootCause || {
         rootCause: 'low_confidence',
@@ -341,14 +361,14 @@ export class TestProcessor {
         actionableSteps: flow.blockers.map((b: any) => b.suggestion),
         blockingOverlay: undefined,
       }
-      
+
       // Send rich notification (Slack Block Kit format)
       try {
         const { config } = await import('../config/env')
         if (config.notifications.slackWebhook) {
           const frontendUrl = config.notifications.frontendBaseUrl || 'http://localhost:3000'
           const testRunUrl = `${frontendUrl}/test/report/${params.runId}`
-          
+
           // Slack Block Kit format for rich cards
           const blocks: any[] = [
             {
@@ -374,7 +394,7 @@ export class TestProcessor {
               },
             },
           ]
-          
+
           // Add screenshot if available (Slack supports image URLs, but base64 needs to be uploaded)
           // For now, we'll include it as a text note and link to the test run
           if (screenshotBase64) {
@@ -386,7 +406,7 @@ export class TestProcessor {
               },
             })
           }
-          
+
           // Add actionable steps
           if (rootCause.actionableSteps && rootCause.actionableSteps.length > 0) {
             blocks.push({
@@ -397,7 +417,7 @@ export class TestProcessor {
               },
             })
           }
-          
+
           // Add overlay opt-in if blocking overlay detected
           if (rootCause.blockingOverlay) {
             blocks.push({
@@ -422,7 +442,7 @@ export class TestProcessor {
               },
             })
           }
-          
+
           // Add link to test run
           blocks.push({
             type: 'section',
@@ -431,12 +451,12 @@ export class TestProcessor {
               text: `<${testRunUrl}|View Test Run>`,
             },
           })
-          
+
           await fetch(config.notifications.slackWebhook, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ blocks }),
-          }).catch(() => {})
+          }).catch(() => { })
         }
       } catch (err) {
         console.error('Failed to send notification:', err)
@@ -449,29 +469,29 @@ export class TestProcessor {
       page,
       onLowConfidence
     )
-    
+
     // STEP 5: Verification Loop - Verify selectors before execution
     console.log(`[${params.runId}] Verifying test plan...`)
-      // Phase 1 & 3: Pass test data store and user instructions to verification
-      // Extract user instructions from jobData if available
-      const userInstructions = jobData?.instructions || jobData?.options?.coverage?.[0] || undefined
-      
-      const verifiedPlans = await this.verificationService.verifyTestPlan(
-        testabilityAssessment.testable.map((flow) => ({
-          name: flow.name,
-          elements: flow.elements,
-          description: flow.description,
-        })),
-        accessibilityMap,
-        page,
-        testDataStore,
-        userInstructions // Phase 3: @fake pattern matching support
-      )
-    
+    // Phase 1 & 3: Pass test data store and user instructions to verification
+    // Extract user instructions from jobData if available
+    const userInstructions = jobData?.instructions || jobData?.options?.coverage?.[0] || undefined
+
+    const verifiedPlans = await this.verificationService.verifyTestPlan(
+      testabilityAssessment.testable.map((flow) => ({
+        name: flow.name,
+        elements: flow.elements,
+        description: flow.description,
+      })),
+      accessibilityMap,
+      page,
+      testDataStore,
+      userInstructions // Phase 3: @fake pattern matching support
+    )
+
     // STEP 6: Risk Analysis
     console.log(`[${params.runId}] Analyzing risks...`)
     const riskAnalysis = await this.riskAnalysisService.analyzeRisks(verifiedPlans, page)
-    
+
     // Merge all analysis results
     const analysis: DiagnosisResult = {
       ...semanticAnalysis,
@@ -515,15 +535,15 @@ export class TestProcessor {
         const stepNumber = -1000 - params.pageIndex - (i * 0.1)
         const url = await this.storageService.uploadScreenshot(params.runId, stepNumber, buffer)
         screenshotUrls.push(url)
-        
+
         // First screenshot is the primary one (for backward compatibility)
         if (i === 0) {
           screenshotUrl = url
         }
-        
+
         console.log(`[${params.runId}] Uploaded screenshot ${i + 1}/${screenshots.length} at position ${screenshots[i].position}px`)
       }
-      
+
       // Upload annotated screenshot (with numbered markers) for diagnosis
       try {
         const annotatedBuffer = annotatedScreenshotData.screenshot
@@ -543,10 +563,10 @@ export class TestProcessor {
 
     console.log(`[${params.runId}] Full-page diagnosis complete: ${screenshots.length} screenshots captured and uploaded, ${context.elements.length} elements found, comprehensive tests: ${comprehensiveTests ? 'completed' : 'failed'}`)
 
-    return { 
-      context, 
-      analysis: analysisWithTests, 
-      screenshotUrl, 
+    return {
+      context,
+      analysis: analysisWithTests,
+      screenshotUrl,
       screenshotUrls,
       comprehensiveTests: comprehensiveTests || undefined
     }
@@ -1103,7 +1123,7 @@ export class TestProcessor {
   /**
    * Fetch aggregated run state (status + paused flag)
    */
-  private async getTestRunState(runId: string): Promise<{ 
+  private async getTestRunState(runId: string): Promise<{
     status: string | null
     paused: boolean
     diagnosis?: DiagnosisResult
@@ -1143,19 +1163,19 @@ export class TestProcessor {
     try {
       const fetch = (await import('node-fetch')).default
       const response = await fetch(`${this.apiUrl}/api/tests/${runId}/manual-actions`)
-      
+
       if (!response.ok) {
         // If endpoint doesn't exist or returns error, no manual actions
         return null
       }
-      
+
       const data = await response.json()
       const actions = data.actions || []
-      
+
       if (actions.length > 0) {
         const manualAction = actions[0] // Get first queued action
         console.log(`[${runId}] 🎮 GOD MODE: Manual action queued: ${manualAction.action} on ${manualAction.selector || manualAction.target || 'element'}`)
-        
+
         // Convert to LLMAction format
         const llmAction: LLMAction = {
           action: manualAction.action,
@@ -1171,7 +1191,7 @@ export class TestProcessor {
           godModeEvent: manualAction.godModeEvent, // Pass through for learning
         }
       }
-      
+
       return null
     } catch (error: any) {
       // Silently fail - manual actions are optional
@@ -1422,7 +1442,7 @@ export class TestProcessor {
       const { viewportHeight, documentHeight } = dimensions
       const scrollIncrement = Math.floor(viewportHeight * 0.2)
       const totalScrollPositions = Math.max(1, Math.ceil((documentHeight - viewportHeight) / scrollIncrement) + 1)
-      
+
       console.log(`[${runId}] Full-page scan: ${totalScrollPositions} positions needed for ${documentHeight}px page`)
 
       let currentScrollStep = 0
@@ -1480,7 +1500,7 @@ export class TestProcessor {
       if (isMultiPage) {
         // Multi-page: Explore step (50-75%)
         await this.ensureDiagnosisActive(runId)
-        
+
         await this.updateDiagnosisProgress(runId, {
           step: 4,
           totalSteps,
@@ -1593,7 +1613,7 @@ export class TestProcessor {
       throw error
     } finally {
       if (session) {
-        await this.playwrightRunner.releaseSession(session.id).catch(() => {})
+        await this.playwrightRunner.releaseSession(session.id).catch(() => { })
       }
     }
   }
@@ -1784,9 +1804,9 @@ export class TestProcessor {
       const blockers = diagnosis.nonTestableComponents?.length || 0
       const pageHighlights = diagnosis.pages && diagnosis.pages.length > 0
         ? `Views checked: ${diagnosis.pages
-            .slice(0, 3)
-            .map(page => page.label || page.title || page.url || page.id)
-            .join(', ')}${diagnosis.pages.length > 3 ? '…' : ''}`
+          .slice(0, 3)
+          .map(page => page.label || page.title || page.url || page.id)
+          .join(', ')}${diagnosis.pages.length > 3 ? '…' : ''}`
         : ''
       const lines = [
         `🧪 Test run ${runId} requires approval`,
@@ -1828,30 +1848,30 @@ export class TestProcessor {
     const browserResults: BrowserMatrixResult[] = []
     const allSteps: TestStep[] = []
     const allArtifacts: string[] = []
-    
+
     // Get goal from build URL or diagnosis
     const goal = build.url || 'Complete test execution'
-    
+
     // Execute for each browser
     for (const browserType of browserMatrix) {
       const browserStartTime = Date.now()
       console.log(`[${runId}] [${browserType.toUpperCase()}] Starting execution...`)
-      
+
       // Create browser-specific profile
       const browserProfile: TestProfile = {
         ...profile,
-        device: browserType === 'firefox' 
+        device: browserType === 'firefox'
           ? DeviceProfile.FIREFOX_LATEST
           : browserType === 'webkit'
-          ? DeviceProfile.SAFARI_LATEST
-          : DeviceProfile.CHROME_LATEST
+            ? DeviceProfile.SAFARI_LATEST
+            : DeviceProfile.CHROME_LATEST
       }
-      
+
       let browserSteps: TestStep[] = []
       let browserArtifacts: string[] = []
       let browserSuccess = true
       let browserError: string | undefined
-      
+
       try {
         // Execute test sequence for this browser
         // We'll call the existing execution logic but with browser-specific profile
@@ -1871,12 +1891,12 @@ export class TestProcessor {
           shouldBlockSelectorFromError,
           projectId
         )
-        
+
         browserSteps = result.steps
         browserArtifacts = result.artifacts
         browserSuccess = result.success
         browserError = result.error
-        
+
         // Tag steps with browser
         const taggedSteps = browserSteps.map(step => ({
           ...step,
@@ -1886,7 +1906,7 @@ export class TestProcessor {
             orientation: step.environment?.orientation || 'portrait' as 'portrait' | 'landscape'
           }
         }))
-        
+
         browserResults.push({
           browser: browserType,
           success: browserSuccess,
@@ -1895,16 +1915,16 @@ export class TestProcessor {
           error: browserError,
           executionTime: Date.now() - browserStartTime
         })
-        
+
         allSteps.push(...taggedSteps)
         allArtifacts.push(...browserArtifacts)
-        
+
         console.log(`[${runId}] [${browserType.toUpperCase()}] Completed: ${browserSuccess ? 'PASS' : 'FAIL'} (${taggedSteps.length} steps, ${((Date.now() - browserStartTime) / 1000).toFixed(1)}s)`)
       } catch (error: any) {
         console.error(`[${runId}] [${browserType.toUpperCase()}] Execution failed:`, error.message)
         browserSuccess = false
         browserError = error.message
-        
+
         browserResults.push({
           browser: browserType,
           success: false,
@@ -1913,19 +1933,19 @@ export class TestProcessor {
           error: browserError,
           executionTime: Date.now() - browserStartTime
         })
-        
+
         allSteps.push(...browserSteps)
         allArtifacts.push(...browserArtifacts)
       }
     }
-    
+
     // Aggregate results
     const passedBrowsers = browserResults.filter(r => r.success).length
     const failedBrowsers = browserResults.filter(r => !r.success).length
     const overallSuccess = failedBrowsers === 0
-    
+
     console.log(`[${runId}] Browser Matrix Summary: ${passedBrowsers}/${browserMatrix.length} passed, ${failedBrowsers} failed`)
-    
+
     return {
       success: overallSuccess,
       steps: allSteps,
@@ -1969,11 +1989,11 @@ export class TestProcessor {
     // Create browser-specific profile
     const browserProfile: TestProfile = {
       ...profile,
-      device: browserType === 'firefox' 
+      device: browserType === 'firefox'
         ? DeviceProfile.FIREFOX_LATEST
         : browserType === 'webkit'
-        ? DeviceProfile.SAFARI_LATEST
-        : DeviceProfile.CHROME_LATEST
+          ? DeviceProfile.SAFARI_LATEST
+          : DeviceProfile.CHROME_LATEST
     }
 
     let session: any = null
@@ -1984,7 +2004,7 @@ export class TestProcessor {
     const selectorHealingMap = new Map<string, string>()
     // stepNumber will be set after navigation and popup handling
     let stepNumber = 0
-    
+
     // Track current environment for compatibility & responsiveness testing
     let currentEnvironment: {
       browser: string
@@ -2027,18 +2047,18 @@ export class TestProcessor {
             livekitApiKey: config.streaming.livekitApiKey,
             livekitApiSecret: config.streaming.livekitApiSecret,
             page: session.page,
-            frameServerPort: config.streaming.frameServerPort ? 
-              config.streaming.frameServerPort + (browserType === 'firefox' ? 1 : browserType === 'webkit' ? 2 : 0) : 
+            frameServerPort: config.streaming.frameServerPort ?
+              config.streaming.frameServerPort + (browserType === 'firefox' ? 1 : browserType === 'webkit' ? 2 : 0) :
               undefined,
           })
-          
+
           console.log(`[${runId}] [${browserType.toUpperCase()}] WebRTC stream started: ${streamStatus.streamUrl}`)
-          
+
           // Store streamer for this browser (will be cleaned up in finally block)
           if (!this.streamer) {
             this.streamer = browserStreamer // Keep reference for first browser
           }
-          
+
           // Notify API server about stream URL with browser identifier
           try {
             const fetch = (await import('node-fetch')).default
@@ -2080,11 +2100,11 @@ export class TestProcessor {
           description: `Navigate to ${build.url}`,
         }
         await runner.executeAction(session.id, navigateAction)
-        
+
         // Wait 3 seconds after navigation for page to fully load and cookie banners to appear
         console.log(`[${runId}] [${browserType.toUpperCase()}] Waiting 3 seconds after navigation for page load...`)
         await new Promise(resolve => setTimeout(resolve, 3000))
-        
+
         // Capture initial screenshot after navigation (may include popup)
         try {
           console.log(`[${runId}] [${browserType.toUpperCase()}] Capturing initial screenshot after navigation...`)
@@ -2100,7 +2120,7 @@ export class TestProcessor {
               orientation: currentEnvironment.orientation
             }
           )
-          
+
           // Create initial step to show page loaded
           const initialStep: TestStep = {
             id: `step_${runId}_${browserType}_0`,
@@ -2122,18 +2142,18 @@ export class TestProcessor {
         } catch (screenshotError: any) {
           console.warn(`[${runId}] [${browserType.toUpperCase()}] Failed to capture initial screenshot:`, screenshotError.message)
         }
-        
+
         // Step 1: Check for and handle popups/cookie consent banners (web only)
         // This MUST happen as step 1 after navigation
         if (build.type === BuildType.WEB && runner && 'checkAndDismissOverlays' in runner) {
           try {
             console.log(`[${runId}] [${browserType.toUpperCase()}] Step 1: Checking for popups/cookie consent banners...`)
             const hasPopup = await (runner as any).checkAndDismissOverlays(session.id)
-            
+
             if (hasPopup) {
               // Wait a bit for popup dismissal animation
               await new Promise(resolve => setTimeout(resolve, 500))
-              
+
               // Capture screenshot after popup dismissal
               const popupScreenshot = await runner.captureScreenshot(session.id)
               const popupScreenshotBuffer = Buffer.from(popupScreenshot, 'base64')
@@ -2147,7 +2167,7 @@ export class TestProcessor {
                   orientation: currentEnvironment.orientation
                 }
               )
-              
+
               // Create step for popup handling
               const popupStep: TestStep = {
                 id: `step_${runId}_${browserType}_1`,
@@ -2183,18 +2203,18 @@ export class TestProcessor {
       // Step 2+: User instructions and actions
       // Update stepNumber to start after navigation (0) and popup handling (1 if handled)
       stepNumber = steps.length > 1 ? 2 : 1 // If popup was handled (step 1 exists), start at 2
-      
+
       // Use Unified Brain Service to understand user instructions
       const userInstructions = options?.coverage?.[0] || ''
       let parsedInstructions = null
       let goal = ''
-      
+
       if (userInstructions) {
         try {
           console.log(`[${runId}] [${browserType.toUpperCase()}] Using Unified Brain Service to parse user instructions: "${userInstructions}"`)
           parsedInstructions = await this.unifiedBrain.parseTestInstructions(userInstructions, build.url)
           console.log(`[${runId}] [${browserType.toUpperCase()}] Unified Brain parsed instructions:`, JSON.stringify(parsedInstructions, null, 2))
-          
+
           // Build comprehensive goal from parsed instructions
           const instructionsSummary = `
 🎯 PRIMARY GOAL: ${parsedInstructions.primaryGoal}
@@ -2206,14 +2226,14 @@ ${parsedInstructions.specificActions.map((a, i) => `${i + 1}. ${a}`).join('\n')}
 ${parsedInstructions.elementsToCheck.map((e, i) => `${i + 1}. ${e}`).join('\n')}
 
 ✅ EXPECTED OUTCOMES:
-${parsedInstructions.expectedOutcomes.length > 0 
-  ? parsedInstructions.expectedOutcomes.map((o, i) => `${i + 1}. ${o}`).join('\n')
-  : 'Verify all actions complete successfully'}
+${parsedInstructions.expectedOutcomes.length > 0
+              ? parsedInstructions.expectedOutcomes.map((o, i) => `${i + 1}. ${o}`).join('\n')
+              : 'Verify all actions complete successfully'}
 
 📝 STRUCTURED PLAN:
 ${parsedInstructions.structuredPlan}
 `
-          
+
           // Combine with test mode requirements
           if (options?.allPages || options?.testMode === 'all') {
             goal = `USER INSTRUCTIONS (PARSED BY UNIFIED BRAIN - HIGHEST PRIORITY):\n${instructionsSummary}\n\nAdditionally, discover and test all pages on the website starting from ${build.url}. Navigate through all internal links, test each page, and ensure all pages are functional.`
@@ -2251,51 +2271,83 @@ ${parsedInstructions.structuredPlan}
       }
 
       const isMonkeyMode = options?.monkeyMode || options?.testMode === 'monkey'
+      const isGuestMode = options?.testMode === 'guest'
+      const guestTestType = options?.guestTestType as string | undefined
+      const guestCredentials = options?.guestCredentials as { username?: string; email?: string; password?: string } | undefined
       const isAllPagesMode = options?.allPages || options?.testMode === 'all'
       const STEP_LIMITS = {
         single: { min: 15, max: 50, default: 15 },
         multi: { min: 25, max: 100, default: 25 },
         all: { min: 50, max: 150, default: 50 },
         monkey: { min: 25, max: 75, default: 25 },
+        guest: { min: 15, max: 25, default: 25 }, // Guest gets 25 steps max
       }
 
       if (isMonkeyMode) {
         goal = 'MONKEY TEST MODE: Explore the application randomly to surface crashes, console errors, and unexpected behavior. Prioritize variety over precision.'
         console.log(`[${runId}] [${browserType.toUpperCase()}] 🐒 Monkey mode enabled - executing exploratory random interactions.`)
       }
-      
+
+      // Guest test mode with specific flows
+      if (isGuestMode && guestTestType) {
+        console.log(`[${runId}] [${browserType.toUpperCase()}] 🎯 Guest test mode: ${guestTestType}`)
+
+        switch (guestTestType) {
+          case 'login':
+            goal = `LOGIN FLOW TEST: Find the login form on this page, enter the provided credentials (username: ${guestCredentials?.username || guestCredentials?.email}, password: ***), submit, and verify if login succeeds or fails. Look for login buttons, sign-in links, or authentication forms.`
+            break
+          case 'signup':
+            goal = `SIGNUP FLOW TEST: Find the registration/signup form, fill in fields with demo data (email: ${guestCredentials?.email || guestCredentials?.username}, password: ***), submit the form, and verify the result.`
+            break
+          case 'visual':
+            goal = `VISUAL TESTING: Explore the main UI elements on this page. Take screenshots of key areas, check for visual consistency, broken layouts, missing images, or rendering issues. Navigate to at most 2-3 additional pages for comparison.`
+            break
+          case 'navigation':
+            goal = `NAVIGATION TEST: Click on main navigation links, test menu items, and verify page transitions work correctly. Check for broken links, 404 errors, or navigation failures. Visit 5-8 different pages.`
+            break
+          case 'form':
+            goal = `FORM TESTING: Find forms on this page (search, contact, newsletter, etc.), fill them with test data, submit, and verify validation messages and success/error states.`
+            break
+          case 'accessibility':
+            goal = `ACCESSIBILITY AUDIT: Check for common accessibility issues - missing alt text on images, proper heading hierarchy, form labels, color contrast issues, and keyboard navigation. Report findings.`
+            break
+          default:
+            goal = `VISUAL TESTING: Explore the main UI elements on this page and perform general testing.`
+        }
+      }
+
       const history: Array<{ action: LLMAction; timestamp: string }> = []
-      
+
       // Track visited URLs and elements to prevent repetition
       const visitedUrls = new Set<string>([build.url || ''])
       const visitedSelectors = new Set<string>()
       const visitedHrefs = new Set<string>()
-      
+
       // Site discovery for "all pages" mode
       let discoveredPages: Array<{ url: string; title: string; selector: string }> = []
       let siteDiscoveryComplete = false
-      
+
       // Store user instructions for logging in each step
       const hasUserInstructions = !!userInstructions
-      
+
       // Site discovery phase for "all pages" mode
       if ((options?.allPages || options?.testMode === 'all') && !siteDiscoveryComplete) {
         try {
           console.log(`[${runId}] [${browserType.toUpperCase()}] Starting site discovery phase - mapping all pages from landing page...`)
-          const discoveryDom = await (isMobile 
+          const discoveryDom = await (isMobile
             ? (this.appiumRunner?.getPageSource(session.id) || Promise.reject(new Error('Appium not available')))
             : this.playwrightRunner.getDOMSnapshot(session.id))
-          
+
           // Extract all internal links from the page
           const baseUrl = new URL(build.url || '').origin
           const linkRegex = /<a[^>]*href=["']([^"']+)["'][^>]*>([^<]*)<\/a>/gi
           let linkMatch
           const uniqueLinks = new Set<string>()
-          
+
           while ((linkMatch = linkRegex.exec(discoveryDom)) !== null) {
             const href = linkMatch[1]
             const text = linkMatch[2].trim()
-            
+
             // Only include internal links
             if (href && !href.startsWith('mailto:') && !href.startsWith('tel:') && !href.startsWith('javascript:')) {
               let fullUrl = href
@@ -2317,7 +2369,7 @@ ${parsedInstructions.structuredPlan}
               } else {
                 continue // Skip anchor links
               }
-              
+
               if (!uniqueLinks.has(fullUrl) && !fullUrl.includes('#')) {
                 uniqueLinks.add(fullUrl)
                 discoveredPages.push({
@@ -2328,7 +2380,7 @@ ${parsedInstructions.structuredPlan}
               }
             }
           }
-          
+
           console.log(`[${runId}] [${browserType.toUpperCase()}] Site discovery complete: Found ${discoveredPages.length} unique pages to test`)
           siteDiscoveryComplete = true
         } catch (discoveryError: any) {
@@ -2344,18 +2396,18 @@ ${parsedInstructions.structuredPlan}
           console.log(`[${runId}] [${browserType.toUpperCase()}] Test run has been ${testRunStatus}. Stopping execution.`)
           // Save current progress before breaking
           if (steps.length > 0) {
-            await this.saveCheckpoint(runId, stepNumber, steps, artifacts).catch(err => 
+            await this.saveCheckpoint(runId, stepNumber, steps, artifacts).catch(err =>
               console.warn(`[${runId}] Failed to save checkpoint before cancellation:`, err.message)
             )
           }
           break
         }
-        
+
         // Check if paused before each step
         const paused = await this.isPaused(runId)
         if (paused) {
           console.log(`[${runId}] [${browserType.toUpperCase()}] Test is paused at step ${stepNumber}. Waiting for resume or manual action...`)
-          
+
           // While paused, check for manual actions (God Mode)
           const manualActionResult = await this.checkForManualAction(runId)
           if (manualActionResult) {
@@ -2364,7 +2416,7 @@ ${parsedInstructions.structuredPlan}
             // Execute manual action and continue (don't increment stepNumber yet)
             try {
               await runner.executeAction(session.id, manualAction)
-              
+
               // Learn from manual action (God Mode Memory)
               if (godModeEvent && session.page) {
                 await this.learnFromManualAction(
@@ -2423,7 +2475,7 @@ ${parsedInstructions.structuredPlan}
               }
             }
           }
-          
+
           // Synthesize context using ContextSynthesizer
           console.log(`[${runId}] [${browserType.toUpperCase()}] Step ${stepNumber}: Synthesizing context...`)
           const contextResult = await this.contextSynthesizer.synthesizeContext({
@@ -2443,15 +2495,15 @@ ${parsedInstructions.structuredPlan}
             browserType,
             testableComponents: diagnosisData?.testableComponents || [],
           })
-          
+
           const { context, filteredContext, currentUrl, comprehensiveData } = contextResult
           console.log(`[${runId}] [${browserType.toUpperCase()}] Step ${stepNumber}: Context synthesized (${context.elements.length} total, ${filteredContext.elements.length} filtered)`)
-          
+
           // Log user instructions if present (remind AI of priority)
           if (hasUserInstructions) {
             console.log(`[${runId}] [${browserType.toUpperCase()}] Step ${stepNumber}: 🎯 Following user instructions: "${userInstructions}"`)
           }
-          
+
           // GOD MODE: Check for manual actions BEFORE generating AI action
           // Manual actions take priority over AI-generated actions
           const manualActionResult = await this.checkForManualAction(runId)
@@ -2460,7 +2512,7 @@ ${parsedInstructions.structuredPlan}
             console.log(`[${runId}] [${browserType.toUpperCase()}] Step ${stepNumber}: 🎮 GOD MODE - Using manual action instead of AI: ${manualAction.action} on ${manualAction.selector || manualAction.target || 'element'}`)
             action = manualAction
             stepMode = 'llm' // Manual actions are treated as LLM actions for logging
-            
+
             // Learn from manual action (God Mode Memory) - will be called after execution
             // Store godModeEvent for later learning
             if (godModeEvent && session.page) {
@@ -2473,7 +2525,7 @@ ${parsedInstructions.structuredPlan}
                   godModeEvent,
                   session.page,
                   manualAction
-                ).catch(() => {})
+                ).catch(() => { })
               }, 1000) // Wait for action to complete
             }
           } else {
@@ -2485,7 +2537,7 @@ ${parsedInstructions.structuredPlan}
               if (strategyActions.length > 0) {
                 console.log(`[${runId}] [${browserType.toUpperCase()}] Step ${stepNumber}: Testing Strategy detected patterns - queuing ${strategyActions.length} structured tests`)
                 actionQueue.push(...strategyActions)
-                
+
                 // Log recommendations
                 const recommendations = this.testingStrategy.getRecommendations(filteredContext)
                 if (recommendations.length > 0) {
@@ -2493,7 +2545,7 @@ ${parsedInstructions.structuredPlan}
                 }
               }
             }
-            
+
             // Speculative execution: attempt to batch obvious flows (e.g., login forms)
             if (actionQueue.length === 0) {
               const speculativeActions = this.generateSpeculativeActions(filteredContext, history, speculativeFlowCache)
@@ -2519,7 +2571,7 @@ ${parsedInstructions.structuredPlan}
                   // Inline DOM analysis (can't use require in browser context)
                   let maxDepth = 0
                   let shadowDOMCount = 0
-                  
+
                   function calculateDepth(node: Node, currentDepth: number = 0): void {
                     if (node.nodeType === Node.ELEMENT_NODE) {
                       maxDepth = Math.max(maxDepth, currentDepth)
@@ -2533,18 +2585,18 @@ ${parsedInstructions.structuredPlan}
                       }
                     }
                   }
-                  
+
                   if (document.body) {
                     calculateDepth(document.body, 0)
                   }
-                  
+
                   return {
                     maxDepth,
                     hasShadowDOM: shadowDOMCount > 0,
                     shadowDOMCount,
                   }
                 }).catch(() => null)
-                
+
                 if (domAnalysisResult) {
                   domAnalysis = {
                     maxDepth: domAnalysisResult.maxDepth,
@@ -2573,7 +2625,7 @@ ${parsedInstructions.structuredPlan}
                         return false
                       }
                     }, lastAction.selector)
-                    
+
                     if (!selectorExists) {
                       previousActionFailed = true
                       previousSelector = lastAction.selector
@@ -2589,29 +2641,51 @@ ${parsedInstructions.structuredPlan}
               // Generate next action with filtered context and visited tracking info
               console.log(`[${runId}] [${browserType.toUpperCase()}] Step ${stepNumber}: Generating action with Unified Brain... (${filteredContext.elements.length} unvisited elements available)`)
               // Enhanced: Pass projectId and page for heuristic lookup
-              action = await this.unifiedBrain.generateAction(
-                filteredContext, 
-                history, 
-                goal,
-                {
-                  visitedUrls: Array.from(visitedUrls),
-                  visitedSelectors: Array.from(visitedSelectors),
-                  discoveredPages: discoveredPages,
-                  currentUrl: currentUrl,
-                  isAllPagesMode: options?.allPages || options?.testMode === 'all',
-                  browser: currentEnvironment.browser as 'chromium' | 'firefox' | 'webkit',
-                  viewport: currentEnvironment.viewport,
-                  // Phase 1: Action failure context
-                  previousActionFailed,
-                  previousSelector,
-                  previousActionError,
-                  // Phase 2: DOM analysis context
-                  domAnalysis,
-                  // God Mode Memory: Pass projectId and page for heuristic lookup
-                  projectId,
-                  page: session.page,
+              // Enhanced: Pass projectId and page for heuristic lookup
+              try {
+                action = await this.unifiedBrain.generateAction(
+                  filteredContext,
+                  history,
+                  goal,
+                  {
+                    visitedUrls: Array.from(visitedUrls),
+                    visitedSelectors: Array.from(visitedSelectors),
+                    discoveredPages: discoveredPages,
+                    currentUrl: currentUrl,
+                    isAllPagesMode: options?.allPages || options?.testMode === 'all',
+                    browser: currentEnvironment.browser as 'chromium' | 'firefox' | 'webkit',
+                    viewport: currentEnvironment.viewport,
+                    // Phase 1: Action failure context
+                    previousActionFailed,
+                    previousSelector,
+                    previousActionError,
+                    // Phase 2: DOM analysis context
+                    domAnalysis,
+                    // God Mode Memory: Pass projectId and page for heuristic lookup
+                    projectId,
+                    page: session.page,
+                  }
+                )
+              } catch (aiError: any) {
+                console.warn(`[${runId}] UnifiedBrain failed:`, aiError.message)
+                // Fallback to Dumb Monkey (Random Clicker)
+                const clickable = filteredContext.elements.find(e =>
+                  (e.type === 'button' || e.type === 'link') && e.elementId && Math.random() > 0.5
+                ) || filteredContext.elements.find(e => e.type === 'button' || e.type === 'link') || filteredContext.elements[0]
+
+                if (clickable) {
+                  action = {
+                    action: 'click',
+                    target: clickable.text || 'Element',
+                    selector: clickable.selector,
+                    description: 'Dumb Monkey Fallback'
+                  }
+                  console.log(`[${runId}] Fallback action: click ${clickable.selector}`)
+                } else {
+                  action = { action: 'scroll', value: 'down', description: 'Scroll Down (Fallback)' }
+                  console.log(`[${runId}] Fallback action: scroll down`)
                 }
-              )
+              }
               stepMode = 'llm'
               console.log(`[${runId}] [${browserType.toUpperCase()}] Step ${stepNumber}: Action generated: ${action.action} ${action.target || ''} ${action.selector || ''}`)
             }
@@ -2623,7 +2697,7 @@ ${parsedInstructions.structuredPlan}
           if (action.action === 'wait' && recentWaits >= 2 && context.elements.length > 0) {
             console.log(`[${runId}] [${browserType.toUpperCase()}] Too many consecutive waits (${recentWaits}), forcing interaction...`)
             // Find first clickable element
-            const clickableElement = context.elements.find(e => 
+            const clickableElement = context.elements.find(e =>
               e.type === 'button' || e.type === 'link' || e.text
             )
             if (clickableElement) {
@@ -2649,7 +2723,7 @@ ${parsedInstructions.structuredPlan}
           // For "all pages" mode, don't complete early - need to discover all pages
           if (action.action === 'complete') {
             const minStepsForAllPages = STEP_LIMITS.all.min
-            
+
             if (isAllPagesMode && stepNumber < minStepsForAllPages) {
               console.log(`[${runId}] [${browserType.toUpperCase()}] All pages mode: Ignoring early completion at step ${stepNumber}, continuing discovery...`)
               // Override complete action - continue testing
@@ -2717,10 +2791,10 @@ ${parsedInstructions.structuredPlan}
               console.log(`[${runId}] [${browserType.toUpperCase()}] Step ${stepNumber}: Environment updated - orientation: ${currentEnvironment.orientation}, viewport: ${currentEnvironment.viewport}`)
             }
           }
-          
+
           // Execute action using TestExecutor
           console.log(`[${runId}] [${browserType.toUpperCase()}] Step ${stepNumber}: Executing action:`, action.action, action.target)
-          
+
           const executionResult = await this.testExecutor.executeAction({
             sessionId: session.id,
             action,
@@ -2734,7 +2808,7 @@ ${parsedInstructions.structuredPlan}
             browserType,
             stepNumber,
           })
-          
+
           const healingMeta = executionResult.healing
           if (healingMeta) {
             const learnedKey = healingMeta.originalSelector || originalSelectorBeforeHealing || healingMeta.healedSelector
@@ -2754,7 +2828,13 @@ ${parsedInstructions.structuredPlan}
 
           // Capture state first (needed for vision validator and artifacts)
           const stateResult = await this.testExecutor.captureState(session.id, isMobile)
-          
+
+          // Broadcast frame to WebSocket (via Redis)
+          if (stateResult?.screenshot) {
+            const base64 = stateResult.screenshot.toString('base64')
+            this.broadcastPageState(runId, base64, currentUrl || '')
+          }
+
           // Capture element bounds using TestExecutor
           const boundsResult = await this.testExecutor.captureElementBounds(
             session.id,
@@ -2839,28 +2919,28 @@ ${parsedInstructions.structuredPlan}
               const fetch = (await import('node-fetch')).default
               const baselineResponse = await fetch(`${this.apiUrl}/api/tests/${options.baselineRunId}`)
               const baselineData = await baselineResponse.json()
-              
+
               // Find matching step in baseline (same step number, browser, viewport)
-              const baselineStep = baselineData.testRun?.steps?.find((s: any) => 
+              const baselineStep = baselineData.testRun?.steps?.find((s: any) =>
                 s.stepNumber === stepNumber &&
                 s.environment?.browser === browserType &&
                 s.environment?.viewport === currentEnvironment.viewport
               )
-              
+
               if (baselineStep?.screenshotUrl) {
                 // Download baseline screenshot
                 const baselineScreenshotResponse = await fetch(baselineStep.screenshotUrl)
                 const baselineBuffer = Buffer.from(await baselineScreenshotResponse.arrayBuffer())
-                
+
                 // Compare screenshots
                 const diffResult = await this.visualDiffService.compareScreenshots(
                   baselineBuffer,
                   screenshotBuffer
                 )
-                
+
                 const threshold = options.visualDiffThreshold || 1.0
                 const isAcceptable = this.visualDiffService.isAcceptable(diffResult.diffPercentage, threshold)
-                
+
                 if (!isAcceptable && diffResult.diffImageBuffer) {
                   // Upload diff image
                   const diffImageUrl = await this.storageService.uploadVisualDiff(
@@ -2932,10 +3012,10 @@ ${parsedInstructions.structuredPlan}
             })),
             visualIssues: combinedVisualIssues.length > 0
               ? combinedVisualIssues.map(v => ({
-                  type: v.type,
-                  description: v.description,
-                  severity: v.severity,
-                }))
+                type: v.type,
+                description: v.description,
+                severity: v.severity,
+              }))
               : undefined,
             mode: stepMode,
             selfHealing: stepHealing,
@@ -3023,7 +3103,7 @@ ${parsedInstructions.structuredPlan}
             if (!isMobile) {
               try {
                 errorElementBounds = await this.playwrightRunner.captureElementBounds(session.id)
-                
+
                 // Mark the target element as failed
                 if (action && action.selector && errorElementBounds.length > 0) {
                   const failedSelector = action.selector
@@ -3079,65 +3159,65 @@ ${parsedInstructions.structuredPlan}
           steps.push(errorStep)
           await this.runLogger.saveCheckpoint(runId, stepNumber, steps, artifacts)
 
-        // If too many consecutive errors, try to recover
-        const recentErrors = steps.slice(-5).filter(s => !s.success).length
-        if (recentErrors >= 3) {
-          console.warn(`[${runId}] [${browserType.toUpperCase()}] Too many consecutive errors (${recentErrors}), attempting recovery...`)
-          
-          // Try multiple recovery strategies
-          let recovered = false
-          
-          // Strategy 1: Scroll to find new elements
-          try {
-            await runner.executeAction(session.id, {
-              action: 'scroll',
-              description: 'Scroll to find new interactive elements',
-              confidence: 0.8,
-            })
-            await new Promise(resolve => setTimeout(resolve, 1000))
-            recovered = true
-            console.log(`[${runId}] [${browserType.toUpperCase()}] Recovery: Scrolled successfully`)
-          } catch (scrollError: any) {
-            console.warn(`[${runId}] [${browserType.toUpperCase()}] Recovery scroll failed:`, scrollError.message)
-          }
-          
-          // Strategy 2: If still failing, try navigating back or refreshing
-          if (!recovered && recentErrors >= 5) {
+          // If too many consecutive errors, try to recover
+          const recentErrors = steps.slice(-5).filter(s => !s.success).length
+          if (recentErrors >= 3) {
+            console.warn(`[${runId}] [${browserType.toUpperCase()}] Too many consecutive errors (${recentErrors}), attempting recovery...`)
+
+            // Try multiple recovery strategies
+            let recovered = false
+
+            // Strategy 1: Scroll to find new elements
             try {
-              const currentUrl = await (isMobile 
-                ? (this.appiumRunner?.getCurrentUrl(session.id).catch(() => build.url || '') || Promise.resolve(build.url || ''))
-                : this.playwrightRunner.getCurrentUrl(session.id).catch(() => build.url || ''))
-              
-              // Try navigating to a different page or refreshing
-              if (currentUrl && currentUrl !== build.url) {
-                console.log(`[${runId}] [${browserType.toUpperCase()}] Recovery: Attempting to navigate to a different page`)
-                await runner.executeAction(session.id, {
-                  action: 'navigate',
-                  value: build.url || currentUrl,
-                  description: 'Navigate to recover from errors',
-                  confidence: 0.7,
-                })
-                await new Promise(resolve => setTimeout(resolve, 2000))
-                recovered = true
+              await runner.executeAction(session.id, {
+                action: 'scroll',
+                description: 'Scroll to find new interactive elements',
+                confidence: 0.8,
+              })
+              await new Promise(resolve => setTimeout(resolve, 1000))
+              recovered = true
+              console.log(`[${runId}] [${browserType.toUpperCase()}] Recovery: Scrolled successfully`)
+            } catch (scrollError: any) {
+              console.warn(`[${runId}] [${browserType.toUpperCase()}] Recovery scroll failed:`, scrollError.message)
+            }
+
+            // Strategy 2: If still failing, try navigating back or refreshing
+            if (!recovered && recentErrors >= 5) {
+              try {
+                const currentUrl = await (isMobile
+                  ? (this.appiumRunner?.getCurrentUrl(session.id).catch(() => build.url || '') || Promise.resolve(build.url || ''))
+                  : this.playwrightRunner.getCurrentUrl(session.id).catch(() => build.url || ''))
+
+                // Try navigating to a different page or refreshing
+                if (currentUrl && currentUrl !== build.url) {
+                  console.log(`[${runId}] [${browserType.toUpperCase()}] Recovery: Attempting to navigate to a different page`)
+                  await runner.executeAction(session.id, {
+                    action: 'navigate',
+                    value: build.url || currentUrl,
+                    description: 'Navigate to recover from errors',
+                    confidence: 0.7,
+                  })
+                  await new Promise(resolve => setTimeout(resolve, 2000))
+                  recovered = true
+                }
+              } catch (navError: any) {
+                console.warn(`[${runId}] [${browserType.toUpperCase()}] Recovery navigation failed:`, navError.message)
               }
-            } catch (navError: any) {
-              console.warn(`[${runId}] [${browserType.toUpperCase()}] Recovery navigation failed:`, navError.message)
+            }
+
+            // Only fail if we have many total errors and recovery didn't help
+            const totalErrors = steps.filter(s => !s.success).length
+            if (totalErrors >= 10 && !recovered) {
+              const errorMsg = `Too many errors (${totalErrors}) in test run - test failed after recovery attempts`
+              const formattedError = formatErrorForStep(new Error(errorMsg))
+              throw new Error(formattedError)
+            } else if (totalErrors >= 15) {
+              // Hard limit - fail regardless of recovery
+              const errorMsg = `Too many errors (${totalErrors}) in test run - test failed (hard limit reached)`
+              const formattedError = formatErrorForStep(new Error(errorMsg))
+              throw new Error(formattedError)
             }
           }
-          
-          // Only fail if we have many total errors and recovery didn't help
-          const totalErrors = steps.filter(s => !s.success).length
-          if (totalErrors >= 10 && !recovered) {
-            const errorMsg = `Too many errors (${totalErrors}) in test run - test failed after recovery attempts`
-            const formattedError = formatErrorForStep(new Error(errorMsg))
-            throw new Error(formattedError)
-          } else if (totalErrors >= 15) {
-            // Hard limit - fail regardless of recovery
-            const errorMsg = `Too many errors (${totalErrors}) in test run - test failed (hard limit reached)`
-            const formattedError = formatErrorForStep(new Error(errorMsg))
-            throw new Error(formattedError)
-          }
-        }
         }
       }
 
@@ -3166,7 +3246,7 @@ ${parsedInstructions.structuredPlan}
 
     } catch (error: any) {
       console.error(`[${runId}] [${browserType.toUpperCase()}] Test run failed:`, error)
-      
+
       // Record final error step using RunLogger
       const finalErrorStep = this.runLogger.createStep({
         runId,
@@ -3189,13 +3269,13 @@ ${parsedInstructions.structuredPlan}
         artifacts,
         error: error.message
       }
-      } finally {
+    } finally {
       // Release session and upload videos/traces
       if (session) {
-        const runner = build.type === BuildType.WEB 
-          ? this.playwrightRunner 
+        const runner = build.type === BuildType.WEB
+          ? this.playwrightRunner
           : (this.appiumRunner || this.playwrightRunner) // Fallback to playwright if appium not available (shouldn't happen due to validation)
-        
+
         try {
           // Release session and get video/trace paths (only Playwright returns paths)
           let releaseResult: { videoPath: string | null; tracePath: string | null } | void = undefined
@@ -3205,7 +3285,7 @@ ${parsedInstructions.structuredPlan}
             await runner.releaseSession(session.id)
           }
           console.log(`[${runId}] [${browserType.toUpperCase()}] Session released`)
-          
+
           // Upload video if available (only for web builds)
           if (releaseResult && releaseResult.videoPath) {
             try {
@@ -3215,7 +3295,7 @@ ${parsedInstructions.structuredPlan}
                 const videoUrl = await this.storageService.uploadVideo(runId, videoBuffer)
                 artifacts.push(videoUrl)
                 console.log(`[${runId}] [${browserType.toUpperCase()}] Video uploaded: ${videoUrl}`)
-                
+
                 // Save video artifact to database (critical - must succeed even if test was cancelled)
                 try {
                   const fetch = (await import('node-fetch')).default
@@ -3229,19 +3309,19 @@ ${parsedInstructions.structuredPlan}
                       size: videoBuffer.length,
                     }),
                   })
-                  
+
                   if (!artifactResponse.ok) {
                     const errorText = await artifactResponse.text()
                     throw new Error(`HTTP ${artifactResponse.status}: ${errorText}`)
                   }
-                  
+
                   console.log(`[${runId}] [${browserType.toUpperCase()}] Video artifact saved to database successfully`)
                 } catch (artifactError: any) {
                   console.error(`[${runId}] [${browserType.toUpperCase()}] CRITICAL: Failed to save video artifact to database:`, artifactError.message)
                   // Keep video file for manual recovery if database save fails
                   console.warn(`[${runId}] [${browserType.toUpperCase()}] Video file preserved at: ${releaseResult.videoPath} (database save failed)`)
                 }
-                
+
                 // Clean up local video file only after successful database save
                 // If database save failed, keep the local file for manual recovery
                 try {
@@ -3259,7 +3339,7 @@ ${parsedInstructions.structuredPlan}
               console.warn(`[${runId}] [${browserType.toUpperCase()}] Failed to upload video:`, videoError.message)
             }
           }
-          
+
           // Upload trace if available (Time-Travel Debugger, only for web builds)
           if (releaseResult && releaseResult.tracePath) {
             try {
@@ -3269,7 +3349,7 @@ ${parsedInstructions.structuredPlan}
                 const traceUrl = await this.storageService.uploadTrace(runId, traceBuffer, browserType)
                 artifacts.push(traceUrl)
                 console.log(`[${runId}] [${browserType.toUpperCase()}] Trace uploaded: ${traceUrl}`)
-                
+
                 // Save trace artifact to database
                 try {
                   const fetch = (await import('node-fetch')).default
@@ -3286,7 +3366,7 @@ ${parsedInstructions.structuredPlan}
                 } catch (artifactError: any) {
                   console.warn(`[${runId}] [${browserType.toUpperCase()}] Failed to save trace artifact:`, artifactError.message)
                 }
-                
+
                 // Clean up local trace file
                 try {
                   fs.unlinkSync(releaseResult.tracePath)
@@ -3403,7 +3483,7 @@ ${parsedInstructions.structuredPlan}
     }
 
     // Otherwise, proceed with normal test execution
-    
+
     const isAllPagesMode = options?.allPages || options?.testMode === 'all'
     const isMultiPageMode = options?.testMode === 'multi'
     const isSinglePageMode = !isMultiPageMode && !isAllPagesMode && options?.testMode !== 'monkey'
@@ -3475,7 +3555,7 @@ ${parsedInstructions.structuredPlan}
     const browserMatrix = options?.browserMatrix || ['chromium']
     const isBrowserMatrixEnabled = browserMatrix.length > 1 || (browserMatrix.length === 1 && browserMatrix[0] !== 'chromium')
     // isMobile already declared above at line 2841
-    
+
     // Browser matrix only applies to web builds
     if (isBrowserMatrixEnabled && build.type === BuildType.WEB && !isMobile) {
       console.log(`[${runId}] Browser Matrix enabled: ${browserMatrix.join(', ')}`)
@@ -3499,10 +3579,10 @@ ${parsedInstructions.structuredPlan}
 
     // Single-browser execution: use extracted method
     // Determine browser type from profile
-    const browserType: 'chromium' | 'firefox' | 'webkit' = 
+    const browserType: 'chromium' | 'firefox' | 'webkit' =
       profile.device === DeviceProfile.FIREFOX_LATEST ? 'firefox'
-      : profile.device === DeviceProfile.SAFARI_LATEST ? 'webkit'
-      : 'chromium'
+        : profile.device === DeviceProfile.SAFARI_LATEST ? 'webkit'
+          : 'chromium'
 
     try {
       // Execute test sequence using extracted method
@@ -3548,7 +3628,7 @@ ${parsedInstructions.structuredPlan}
 
     } catch (error: any) {
       console.error(`[${runId}] Test run failed:`, error)
-      
+
       return {
         success: false,
         steps: [],
@@ -3569,6 +3649,26 @@ ${parsedInstructions.structuredPlan}
 
       // Note: Video upload is handled inside executeTestSequenceForBrowser()
       // for single-browser execution
+    }
+  }
+
+  private async broadcastPageState(runId: string, screenshot: string, url: string) {
+    try {
+      const payload = {
+        type: 'page_state',
+        state: {
+          screenshot,
+          url,
+          elements: []
+        }
+      }
+      await this.redis.publish('ws:broadcast', JSON.stringify({
+        runId,
+        payload,
+        serverId: 'worker'
+      }))
+    } catch (e: any) {
+      console.warn(`[${runId}] Failed to broadcast page state:`, e.message)
     }
   }
 }
