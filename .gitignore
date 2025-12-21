@@ -24,7 +24,7 @@ yarn-error.log*
 
 # Local env files
 .env*.local
-.env
+#.env
 
 # Vercel
 .vercel
@@ -39,18 +39,3 @@ next-env.d.ts
 *.swp
 *.swo
 *~
-
-# Backend directories (not part of frontend repo)
-# Temporarily commented for backend push
-# api/
-# worker/
-*.md
-!README.md
-!QUICK_START_GUIDE.md
-!FRONTEND_IMPLEMENTATION_COMPLETE.md
-# docker-compose.yml
-# start-dev.*
-# verify-setup.js
-
-# Playwright trace files (large runtime artifacts - disabled)
-worker/traces/
