@@ -2,7 +2,7 @@ export default function InfiniteLoopsContent() {
   return (
     <article>
       <h1>How Infinite Loops Are Prevented</h1>
-      
+
       <p style={{ fontSize: '1.125rem', color: 'var(--text-secondary)', marginBottom: '2rem', lineHeight: 1.7 }}>
         <strong>Rihario detects infinite loops and prevents exploration from getting stuck.</strong> Safety guards monitor for redirect loops, repeated actions, and stuck states. When detected, exploration stops and reports the loop so you know what happened.
       </p>
@@ -190,7 +190,7 @@ export default function InfiniteLoopsContent() {
         <li><strong>Same URL visited 5+ times</strong> - Potential redirect loop</li>
         <li><strong>Same action repeated 5+ times</strong> - Potential action loop</li>
         <li><strong>No new pages in 10 steps</strong> - Potential navigation loop</li>
-        <li><strong>Redirect chain > 10 redirects</strong> - Potential redirect loop</li>
+        <li><strong>Redirect chain &gt; 10 redirects</strong> - Potential redirect loop</li>
       </ul>
 
       <p>

@@ -16,9 +16,9 @@ type NavItem = {
 
 const mainNav: NavItem[] = [
   { id: 'dashboard', label: 'Dashboard', href: '/dashboard', icon: '📊' },
-  { id: 'runs', label: 'Test Runs', href: '/dashboard', icon: '🔬' },
+  { id: 'runs', label: 'Test Runs', href: '/runs', icon: '🔬' },
   { id: 'projects', label: 'Projects', href: '#', icon: '📁', disabled: true },
-  { id: 'settings', label: 'Settings', href: '#', icon: '⚙️', disabled: true },
+  { id: 'settings', label: 'Settings', href: '/settings', icon: '⚙️' },
 ]
 
 const bottomNav: NavItem[] = [
@@ -32,7 +32,7 @@ export default function Navigation() {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [isCollapsed, setIsCollapsed] = useState(false)
-  const expandedWidth = 260
+  const expandedWidth = 280
   const collapsedWidth = 72
   const sidebarWidth = isCollapsed ? collapsedWidth : expandedWidth
 

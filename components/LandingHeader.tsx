@@ -98,6 +98,7 @@ export function LandingHeader() {
                 { label: 'Live Exploration', href: '/features#live-explore' },
                 { label: 'Visual Checks', href: '/features#visual-checks' },
                 { label: 'Flow Exploration', href: '/features#flow-exploration' },
+                { label: 'Cross-Browser Testing', href: '/docs/parallel-cross-browser-testing' },
                 { label: 'Human-in-the-Loop', href: '/features#human-control' },
                 { label: 'Issue Detection', href: '/features#issue-detection' },
                 { label: 'Simple Replay', href: '/features#replay' },

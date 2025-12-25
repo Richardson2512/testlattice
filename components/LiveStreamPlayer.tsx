@@ -48,6 +48,18 @@ export default function LiveStreamPlayer({
   const [overrideAction, setOverrideAction] = useState<{ type: string; selector?: string; value?: string } | null>(null)
   const [customInstructions, setCustomInstructions] = useState('')
 
+  // Sync playbackStep with currentStep prop changes
+  useEffect(() => {
+    setPlaybackStep(currentStep)
+  }, [currentStep])
+
+  // Infer connection from step count (if steps exist, we have data)
+  useEffect(() => {
+    if (totalSteps > 0 && !isConnected) {
+      setIsConnected(true)
+    }
+  }, [totalSteps])
+
   // Connect to LiveKit (WebRTC) if available
   useEffect(() => {
     if (livekitUrl && livekitToken && streamMode === 'webrtc') {

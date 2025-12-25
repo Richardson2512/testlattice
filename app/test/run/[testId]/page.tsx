@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { api, TestRun, TestArtifact } from '../../../../lib/api'
 import LiveStreamPlayer from '../../../../components/LiveStreamPlayer'
 import { DiagnosisReport } from '@/components/DiagnosisReport'
+import { filterStepsByBrowser, getBrowserDisplayName, aggregateBrowserRuns, type BrowserType } from '../../../../lib/browserResults'
 
 // --- ICONS ---
 const Icons = {
@@ -19,28 +20,51 @@ const Icons = {
 
 // --- COMPONENTS ---
 
-const StepLog = ({ steps }: { steps: any[] }) => (
-  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', fontFamily: 'var(--font-mono)', fontSize: '0.8rem' }}>
-    {steps.map((step, i) => (
-      <div key={i} style={{
-        display: 'flex', gap: '0.5rem', padding: '0.5rem 0.75rem', borderRadius: 'var(--radius-sm)',
-        background: step.success === false ? 'rgba(220, 38, 38, 0.08)' : 'transparent',
-        borderLeft: `3px solid ${step.success === false ? 'var(--error)' : step.success === true ? 'var(--success)' : 'var(--beige-300)'}`
-      }}>
-        <div style={{ color: 'var(--text-muted)', minWidth: '20px', fontWeight: 600 }}>{i + 1}</div>
-        <div style={{ flex: 1 }}>
-          <div style={{ color: step.success === false ? 'var(--error)' : 'var(--text-primary)', fontWeight: 500 }}>{step.action}</div>
-          {step.selector && <div style={{ color: 'var(--text-muted)', fontSize: '0.7rem', marginTop: '2px' }}>{step.selector}</div>}
-          {step.value && <div style={{ color: 'var(--info)', fontSize: '0.7rem' }}>"{step.value}"</div>}
-        </div>
-        <div style={{ color: step.success ? 'var(--success)' : (step.success === false ? 'var(--error)' : 'var(--text-muted)') }}>
-          {step.success ? '✓' : (step.success === false ? '✗' : '•')}
-        </div>
-      </div>
-    ))}
-    {steps.length === 0 && <div style={{ color: 'var(--text-muted)', fontStyle: 'italic', padding: '1rem' }}>Waiting for test to start...</div>}
-  </div>
-)
+const TestStepLog = ({ steps, showBrowserBadges = false }: { steps: any[], showBrowserBadges?: boolean }) => {
+  const getStepBrowser = (step: any) => step.browser || step.environment?.browser
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', fontFamily: 'var(--font-mono)', fontSize: '0.8rem' }}>
+      {steps.map((step, i) => {
+        const stepBrowser = getStepBrowser(step)
+        const browserLabel = showBrowserBadges && stepBrowser ? `[${getBrowserDisplayName(stepBrowser)}]` : ''
+
+        return (
+          <div key={step.id || i} style={{
+            display: 'flex', gap: '0.5rem', padding: '0.5rem 0.75rem', borderRadius: 'var(--radius-sm)',
+            background: step.success === false ? 'rgba(220, 38, 38, 0.08)' : 'transparent',
+            borderLeft: `3px solid ${step.success === false ? 'var(--error)' : step.success === true ? 'var(--success)' : 'var(--beige-300)'}`
+          }}>
+            <div style={{ color: 'var(--text-muted)', minWidth: '20px', fontWeight: 600 }}>{i + 1}</div>
+            <div style={{ flex: 1 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                <div style={{ color: step.success === false ? 'var(--error)' : 'var(--text-primary)', fontWeight: 500 }}>{step.action}</div>
+                {browserLabel && (
+                  <span style={{
+                    padding: '2px 6px',
+                    borderRadius: '4px',
+                    fontSize: '0.65rem',
+                    fontWeight: 600,
+                    background: 'rgba(59, 130, 246, 0.2)',
+                    color: '#3b82f6',
+                  }}>
+                    {browserLabel}
+                  </span>
+                )}
+              </div>
+              {step.selector && <div style={{ color: 'var(--text-muted)', fontSize: '0.7rem', marginTop: '2px' }}>{step.selector}</div>}
+              {step.value && <div style={{ color: 'var(--info)', fontSize: '0.7rem' }}>"{step.value}"</div>}
+            </div>
+            <div style={{ color: step.success ? 'var(--success)' : (step.success === false ? 'var(--error)' : 'var(--text-muted)') }}>
+              {step.success ? '✓' : (step.success === false ? '✗' : '•')}
+            </div>
+          </div>
+        )
+      })}
+      {steps.length === 0 && <div style={{ color: 'var(--text-muted)', fontStyle: 'italic', padding: '1rem' }}>Waiting for test to start...</div>}
+    </div>
+  )
+}
 
 export default function TestRunPage() {
   const params = useParams()
@@ -48,7 +72,16 @@ export default function TestRunPage() {
   const [testRun, setTestRun] = useState<TestRun | null>(null)
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<'inspector' | 'console' | 'network'>('inspector')
+  const [selectedBrowser, setSelectedBrowser] = useState<BrowserType | 'all'>('all')
   const wsRef = useRef<WebSocket | null>(null)
+
+  // Aggregate browser results for multi-browser tests
+  const aggregated = useMemo(() => {
+    if (!testRun) return null
+    return aggregateBrowserRuns(testRun)
+  }, [testRun])
+
+  const isMultiBrowser = aggregated && aggregated.selectedBrowsers.length > 1
 
   // Polling & Data Load
   useEffect(() => {
@@ -218,7 +251,14 @@ export default function TestRunPage() {
             <Icons.Terminal /> Execution Log
           </div>
           <div style={{ flex: 1, overflowY: 'auto', padding: '0.75rem' }}>
-            <StepLog steps={testRun?.steps || []} />
+            <TestStepLog
+              steps={
+                (selectedBrowser === 'all'
+                  ? (testRun?.steps || [])
+                  : filterStepsByBrowser(testRun?.steps || [], selectedBrowser)) || []
+              }
+              showBrowserBadges={!!(isMultiBrowser && selectedBrowser === 'all')}
+            />
           </div>
         </aside>
 

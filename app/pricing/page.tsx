@@ -1,14 +1,16 @@
 'use client'
 
-import React from 'react'
+import React, { useState } from 'react'
 import Link from 'next/link'
 import { LandingHeader } from '@/components/LandingHeader'
 import { PRICING_TIERS, VISUAL_TEST_ADDONS, type PricingTier } from '@/lib/pricing'
 import { useTierInfo } from '@/lib/hooks'
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
+
 export default function PricingPage() {
   const { data: tierInfo } = useTierInfo()
-  
+
   // Map backend tier to pricing tier
   const tierMap: Record<string, PricingTier> = {
     'guest': 'free',
@@ -17,52 +19,52 @@ export default function PricingPage() {
     'pro': 'pro',
     'agency': 'pro',
   }
-  
+
   const currentTier = tierInfo ? (tierMap[tierInfo.tier] || 'free') : 'free'
   const tiers = Object.values(PRICING_TIERS)
 
   return (
-    <main style={{ 
-      minHeight: '100vh', 
-      background: 'var(--bg-primary)', 
+    <main style={{
+      minHeight: '100vh',
+      background: 'var(--bg-primary)',
       color: 'var(--text-primary)',
       fontFamily: 'var(--font-sans)'
     }}>
       <LandingHeader />
 
       {/* Header Section */}
-      <section style={{ 
-        paddingTop: '120px', 
-        paddingBottom: '4rem', 
+      <section style={{
+        paddingTop: '120px',
+        paddingBottom: '4rem',
         textAlign: 'center',
         background: 'linear-gradient(180deg, var(--bg-primary) 0%, var(--beige-100) 100%)'
       }}>
         <div className="container" style={{ maxWidth: '800px', margin: '0 auto', padding: '0 2rem' }}>
-          <div style={{ 
-            color: 'var(--primary)', 
-            fontWeight: 600, 
-            letterSpacing: '0.05em', 
-            fontSize: '0.875rem', 
-            textTransform: 'uppercase', 
-            marginBottom: '1rem' 
+          <div style={{
+            color: 'var(--primary)',
+            fontWeight: 600,
+            letterSpacing: '0.05em',
+            fontSize: '0.875rem',
+            textTransform: 'uppercase',
+            marginBottom: '1rem'
           }}>
             Pricing & Plans
           </div>
-          <h1 style={{ 
-            fontSize: 'clamp(2.5rem, 5vw, 3.5rem)', 
-            fontWeight: 700, 
-            marginBottom: '1.5rem', 
+          <h1 style={{
+            fontSize: 'clamp(2.5rem, 5vw, 3.5rem)',
+            fontWeight: 700,
+            marginBottom: '1.5rem',
             lineHeight: 1.2,
             color: 'var(--text-primary)'
           }}>
             Choose Your <span className="text-gradient">Plan</span>
           </h1>
-          <p style={{ 
-            maxWidth: '600px', 
-            margin: '0 auto', 
-            fontSize: '1.125rem', 
-            color: 'var(--text-secondary)', 
-            lineHeight: 1.6 
+          <p style={{
+            maxWidth: '600px',
+            margin: '0 auto',
+            fontSize: '1.125rem',
+            color: 'var(--text-secondary)',
+            lineHeight: 1.6
           }}>
             Transparent pricing for teams of all sizes. Upgrade anytime to unlock more features.
           </p>
@@ -71,9 +73,9 @@ export default function PricingPage() {
 
       {/* Pricing Cards */}
       <section style={{ paddingBottom: '6rem' }}>
-        <div className="container" style={{ 
-          maxWidth: '1400px', 
-          margin: '0 auto', 
+        <div className="container" style={{
+          maxWidth: '1400px',
+          margin: '0 auto',
           padding: '0 2rem',
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
@@ -81,9 +83,9 @@ export default function PricingPage() {
           alignItems: 'stretch'
         }}>
           {tiers.map((tier) => (
-            <PricingCard 
-              key={tier.id} 
-              tier={tier} 
+            <PricingCard
+              key={tier.id}
+              tier={tier}
               isCurrentTier={tier.id === currentTier}
             />
           ))}
@@ -91,26 +93,26 @@ export default function PricingPage() {
       </section>
 
       {/* Add-Ons Section */}
-      <section style={{ 
+      <section style={{
         padding: '4rem 0 6rem',
         background: 'var(--beige-100)'
       }}>
-        <div className="container" style={{ 
-          maxWidth: '1200px', 
-          margin: '0 auto', 
-          padding: '0 2rem' 
+        <div className="container" style={{
+          maxWidth: '1200px',
+          margin: '0 auto',
+          padding: '0 2rem'
         }}>
           <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
-            <h2 style={{ 
-              fontSize: '2rem', 
-              fontWeight: 700, 
+            <h2 style={{
+              fontSize: '2rem',
+              fontWeight: 700,
               marginBottom: '0.5rem',
               color: 'var(--text-primary)'
             }}>
               Visual Test Add-Ons
             </h2>
-            <p style={{ 
-              fontSize: '1rem', 
+            <p style={{
+              fontSize: '1rem',
               color: 'var(--text-secondary)',
               maxWidth: '600px',
               margin: '0 auto'
@@ -141,12 +143,12 @@ export default function PricingPage() {
             maxWidth: '600px',
             margin: '2rem auto 0'
           }}>
-            <p style={{ 
-              fontSize: '0.875rem', 
+            <p style={{
+              fontSize: '0.875rem',
               color: 'var(--text-secondary)',
               margin: 0
             }}>
-              <strong style={{ color: 'var(--text-primary)' }}>Note:</strong> Add-ons can only be purchased by Starter, Indie, or Pro users. 
+              <strong style={{ color: 'var(--text-primary)' }}>Note:</strong> Add-ons can only be purchased by Starter, Indie, or Pro users.
               Add-ons stack on top of your plan limits and reset monthly.
             </p>
           </div>
@@ -157,15 +159,48 @@ export default function PricingPage() {
 }
 
 function PricingCard({ tier, isCurrentTier }: { tier: typeof PRICING_TIERS[PricingTier], isCurrentTier: boolean }) {
+  const [isLoading, setIsLoading] = useState(false)
+
+  const handleCheckout = async () => {
+    if (isCurrentTier || !tier.polarProductId) return
+
+    setIsLoading(true)
+    try {
+      const response = await fetch(`${API_URL}/api/billing/checkout`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          productId: tier.polarProductId,
+          tier: tier.id,
+        }),
+      })
+
+      const data = await response.json()
+      if (data.checkoutUrl) {
+        window.location.href = data.checkoutUrl
+      } else {
+        console.error('No checkout URL returned')
+        alert('Failed to start checkout. Please try again.')
+      }
+    } catch (error) {
+      console.error('Checkout error:', error)
+      alert('Failed to start checkout. Please try again.')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Free tier goes to signup, paid tiers use checkout
+  const isFreeGetStarted = tier.id === 'free' && !isCurrentTier
   return (
     <div
       className="glass-card"
       style={{
         padding: '2rem',
-        background: tier.popular 
+        background: tier.popular
           ? 'linear-gradient(135deg, var(--bg-card) 0%, var(--beige-100) 100%)'
           : 'var(--bg-card)',
-        border: tier.popular 
+        border: tier.popular
           ? `2px solid var(--primary)`
           : '1px solid var(--border-light)',
         borderRadius: 'var(--radius-lg)',
@@ -173,7 +208,7 @@ function PricingCard({ tier, isCurrentTier }: { tier: typeof PRICING_TIERS[Prici
         display: 'flex',
         flexDirection: 'column',
         transform: tier.popular ? 'scale(1.05)' : 'scale(1)',
-        boxShadow: tier.popular 
+        boxShadow: tier.popular
           ? 'var(--shadow-lg)'
           : 'var(--shadow-sm)',
         transition: 'all 0.3s ease',
@@ -216,96 +251,114 @@ function PricingCard({ tier, isCurrentTier }: { tier: typeof PRICING_TIERS[Prici
       )}
 
       <div style={{ marginBottom: '1.5rem' }}>
-        <h3 style={{ 
-          fontSize: '1.5rem', 
-          fontWeight: 700, 
+        <h3 style={{
+          fontSize: '1.5rem',
+          fontWeight: 700,
           marginBottom: '0.5rem',
           color: 'var(--text-primary)'
         }}>
           {tier.name}
         </h3>
-        <p style={{ 
-          fontSize: '0.875rem', 
+        <p style={{
+          fontSize: '0.875rem',
           color: 'var(--text-secondary)',
           marginBottom: '1.5rem'
         }}>
           {tier.description}
         </p>
-        <div style={{ 
-          fontSize: '3rem', 
-          fontWeight: 700, 
+        <div style={{
+          fontSize: '3rem',
+          fontWeight: 700,
           lineHeight: 1,
           color: 'var(--text-primary)',
           marginBottom: '0.5rem'
         }}>
           {tier.priceLabel}
-          <span style={{ 
-            fontSize: '1rem', 
-            color: 'var(--text-secondary)', 
-            fontWeight: 400 
+          <span style={{
+            fontSize: '1rem',
+            color: 'var(--text-secondary)',
+            fontWeight: 400
           }}>
             /mo
           </span>
         </div>
       </div>
 
-      <Link
-        href={isCurrentTier ? '#' : '/signup'}
-        style={{
-          display: 'block',
-          width: '100%',
-          padding: '0.875rem 1.5rem',
-          textAlign: 'center',
-          background: isCurrentTier 
-            ? 'var(--beige-200)'
-            : tier.popular 
-              ? 'var(--primary)'
-              : 'var(--beige-300)',
-          color: isCurrentTier
-            ? 'var(--text-secondary)'
-            : tier.popular
-              ? 'var(--text-inverse)'
-              : 'var(--text-primary)',
-          borderRadius: 'var(--radius-md)',
-          fontWeight: 600,
-          textDecoration: 'none',
-          transition: 'all 0.2s ease',
-          marginBottom: '2rem',
-          cursor: isCurrentTier ? 'default' : 'pointer',
-          pointerEvents: isCurrentTier ? 'none' : 'auto',
-          boxShadow: tier.popular && !isCurrentTier ? 'var(--shadow-md)' : 'none',
-        }}
-        onClick={(e) => {
-          if (isCurrentTier) {
-            e.preventDefault()
-          }
-        }}
-      >
-        {isCurrentTier ? 'Current Plan' : tier.cta}
-      </Link>
+      {/* CTA Button - Link for free tier, button for paid tiers */}
+      {isFreeGetStarted ? (
+        <Link
+          href="/signup"
+          style={{
+            display: 'block',
+            width: '100%',
+            padding: '0.875rem 1.5rem',
+            textAlign: 'center',
+            background: 'var(--beige-300)',
+            color: 'var(--text-primary)',
+            borderRadius: 'var(--radius-md)',
+            fontWeight: 600,
+            textDecoration: 'none',
+            transition: 'all 0.2s ease',
+            marginBottom: '2rem',
+          }}
+        >
+          {tier.cta}
+        </Link>
+      ) : (
+        <button
+          onClick={handleCheckout}
+          disabled={isCurrentTier || isLoading}
+          style={{
+            display: 'block',
+            width: '100%',
+            padding: '0.875rem 1.5rem',
+            textAlign: 'center',
+            background: isCurrentTier
+              ? 'var(--beige-200)'
+              : tier.popular
+                ? 'var(--primary)'
+                : 'var(--beige-300)',
+            color: isCurrentTier
+              ? 'var(--text-secondary)'
+              : tier.popular
+                ? 'var(--text-inverse)'
+                : 'var(--text-primary)',
+            borderRadius: 'var(--radius-md)',
+            fontWeight: 600,
+            border: 'none',
+            transition: 'all 0.2s ease',
+            marginBottom: '2rem',
+            cursor: isCurrentTier || isLoading ? 'default' : 'pointer',
+            opacity: isLoading ? 0.7 : 1,
+            boxShadow: tier.popular && !isCurrentTier ? 'var(--shadow-md)' : 'none',
+          }}
+        >
+          {isLoading ? 'Loading...' : isCurrentTier ? 'Current Plan' : tier.cta}
+        </button>
+      )}
 
-      <ul style={{ 
-        listStyle: 'none', 
-        padding: 0, 
+      <ul style={{
+        listStyle: 'none',
+        padding: 0,
         margin: 0,
-        display: 'flex', 
-        flexDirection: 'column', 
+        display: 'flex',
+        flexDirection: 'column',
         gap: '0.75rem',
         flex: 1
       }}>
         {tier.features.map((feature, idx) => (
-          <li 
+          <li
             key={idx}
-            style={{ 
-              display: 'flex', 
-              alignItems: 'flex-start', 
+            style={{
+              display: 'flex',
+              alignItems: 'flex-start',
               gap: '0.75rem',
               fontSize: '0.875rem',
               color: 'var(--text-secondary)'
             }}
           >
-            <span style={{ 
-              color: 'var(--success)', 
+            <span style={{
+              color: 'var(--success)',
               fontSize: '1rem',
               flexShrink: 0,
               marginTop: '0.125rem'
@@ -335,31 +388,31 @@ function AddOnCard({ addon }: { addon: typeof VISUAL_TEST_ADDONS[0] }) {
       }}
     >
       <div>
-        <h4 style={{ 
-          fontSize: '1.125rem', 
-          fontWeight: 600, 
+        <h4 style={{
+          fontSize: '1.125rem',
+          fontWeight: 600,
           marginBottom: '0.25rem',
           color: 'var(--text-primary)'
         }}>
           {addon.name}
         </h4>
-        <p style={{ 
-          fontSize: '0.875rem', 
+        <p style={{
+          fontSize: '0.875rem',
           color: 'var(--text-secondary)',
           marginBottom: '1rem'
         }}>
           {addon.description}
         </p>
-        <div style={{ 
-          fontSize: '2rem', 
+        <div style={{
+          fontSize: '2rem',
           fontWeight: 700,
           color: 'var(--text-primary)'
         }}>
           {addon.priceLabel}
-          <span style={{ 
-            fontSize: '0.875rem', 
-            color: 'var(--text-secondary)', 
-            fontWeight: 400 
+          <span style={{
+            fontSize: '0.875rem',
+            color: 'var(--text-secondary)',
+            fontWeight: 400
           }}>
             /mo
           </span>

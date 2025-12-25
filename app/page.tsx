@@ -110,6 +110,66 @@ export default async function Home() {
       {/* Social Proof */}
       <SocialProofSection />
 
+      {/* Cross-Browser Testing Highlight */}
+      <section style={{
+        padding: '6rem 0',
+        background: 'linear-gradient(180deg, var(--bg-primary) 0%, var(--beige-100) 100%)',
+        position: 'relative',
+        overflow: 'hidden'
+      }}>
+        <div className="container" style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 2rem', position: 'relative', zIndex: 1 }}>
+          <div style={{ textAlign: 'center', maxWidth: '800px', margin: '0 auto' }}>
+            <h2 style={{
+              fontSize: 'clamp(2rem, 4vw, 3rem)',
+              fontWeight: 700,
+              marginBottom: '1rem',
+              lineHeight: 1.2,
+              color: 'var(--text-primary)'
+            }}>
+              Test Once. See Results Everywhere.
+            </h2>
+            <p style={{
+              fontSize: '1.25rem',
+              color: 'var(--text-secondary)',
+              marginBottom: '2.5rem',
+              lineHeight: 1.6
+            }}>
+              Run your tests across Chrome, Firefox, and Safari in parallel — no re-runs, no guesswork.
+            </p>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              gap: '1.5rem',
+              marginBottom: '2.5rem',
+              maxWidth: '600px',
+              margin: '0 auto 2.5rem'
+            }}>
+              {['Chrome', 'Firefox', 'Safari'].map((browser) => (
+                <div key={browser} style={{
+                  padding: '1.5rem',
+                  background: 'var(--bg-card)',
+                  border: '1px solid var(--border-light)',
+                  borderRadius: 'var(--radius-lg)',
+                  textAlign: 'center'
+                }}>
+                  <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>🌐</div>
+                  <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{browser}</div>
+                </div>
+              ))}
+            </div>
+            <Link href="/pricing" className="btn btn-primary" style={{
+              display: 'inline-block',
+              padding: '1rem 2rem',
+              fontSize: '1rem',
+              fontWeight: 600,
+              textDecoration: 'none'
+            }}>
+              Upgrade to Pro for full cross-browser coverage
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* How it Works */}
       <HowItWorksSection />
 

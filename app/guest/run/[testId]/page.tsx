@@ -12,84 +12,142 @@ const Icons = {
     Globe: () => <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" /></svg>,
 }
 
-// --- STEP LOG COMPONENT ---
-const StepLog = ({ steps }: { steps: any[] }) => (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-        {steps.map((step, i) => (
-            <div key={i} style={{
-                display: 'flex',
-                gap: '12px',
-                padding: '12px',
-                borderRadius: 'var(--radius-md)',
-                background: step.success === false
-                    ? 'var(--maroon-50)'
-                    : step.success
-                        ? 'var(--beige-100)'
-                        : 'var(--bg-card)',
-                border: '1px solid',
-                borderColor: step.success === false
-                    ? 'var(--maroon-100)'
-                    : 'var(--border-light)',
-                borderLeftWidth: '4px',
-                borderLeftColor: step.success === false
-                    ? 'var(--maroon-500)'
-                    : step.success
-                        ? 'var(--success)'
-                        : 'var(--beige-400)',
-            }}>
-                <div style={{
-                    color: 'var(--beige-500)',
-                    minWidth: '24px',
-                    textAlign: 'right',
-                    fontWeight: 700,
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: '12px'
-                }}>
-                    {i + 1}
-                </div>
-                <div style={{ flex: 1 }}>
-                    <div style={{
-                        fontWeight: 600,
-                        marginBottom: '4px',
-                        color: 'var(--text-primary)',
-                        fontSize: '13px'
-                    }}>
-                        {step.action}
-                    </div>
-                    {step.selector && (
-                        <span style={{
-                            fontSize: '11px',
-                            background: 'var(--beige-200)',
-                            color: 'var(--text-secondary)',
-                            padding: '2px 6px',
-                            borderRadius: '4px',
-                            fontFamily: 'var(--font-mono)',
-                            display: 'inline-block'
-                        }}>
-                            {step.selector}
-                        </span>
-                    )}
-                    {step.description && (
-                        <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>
-                            {step.description}
+// --- ICONS ---
+const StepIcons = {
+    Thought: () => <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" opacity="0.6"><circle cx="12" cy="12" r="10" strokeWidth={2} /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 16v-4m0-4h.01" /></svg>,
+    Browser: () => <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2" strokeWidth={2} /><path strokeWidth={2} d="M3 9h18" /></svg>,
+    Click: () => <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" /></svg>,
+    Type: () => <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>,
+    Wait: () => <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="10" strokeWidth={2} /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6l4 2" /></svg>,
+    Check: () => <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#22c55e"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>,
+    Error: () => <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#ef4444"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>,
+    Chevron: () => <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" opacity="0.4"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>,
+}
+
+// --- STEP LOG COMPONENT (Antigravity Style) ---
+const StepLog = ({ steps, status }: { steps: any[], status?: string }) => {
+    const isRunning = status === 'RUNNING' || status === 'PENDING'
+
+    const getStepIcon = (step: any) => {
+        if (step.action === 'navigate') return <StepIcons.Browser />
+        if (step.action === 'click') return <StepIcons.Click />
+        if (step.action === 'type') return <StepIcons.Type />
+        if (step.action === 'wait') return <StepIcons.Wait />
+        if (step.action === 'preflight') return <StepIcons.Check />
+        if (step.action === 'error') return <StepIcons.Error />
+        return <StepIcons.Thought />
+    }
+
+    const getStepDescription = (step: any) => {
+        if (step.action === 'navigate') {
+            return `Opened URL in Browser`
+        }
+        if (step.action === 'click') {
+            return `Clicking ${step.target || step.selector || 'element'}`
+        }
+        if (step.action === 'type') {
+            return `Typed '${step.value || '...'}' in Browser`
+        }
+        if (step.action === 'preflight') {
+            return 'Running preflight checks (cookies, popups)'
+        }
+        if (step.action === 'wait') {
+            return `Wait for ${step.value || '1'}s`
+        }
+        return step.description || step.action
+    }
+
+    const getSubtitle = (step: any) => {
+        if (step.action === 'navigate' && step.value) {
+            return step.value
+        }
+        if (step.selector) {
+            return step.selector
+        }
+        return null
+    }
+
+    const getDuration = (step: any, index: number, allSteps: any[]) => {
+        if (index === 0) return null
+        const prevStep = allSteps[index - 1]
+        if (prevStep?.timestamp && step?.timestamp) {
+            const diff = new Date(step.timestamp).getTime() - new Date(prevStep.timestamp).getTime()
+            const seconds = Math.round(diff / 1000)
+            return seconds < 1 ? '<1s' : `${seconds}s`
+        }
+        return '<1s'
+    }
+
+    return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
+            {steps.map((step, i) => (
+                <React.Fragment key={i}>
+                    {/* Thought indicator (timing between steps) */}
+                    {i > 0 && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '4px 8px', color: 'var(--text-muted)', fontSize: '12px' }}>
+                            <StepIcons.Chevron />
+                            <StepIcons.Thought />
+                            <span>Thought for {getDuration(step, i, steps)}</span>
                         </div>
                     )}
+
+                    {/* Main Step Entry */}
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        padding: '8px',
+                        borderRadius: '6px',
+                        background: step.success === false ? 'rgba(239, 68, 68, 0.1)' : 'transparent',
+                        color: step.success === false ? '#ef4444' : 'var(--text-primary)',
+                    }}>
+                        <StepIcons.Chevron />
+                        {getStepIcon(step)}
+                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                            <span style={{ fontSize: '13px', fontWeight: 500 }}>{getStepDescription(step)}</span>
+                            {getSubtitle(step) && (
+                                <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontFamily: 'monospace', opacity: 0.7 }}>
+                                    {getSubtitle(step)}
+                                </span>
+                            )}
+                        </div>
+                        {/* View button for clickable steps */}
+                        {(step.action === 'click' || step.action === 'navigate' || step.action === 'type') && step.screenshotUrl && (
+                            <button style={{
+                                background: '#3b82f6',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '4px',
+                                padding: '4px 10px',
+                                fontSize: '11px',
+                                fontWeight: 600,
+                                cursor: 'pointer'
+                            }}>View</button>
+                        )}
+                    </div>
+                </React.Fragment>
+            ))}
+
+            {/* Initializing State */}
+            {steps.length === 0 && isRunning && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px', color: 'var(--text-muted)', fontSize: '12px' }}>
+                    <StepIcons.Chevron />
+                    <StepIcons.Thought />
+                    <span>Thought for &lt;1s</span>
                 </div>
-            </div>
-        ))}
-        {steps.length === 0 && (
-            <div style={{
-                color: 'var(--text-muted)',
-                fontStyle: 'italic',
-                padding: '24px',
-                textAlign: 'center',
-                fontSize: '14px'
-            }}>
-                Initializing visual agent...
-            </div>
-        )}
-    </div>
-)
+            )}
+
+            {/* Processing State */}
+            {isRunning && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px', color: 'var(--text-muted)', fontSize: '12px' }}>
+                    <StepIcons.Chevron />
+                    <div className="spinner" style={{ width: '14px', height: '14px', border: '2px solid var(--text-muted)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
+                    <span style={{ fontStyle: 'italic' }}>Processing...</span>
+                </div>
+            )}
+        </div>
+    )
+}
 
 export default function GuestTestRunPage() {
     const params = useParams()
@@ -116,6 +174,15 @@ export default function GuestTestRunPage() {
             const { testRun } = await api.getTestRun(testId)
             setTestRun(testRun)
             setLoading(false)
+
+            // If we have steps but no live frame, try to use the last step's screenshot as fallback
+            if (testRun?.steps && testRun.steps.length > 0 && !lastFrame) {
+                const lastStepWithScreenshot = [...testRun.steps].reverse().find(s => s.screenshotUrl)
+                if (lastStepWithScreenshot?.screenshotUrl) {
+                    console.log('[Guest Test] Using last step screenshot as fallback:', lastStepWithScreenshot.screenshotUrl)
+                    setLastFrame(lastStepWithScreenshot.screenshotUrl)
+                }
+            }
         } catch (e: any) {
             console.error('Load failed', e)
             // If 404, test run might not exist yet - keep loading and retry
@@ -315,6 +382,8 @@ export default function GuestTestRunPage() {
                             <LiveStreamPlayer
                                 runId={testId}
                                 frameData={lastFrame}
+                                currentStep={testRun?.steps?.length || 0}
+                                totalSteps={testRun?.steps?.length || 0}
                                 style={{ width: '100%', height: '100%' }}
                                 minimal={true}
                             />
@@ -386,7 +455,7 @@ export default function GuestTestRunPage() {
                         padding: '16px',
                         background: 'var(--bg-card)'
                     }}>
-                        <StepLog steps={testRun?.steps || []} />
+                        <StepLog steps={testRun?.steps || []} status={testRun?.status} />
                     </div>
                 </div>
             </div>

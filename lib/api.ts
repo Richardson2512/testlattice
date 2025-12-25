@@ -258,6 +258,7 @@ export interface BrowserMatrixResult {
 export interface TestRun {
   id: string
   projectId: string
+  name?: string // Custom name
   status: 'pending' | 'queued' | 'diagnosing' | 'waiting_approval' | 'running' | 'completed' | 'failed' | 'cancelled'
   build: {
     type: 'web'
@@ -291,6 +292,17 @@ export interface TestRun {
     failedBrowsers: number
     browsers: Array<{ browser: string; success: boolean; steps: number }>
   }
+  // Parallel browser testing support
+  selectedBrowsers?: Array<'chromium' | 'firefox' | 'webkit'>  // Browsers selected for this test run
+  browserRuns?: Array<{  // Per-browser run data
+    browser: 'chromium' | 'firefox' | 'webkit'
+    status: 'PASSED' | 'FAILED' | 'BLOCKED' | 'PARTIAL'
+    duration?: number
+    criticalErrors?: string[]
+    visualIssuesCount?: number
+    accessibilityIssuesCount?: number
+    stepsCount?: number
+  }>
   // Guest test properties
   guestSessionId?: string
   expiresAt?: string
@@ -307,6 +319,12 @@ export interface TestRun {
     success: boolean
     error?: string
     mode?: 'llm' | 'speculative' | 'monkey'
+    browser?: 'chromium' | 'firefox' | 'webkit'  // Browser for this step (mandatory for parallel browser tests)
+    environment?: {
+      browser?: 'chromium' | 'firefox' | 'webkit'
+      viewport?: string
+      orientation?: 'portrait' | 'landscape'
+    }
     selfHealing?: {
       strategy: 'text' | 'attribute' | 'position' | 'fallback'
       originalSelector?: string
@@ -569,6 +587,13 @@ export const api = {
   async stopTestRun(runId: string): Promise<{ success: boolean; testRun: TestRun; message: string }> {
     return request(`/api/tests/${runId}/stop`, {
       method: 'POST',
+    })
+  },
+
+  async updateTestRunName(runId: string, name: string): Promise<{ success: boolean; testRun: TestRun }> {
+    return request(`/api/tests/${runId}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ name }),
     })
   },
 

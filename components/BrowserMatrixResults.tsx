@@ -3,6 +3,8 @@
 import { BrowserMatrixResult } from '@/lib/api'
 import { useState } from 'react'
 
+import { getBrowserIcon, getBrowserDisplayName } from '@/lib/browserResults'
+
 interface BrowserMatrixResultsProps {
   results: BrowserMatrixResult[]
   summary?: {
@@ -15,33 +17,15 @@ interface BrowserMatrixResultsProps {
 
 export function BrowserMatrixResults({ results, summary }: BrowserMatrixResultsProps) {
   const [selectedBrowser, setSelectedBrowser] = useState<string | null>(null)
-  
+
   if (!results || results.length === 0) {
     return null
   }
-  
-  const getBrowserName = (browser: string): string => {
-    switch (browser) {
-      case 'chromium': return 'Chrome'
-      case 'firefox': return 'Firefox'
-      case 'webkit': return 'Safari'
-      default: return browser
-    }
-  }
-  
-  const getBrowserIcon = (browser: string): string => {
-    switch (browser) {
-      case 'chromium': return '🌐'
-      case 'firefox': return '🦊'
-      case 'webkit': return '🧭'
-      default: return '🌐'
-    }
-  }
-  
+
   return (
     <div className="browser-matrix-results">
       <h3 className="section-title">Cross-Browser Test Results</h3>
-      
+
       {/* Summary Card */}
       {summary && (
         <div className={`summary-card ${summary.failedBrowsers > 0 ? 'has-failures' : 'all-passed'}`}>
@@ -72,26 +56,30 @@ export function BrowserMatrixResults({ results, summary }: BrowserMatrixResultsP
           )}
         </div>
       )}
-      
+
       {/* Individual Browser Results */}
       <div className="browser-results-grid">
         {results.map((result) => (
-          <div 
+          <div
             key={result.browser}
             className={`browser-result-card ${result.success ? 'success' : 'failed'}`}
           >
             <div className="browser-header">
               <span className="browser-icon-large">
-                {getBrowserIcon(result.browser)}
+                <img
+                  src={getBrowserIcon(result.browser as any)}
+                  alt={result.browser}
+                  style={{ width: '2rem', height: '2rem' }}
+                />
               </span>
               <div className="browser-title">
-                <h4>{getBrowserName(result.browser)}</h4>
+                <h4>{getBrowserDisplayName(result.browser as any)}</h4>
                 <span className={`status-badge ${result.success ? 'success' : 'failed'}`}>
                   {result.success ? '✅ Passed' : '❌ Failed'}
                 </span>
               </div>
             </div>
-            
+
             <div className="browser-stats">
               <div className="stat">
                 <span className="stat-label">Steps</span>
@@ -108,16 +96,16 @@ export function BrowserMatrixResults({ results, summary }: BrowserMatrixResultsP
                 <span className="stat-value">{result.artifacts.length}</span>
               </div>
             </div>
-            
+
             {result.error && (
               <div className="browser-error">
                 <p className="error-label">❌ Error:</p>
                 <p className="error-message">{result.error}</p>
               </div>
             )}
-            
+
             <div className="browser-actions">
-              <button 
+              <button
                 className="btn-secondary btn-sm"
                 onClick={() => setSelectedBrowser(
                   selectedBrowser === result.browser ? null : result.browser
@@ -126,7 +114,7 @@ export function BrowserMatrixResults({ results, summary }: BrowserMatrixResultsP
                 {selectedBrowser === result.browser ? 'Hide' : 'View'} Details
               </button>
             </div>
-            
+
             {/* Expanded Details */}
             {selectedBrowser === result.browser && result.steps && (
               <div className="browser-steps-preview">
@@ -152,7 +140,7 @@ export function BrowserMatrixResults({ results, summary }: BrowserMatrixResultsP
           </div>
         ))}
       </div>
-      
+
       {/* Compatibility Issues Summary */}
       {results.some(r => !r.success) && (
         <div className="compatibility-issues">
@@ -162,7 +150,14 @@ export function BrowserMatrixResults({ results, summary }: BrowserMatrixResultsP
               .filter(r => !r.success)
               .map(r => (
                 <li key={r.browser} className="issue-item">
-                  <strong>{getBrowserIcon(r.browser)} {getBrowserName(r.browser)}:</strong>{' '}
+                  <strong>
+                    <img
+                      src={getBrowserIcon(r.browser as any)}
+                      alt={r.browser}
+                      style={{ width: '1rem', height: '1rem', verticalAlign: 'middle', marginRight: '0.5rem' }}
+                    />
+                    {getBrowserDisplayName(r.browser as any)}:
+                  </strong>{' '}
                   {r.error || 'Test failed'}
                 </li>
               ))}
@@ -173,7 +168,7 @@ export function BrowserMatrixResults({ results, summary }: BrowserMatrixResultsP
           </p>
         </div>
       )}
-      
+
       {/* Success Message */}
       {results.every(r => r.success) && results.length > 1 && (
         <div className="compatibility-success">

@@ -24,6 +24,7 @@ export function DocsNav() {
         { href: '/docs/how-ai-explores', label: 'How AI Explores Your App (Explained Simply)' },
         { href: '/docs/pre-ship-confidence', label: 'What "Pre-Ship Confidence" Actually Means' },
         { href: '/docs/human-in-the-loop', label: 'Human-in-the-Loop Testing Explained' },
+        { href: '/docs/quality-standards', label: 'Quality & Health Standards' },
         { href: '/docs/not-replacement-playwright', label: 'Why This Tool Is Not a Replacement for Playwright or Selenium' },
       ]
     },

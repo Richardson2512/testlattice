@@ -123,12 +123,12 @@ export default function DashboardPage() {
     isFetching,
     refetch: loadData,
     invalidate
-  } = useDashboardData({ selectedProject })
+  } = useDashboardData({ selectedProject, enabled: !!teamId })
 
   // Get tier info and usage
   const { data: tierInfo } = useTierInfo()
   const { usage } = useUsage()
-  
+
   // Map backend tier to pricing tier
   const tierMap: Record<string, PricingTier> = {
     'guest': 'free',
@@ -145,9 +145,7 @@ export default function DashboardPage() {
     type: 'test-limit' | 'visual-test-limit' | 'locked-feature'
     feature?: string
   }>({ isOpen: false, type: 'test-limit' })
-    selectedProject,
-    enabled: !!teamId
-  })
+
 
   // -- LOGIC --
 
@@ -240,7 +238,7 @@ export default function DashboardPage() {
           setIsSubmitting(false)
           setUpgradeModal({
             isOpen: true,
-            type: checkResult.reason || 'test-limit',
+            type: (checkResult.reason === 'mobile-locked' ? 'locked-feature' : checkResult.reason) as 'test-limit' | 'visual-test-limit' | 'locked-feature' || 'test-limit',
             feature: checkResult.reason === 'mobile-locked' ? 'mobile' : undefined,
           })
           return
@@ -325,7 +323,7 @@ export default function DashboardPage() {
       fontFamily: 'var(--font-sans)',
       padding: '2rem',
     }}>
-      <div style={{ maxWidth: '1200px' }}>
+      <div style={{ width: '100%' }}>
 
         {/* Header */}
         <div style={{
@@ -865,12 +863,12 @@ export default function DashboardPage() {
                   DeviceProfile.ANDROID_EMULATOR,
                   DeviceProfile.IOS_SIMULATOR,
                 ].includes(device as DeviceProfile) && (
-                  <UpgradeBanner
-                    feature="mobile"
-                    currentTier={currentTier}
-                    onDismiss={() => setDevice('chrome-latest')}
-                  />
-                )}
+                    <UpgradeBanner
+                      feature="mobile"
+                      currentTier={currentTier}
+                      onDismiss={() => setDevice('chrome-latest')}
+                    />
+                  )}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', marginBottom: '1rem' }}>
                   <DeviceProfileSelector value={device as DeviceProfile} onChange={setDevice} />
                   <div>

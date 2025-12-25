@@ -12,18 +12,18 @@ export function formatActionType(action: string): { label: string; icon: string;
     'wait': { label: 'Wait', icon: '⏱️', color: 'yellow' },
     'assert': { label: 'Assert', icon: '✓', color: 'teal' },
     'complete': { label: 'Complete', icon: '🎉', color: 'green' },
-    
+
     // NEW: Form actions
     'check': { label: 'Check', icon: '☑️', color: 'green' },
     'uncheck': { label: 'Uncheck', icon: '☐', color: 'gray' },
     'select': { label: 'Select', icon: '📋', color: 'blue' },
     'submit': { label: 'Submit', icon: '📤', color: 'purple' },
-    
+
     // NEW: Navigation actions
     'goBack': { label: 'Back', icon: '⬅️', color: 'orange' },
     'goForward': { label: 'Forward', icon: '➡️', color: 'orange' },
   }
-  
+
   return actionMap[action] || { label: action, icon: '❓', color: 'gray' }
 }
 
@@ -79,7 +79,7 @@ export function getDeviceInfo(device: string): {
       isMobile: true
     },
   }
-  
+
   return deviceMap[device] || {
     name: device,
     icon: '❓',
@@ -100,10 +100,10 @@ export function getBrowserName(browser: string): string {
 
 export function getBrowserIcon(browser: string): string {
   switch (browser) {
-    case 'chromium': return '🌐'
-    case 'firefox': return '🦊'
-    case 'webkit': return '🧭'
-    default: return '🌐'
+    case 'chromium': return '/browsers/chrome.svg'
+    case 'firefox': return '/browsers/firefox.svg'
+    case 'webkit': return '/browsers/safari.svg'
+    default: return '/browsers/chrome.svg'
   }
 }
 

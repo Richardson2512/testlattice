@@ -9,19 +9,19 @@ export interface PricingTierLimits {
   // Test limits
   totalTestsPerMonth: number
   maxVisualTests: number
-  
+
   // Browser & Device
   browsers: Array<'chromium' | 'firefox' | 'webkit'>
   mobileSupported: boolean
-  
+
   // Projects
   maxProjects: number | 'unlimited'
-  
+
   // Features
   exports: boolean
   historyDays: number
   reRuns: boolean
-  
+
   // Advanced features
   priorityQueue: boolean
   savedConfigurations: boolean
@@ -41,6 +41,7 @@ export interface PricingTierInfo {
   features: string[]
   cta: string
   popular?: boolean
+  polarProductId?: string // Polar.sh product ID for checkout
 }
 
 export const PRICING_TIERS: Record<PricingTier, PricingTierInfo> = {
@@ -75,8 +76,10 @@ export const PRICING_TIERS: Record<PricingTier, PricingTierInfo> = {
       'No exports',
       'No history',
       'No re-runs',
+      'No parallel cross-browser testing',
     ],
     cta: 'Get Started',
+    polarProductId: undefined, // Free tier - no checkout
   },
   starter: {
     id: 'starter',
@@ -107,8 +110,10 @@ export const PRICING_TIERS: Record<PricingTier, PricingTierInfo> = {
       'Single project',
       'Full reports',
       'Test history (30 days)',
+      'No parallel cross-browser testing',
     ],
     cta: 'Upgrade to Starter',
+    polarProductId: '84331781-6628-4f25-a1c4-81c9aff5c301',
   },
   indie: {
     id: 'indie',
@@ -141,8 +146,10 @@ export const PRICING_TIERS: Record<PricingTier, PricingTierInfo> = {
       'Test history (90 days)',
       'Priority execution queue',
       'Saved test configurations',
+      'Parallel cross-browser testing (2 browsers)',
     ],
     cta: 'Upgrade to Indie',
+    polarProductId: 'a9519689-9ac5-4b9e-b006-ad35b2d68531',
     popular: true, // Most Popular badge
   },
   pro: {
@@ -175,8 +182,10 @@ export const PRICING_TIERS: Record<PricingTier, PricingTierInfo> = {
       'Scheduled tests',
       'Shared dashboards',
       'Basic CI integration',
+      'Parallel cross-browser testing (Chrome, Firefox, Safari)',
     ],
     cta: 'Upgrade to Pro',
+    polarProductId: '1db05405-2505-4156-a535-f4318daabc8c',
   },
 }
 
@@ -214,11 +223,11 @@ export const VISUAL_TEST_ADDONS: VisualTestAddOn[] = [
 export function getNextTierForFeature(feature: string, currentTier: PricingTier): PricingTier | null {
   const tierOrder: PricingTier[] = ['free', 'starter', 'indie', 'pro']
   const currentIndex = tierOrder.indexOf(currentTier)
-  
+
   for (let i = currentIndex + 1; i < tierOrder.length; i++) {
     const tier = tierOrder[i]
     const tierInfo = PRICING_TIERS[tier]
-    
+
     // Check if this tier has the feature
     if (feature === 'mobile' && tierInfo.limits.mobileSupported) return tier
     if (feature === 'exports' && tierInfo.limits.exports) return tier
@@ -228,7 +237,7 @@ export function getNextTierForFeature(feature: string, currentTier: PricingTier)
     if (feature === 'ci-integration' && tierInfo.limits.ciIntegration) return tier
     if (feature === 'shared-dashboards' && tierInfo.limits.sharedDashboards) return tier
   }
-  
+
   return null
 }
 
