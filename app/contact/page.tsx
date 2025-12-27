@@ -3,12 +3,86 @@
 import { LandingHeader } from '@/components/LandingHeader'
 import { Footer } from '@/components/Footer'
 
+// Helpers
+function ContactInfoBlock({ icon, title, desc, action }: { icon: string, title: string, desc: string, action: string }) {
+    return (
+        <div style={{ display: 'flex', gap: '1.25rem' }}>
+            <div style={{
+                width: '56px',
+                height: '56px',
+                background: 'var(--beige-200)',
+                borderRadius: '12px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '1.75rem',
+                border: '1px solid var(--border-light)'
+            }}>
+                {icon}
+            </div>
+            <div>
+                <h3 style={{ fontSize: '1.125rem', fontWeight: 700, marginBottom: '0.25rem' }}>{title}</h3>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', marginBottom: '0.375rem', lineHeight: 1.5 }}>{desc}</p>
+                <div style={{ color: 'var(--maroon-700)', fontWeight: 600 }}>{action}</div>
+            </div>
+        </div>
+    )
+}
+
+function FormInput({ label, placeholder, type = 'text' }: { label: string, placeholder: string, type?: string }) {
+    return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            <label style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-secondary)' }}>{label}</label>
+            <input
+                type={type}
+                placeholder={placeholder}
+                style={{
+                    padding: '0.75rem 0.875rem',
+                    background: 'var(--beige-50)',
+                    border: '1px solid var(--border-medium)',
+                    borderRadius: 'var(--radius-md)',
+                    color: 'var(--text-primary)',
+                    fontSize: '1rem',
+                    outline: 'none',
+                    width: '100%'
+                }}
+            />
+        </div>
+    )
+}
+
 export default function ContactPage() {
     return (
-        <main style={{ minHeight: '100vh', background: 'var(--bg-primary)', color: 'var(--text-primary)', fontFamily: 'var(--font-sans)', overflowX: 'hidden' }}>
+        <div style={{ minHeight: '100vh', background: 'var(--bg-primary)', color: 'var(--text-primary)', fontFamily: 'var(--font-sans)', overflowX: 'hidden', position: 'relative' }}>
             <LandingHeader />
 
-            <div className="container" style={{ padding: '160px 20px 100px', maxWidth: '1200px', margin: '0 auto' }}>
+            {/* Background Gradients */}
+            <div style={{
+                position: 'absolute',
+                top: '-20%',
+                right: '-10%',
+                width: '800px',
+                height: '800px',
+                background: 'radial-gradient(circle, rgba(153, 27, 27, 0.08) 0%, transparent 60%)',
+                borderRadius: '50%',
+                zIndex: 0,
+                filter: 'blur(60px)',
+                pointerEvents: 'none'
+            }} />
+            <div style={{
+                position: 'absolute',
+                bottom: '-10%',
+                left: '-5%',
+                width: '600px',
+                height: '600px',
+                background: 'radial-gradient(circle, rgba(220, 38, 38, 0.05) 0%, transparent 60%)',
+                borderRadius: '50%',
+                zIndex: 0,
+                filter: 'blur(60px)',
+                pointerEvents: 'none'
+            }} />
+
+            <div className="container" style={{ padding: '160px 20px 100px', maxWidth: '1200px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '5rem', alignItems: 'start' }}>
 
                     {/* LEFT: Info & Context */}
@@ -126,54 +200,6 @@ export default function ContactPage() {
                     -webkit-text-fill-color: transparent;
                 }
             `}</style>
-        </main>
-    )
-}
-
-// Helpers
-function ContactInfoBlock({ icon, title, desc, action }: { icon: string, title: string, desc: string, action: string }) {
-    return (
-        <div style={{ display: 'flex', gap: '1.25rem' }}>
-            <div style={{
-                width: '56px',
-                height: '56px',
-                background: 'var(--beige-200)',
-                borderRadius: '12px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '1.75rem',
-                border: '1px solid var(--border-light)'
-            }}>
-                {icon}
-            </div>
-            <div>
-                <h3 style={{ fontSize: '1.125rem', fontWeight: 700, marginBottom: '0.25rem' }}>{title}</h3>
-                <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', marginBottom: '0.375rem', lineHeight: 1.5 }}>{desc}</p>
-                <div style={{ color: 'var(--maroon-700)', fontWeight: 600 }}>{action}</div>
-            </div>
-        </div>
-    )
-}
-
-function FormInput({ label, placeholder, type = 'text' }: { label: string, placeholder: string, type?: string }) {
-    return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-            <label style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-secondary)' }}>{label}</label>
-            <input
-                type={type}
-                placeholder={placeholder}
-                style={{
-                    padding: '0.75rem 0.875rem',
-                    background: 'var(--beige-50)',
-                    border: '1px solid var(--border-medium)',
-                    borderRadius: 'var(--radius-md)',
-                    color: 'var(--text-primary)',
-                    fontSize: '1rem',
-                    outline: 'none',
-                    width: '100%'
-                }}
-            />
         </div>
     )
 }
