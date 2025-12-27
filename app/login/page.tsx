@@ -68,7 +68,7 @@ export default function LoginPage() {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="name@company.com"
+            placeholder="Write your email address"
             required
             style={{
               width: '100%',
