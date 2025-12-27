@@ -136,6 +136,7 @@ export function LandingHeader() {
             }}>
               <Link href="/docs" className="dropdown-item" style={{ display: 'block', padding: '0.5rem 0.75rem', borderRadius: '6px', color: 'var(--text-primary)', textDecoration: 'none' }}>Documentation</Link>
               <Link href="#" className="dropdown-item" style={{ display: 'block', padding: '0.5rem 0.75rem', borderRadius: '6px', color: 'var(--text-primary)', textDecoration: 'none' }}>Blog</Link>
+              <Link href="/contact" className="dropdown-item" style={{ display: 'block', padding: '0.5rem 0.75rem', borderRadius: '6px', color: 'var(--text-primary)', textDecoration: 'none' }}>Contact Us</Link>
               <Link href="#" className="dropdown-item" style={{ display: 'block', padding: '0.5rem 0.75rem', borderRadius: '6px', color: 'var(--text-primary)', textDecoration: 'none' }}>Community</Link>
             </div>
           </div>

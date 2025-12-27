@@ -5,6 +5,7 @@ import { CtaSection } from '@/components/CtaSection'
 import { theme } from '@/lib/theme'
 import Script from 'next/script'
 import { WhyRiharioTOC } from '@/components/WhyRiharioTOC'
+import { Footer } from '@/components/Footer'
 
 export const metadata = {
     title: 'Why Rihario? AI Testing for Indie Hackers | No Code Required',
@@ -397,9 +398,7 @@ export default function WhyRihario() {
                 <WhyRiharioTOC />
             </div>
 
-            <footer style={{ padding: '4rem 0', textAlign: 'center', color: theme.text.secondary, fontSize: '0.9rem' }}>
-                &copy; {new Date().getFullYear()} Rihario. Defining Vibe Testing.
-            </footer>
+            <Footer />
         </main>
     )
 }

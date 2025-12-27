@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { LandingHeader } from '@/components/LandingHeader'
 import { InteractiveBrowserStack } from '@/components/InteractiveBrowserStack'
+import { Footer } from '@/components/Footer'
 
 // SVG Logos for "Real" look
 const Logos = {
@@ -227,16 +228,7 @@ export default function FeaturesPage() {
                 </div>
             </section>
 
-
-
-            {/* Footer */}
-            <footer style={{ background: 'var(--beige-100)', padding: '4rem 0 2rem' }}>
-                <div className="container">
-                    <div style={{ borderTop: '1px solid var(--border-medium)', paddingTop: '2rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-                        © {new Date().getFullYear()} Rihario Inc. All rights reserved.
-                    </div>
-                </div>
-            </footer>
+            <Footer />
         </main>
     )
 }

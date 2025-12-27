@@ -10,6 +10,7 @@ import { ComparisonSection } from '@/components/ComparisonSection'
 import { FaqSection } from '@/components/FaqSection'
 import { CtaSection } from '@/components/CtaSection'
 import { FeatureCarousel } from '@/components/FeatureCarousel'
+import { Footer } from '@/components/Footer'
 
 export default async function Home() {
   const supabase = await createClient()
@@ -107,10 +108,6 @@ export default async function Home() {
         </div>
       </section>
 
-
-
-
-
       {/* How it Works */}
       <HowItWorksSection />
 
@@ -190,47 +187,7 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer style={{ background: 'var(--beige-100)', padding: '4rem 0 2rem' }}>
-        <div className="container">
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '4rem', marginBottom: '4rem' }}>
-            <div style={{ gridColumn: 'span 1' }}>
-              <div style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <span>🧪</span> Rihario
-              </div>
-              <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-                Vibe testing for solo & indie developers. Feel confident before shipping.
-              </p>
-            </div>
-            <div>
-              <h4 style={{ fontSize: '0.9rem', marginBottom: '1rem', color: 'var(--text-primary)' }}>Product</h4>
-              <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                <li><Link href="/features" style={{ color: 'var(--text-muted)' }}>Features</Link></li>
-                <li><Link href="#" style={{ color: 'var(--text-muted)' }}>Integrations</Link></li>
-                <li><Link href="/pricing" style={{ color: 'var(--text-muted)' }}>Pricing</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h4 style={{ fontSize: '0.9rem', marginBottom: '1rem', color: 'var(--text-primary)' }}>Company</h4>
-              <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                <li><Link href="#" style={{ color: 'var(--text-muted)' }}>About</Link></li>
-                <li><Link href="#" style={{ color: 'var(--text-muted)' }}>Blog</Link></li>
-                <li><Link href="/contact" style={{ color: 'var(--text-muted)' }}>Contact</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h4 style={{ fontSize: '0.9rem', marginBottom: '1rem', color: 'var(--text-primary)' }}>Legal</h4>
-              <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                <li><Link href="#" style={{ color: 'var(--text-muted)' }}>Privacy</Link></li>
-                <li><Link href="#" style={{ color: 'var(--text-muted)' }}>Terms</Link></li>
-              </ul>
-            </div>
-          </div>
-          <div style={{ borderTop: '1px solid var(--border-medium)', paddingTop: '2rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-            © {new Date().getFullYear()} Rihario Inc. All rights reserved.
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </main>
   )
 }
