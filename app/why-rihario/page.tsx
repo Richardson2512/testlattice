@@ -1,5 +1,6 @@
 
 import Link from 'next/link'
+import { BehaviorPillarSection } from '@/components/why-rihario/BehaviorPillarSection'
 import { LandingHeader } from '@/components/LandingHeader'
 import { CtaSection } from '@/components/CtaSection'
 import { theme } from '@/lib/theme'
@@ -397,6 +398,8 @@ export default function WhyRihario() {
                 {/* Right Sidebar - Table of Contents */}
                 <WhyRiharioTOC />
             </div>
+
+            <BehaviorPillarSection />
 
             <Footer />
         </main>

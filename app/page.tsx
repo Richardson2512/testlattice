@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { LandingHeader } from '@/components/LandingHeader'
 import { FeaturesSection } from '@/components/FeaturesSection'
+import { BehaviorAnalysisSection } from '@/components/features/BehaviorAnalysisSection'
 import { GuestTestModalWrapper } from '@/components/GuestTestModalWrapper'
 import { SocialProofSection } from '@/components/SocialProofSection'
 import { HowItWorksSection } from '@/components/HowItWorksSection'
@@ -110,6 +111,9 @@ export default async function Home() {
 
       {/* How it Works */}
       <HowItWorksSection />
+
+      {/* Behavior Analysis Feature */}
+      <BehaviorAnalysisSection />
 
       {/* Features Grid */}
       <section id="features" style={{ padding: '5rem 0', background: 'var(--bg-secondary)' }}>

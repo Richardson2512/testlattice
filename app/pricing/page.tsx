@@ -6,6 +6,8 @@ import { LandingHeader } from '@/components/LandingHeader'
 import { PRICING_TIERS, VISUAL_TEST_ADDONS, type PricingTier } from '@/lib/pricing'
 import { useTierInfo } from '@/lib/hooks'
 
+import { BehaviorAddOnCard } from '@/components/pricing/BehaviorAddOnCard'
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
 
 export default function PricingPage() {
@@ -131,6 +133,7 @@ export default function PricingPage() {
             {VISUAL_TEST_ADDONS.map((addon) => (
               <AddOnCard key={addon.id} addon={addon} />
             ))}
+            <BehaviorAddOnCard />
           </div>
 
           <div style={{
