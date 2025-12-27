@@ -4,6 +4,8 @@ import Navigation from './components/Navigation'
 import { ErrorBoundary } from '../components/ErrorBoundary'
 import { ScrollToTop } from '../components/ScrollToTop'
 import { createClient } from '@/lib/supabase/server'
+import { Analytics } from '@vercel/analytics/react'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 
 export const metadata: Metadata = {
   title: {
@@ -84,6 +86,8 @@ export default async function RootLayout({
           </main>
           <ScrollToTop />
         </ErrorBoundary>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   )
