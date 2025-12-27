@@ -14,9 +14,8 @@ export default function BehaviorAnalysisDocsPage() {
             <LandingHeader />
 
             <main className="container" style={{ maxWidth: '900px', margin: '0 auto', padding: '8rem 1.5rem 6rem' }}>
-                {/* Breadcrumb */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', color: 'var(--text-muted)', marginBottom: '2rem' }}>
-                    <Link href="/docs" style={{ color: 'inherit', textDecoration: 'none', transition: 'color 0.2s' }} onMouseOver={e => e.currentTarget.style.color = 'var(--primary)'} onMouseOut={e => e.currentTarget.style.color = 'inherit'}>Docs</Link>
+                    <Link href="/docs" className="hover-text-primary" style={{ color: 'inherit', textDecoration: 'none' }}>Docs</Link>
                     <span>/</span>
                     <span style={{ color: 'var(--text-secondary)' }}>Behavior Analysis</span>
                 </div>
@@ -125,15 +124,8 @@ export default function BehaviorAnalysisDocsPage() {
                         <p style={{ marginBottom: '1.5rem', color: 'var(--text-secondary)' }}>
                             Behavior Analysis is available as an add-on for Indie and Pro plans.
                         </p>
-                        <Link href="/pricing" style={{
-                            display: 'inline-block',
-                            background: 'var(--primary)',
-                            color: 'white',
-                            padding: '0.75rem 2rem',
-                            borderRadius: 'var(--radius-md)',
-                            fontWeight: 600,
-                            textDecoration: 'none',
-                            transition: 'opacity 0.2s'
+                        <Link href="/pricing" className="btn btn-primary" style={{
+                            padding: '0.75rem 2rem'
                         }}>
                             View Pricing
                         </Link>

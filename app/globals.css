@@ -839,3 +839,11 @@ h3 { font-size: clamp(1.5rem, 3vw, 2.25rem); }
     font-size: 1.25rem;
   }
 }
+
+/* Utility Classes */
+.hover-text-primary {
+  transition: color 0.2s ease;
+}
+.hover-text-primary:hover {
+  color: var(--primary) !important;
+}
