@@ -1,6 +1,5 @@
 import React from 'react'
 import Link from 'next/link'
-import { Card } from '@/components/ui/card'
 import { LandingHeader } from '@/components/LandingHeader'
 import { Footer } from '@/components/Footer'
 
@@ -32,18 +31,18 @@ export default function BehaviorAnalysisDocsPage() {
                     </p>
 
                     <div className="grid md:grid-cols-2 gap-8 mb-16">
-                        <Card className="p-6 bg-[var(--bg-card)] border-[var(--border-light)] shadow-sm">
+                        <div className="glass-card p-6">
                             <h3 className="text-xl font-semibold mb-3 text-[var(--primary)]">Safety & Compliance</h3>
                             <p className="text-[var(--text-secondary)]">
                                 Ensure your agent never leaks PII, gives medical advice, or violates regulatory standards, even when "jailbroken" by malicious users.
                             </p>
-                        </Card>
-                        <Card className="p-6 bg-[var(--bg-card)] border-[var(--border-light)] shadow-sm">
+                        </div>
+                        <div className="glass-card p-6">
                             <h3 className="text-xl font-semibold mb-3 text-[var(--primary)]">Persona Adherence</h3>
                             <p className="text-[var(--text-secondary)]">
                                 Verify that your sales bot stays professional, your support agent remains empathetic, and your brand voice never breaks character.
                             </p>
-                        </Card>
+                        </div>
                     </div>
 
                     <h2 className="text-3xl font-bold mt-16 mb-6 text-[var(--text-primary)]">The Architecture of Autonomous Red-Teaming</h2>

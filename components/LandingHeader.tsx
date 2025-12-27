@@ -102,7 +102,6 @@ export function LandingHeader() {
                   href={item.href}
                   className="dropdown-item"
                   style={{
-                    display: 'block',
                     padding: '0.5rem 0.75rem',
                     borderRadius: '6px',
                     color: 'var(--text-primary)',
