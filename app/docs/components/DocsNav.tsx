@@ -88,6 +88,12 @@ export function DocsNav() {
       ]
     },
     {
+      title: 'Resources',
+      items: [
+        { href: '/docs/behavior-analysis', label: 'Behavior Analysis Testing' },
+      ]
+    },
+    {
       title: 'FAQ',
       items: [
         { href: '/docs/faq-ai-vs-manual', label: 'Is AI Testing Better Than Manual Testing?' },

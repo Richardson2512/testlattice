@@ -2,9 +2,9 @@ export default function GenerateFixPromptsContent() {
   return (
     <article>
       <h1>How to Generate Fix Prompts from Test Results</h1>
-      
+
       <p style={{ fontSize: '1.125rem', color: 'var(--text-secondary)', marginBottom: '2rem', lineHeight: 1.7 }}>
-        <strong>Rihario can generate fix prompts from detected issues, helping you use AI coding assistants (Cursor, ChatGPT, Copilot) to fix problems quickly.</strong> Fix prompts include error details, context, and instructions for fixing the issue. They're assistive, not automatic - you review and apply the fixes.
+        <strong>Rihario can generate fix prompts from detected issues, helping you use AI coding assistants (Cursor, VS Code Copilot, Antigravity) and LLMs (ChatGPT, Claude, Gemini) to fix problems quickly.</strong> Fix prompts include error details, context, and instructions for fixing the issue. They're assistive, not automatic - you review and apply the fixes.
       </p>
 
       <h2>What Are Fix Prompts?</h2>
@@ -57,9 +57,9 @@ export default function GenerateFixPromptsContent() {
 
       <ul>
         <li><strong>Cursor</strong> - Paste into Cursor chat, get code suggestions</li>
-        <li><strong>ChatGPT</strong> - Use in ChatGPT conversation for fix suggestions</li>
-        <li><strong>GitHub Copilot</strong> - Use Copilot chat for code fixes</li>
-        <li><strong>Other AI assistants</strong> - Works with any coding assistant</li>
+        <li><strong>VS Code Copilot</strong> - Use Copilot chat for code fixes</li>
+        <li><strong>Antigravity</strong> - Provide the prompt to your Antigravity agent</li>
+        <li><strong>LLMs</strong> - Works great with ChatGPT, Claude, and Gemini</li>
       </ul>
 
       <h2>Example Fix Prompt</h2>
@@ -174,23 +174,23 @@ Please provide code fix for this issue.`}
         <li>Apply fixes and test</li>
       </ol>
 
-      <h3>ChatGPT</h3>
-
-      <ol>
-        <li>Copy fix prompt from Rihario</li>
-        <li>Open ChatGPT conversation</li>
-        <li>Paste prompt</li>
-        <li>Get code suggestions</li>
-        <li>Apply fixes and test</li>
-      </ol>
-
-      <h3>GitHub Copilot</h3>
+      <h3>VS Code Copilot</h3>
 
       <ol>
         <li>Copy fix prompt from Rihario</li>
         <li>Open Copilot chat in VS Code</li>
         <li>Paste prompt</li>
         <li>Review suggestions</li>
+        <li>Apply fixes and test</li>
+      </ol>
+
+      <h3>Antigravity & LLMs (ChatGPT, Claude, Gemini)</h3>
+
+      <ol>
+        <li>Copy fix prompt from Rihario</li>
+        <li>Paste into your agent or LLM chat interface</li>
+        <li>The prompt contains all context needed for the model</li>
+        <li>Review the suggested solution</li>
         <li>Apply fixes and test</li>
       </ol>
 
