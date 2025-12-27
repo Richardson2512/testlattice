@@ -27,42 +27,41 @@ export function useUsage() {
       try {
         setLoading(true)
         // TODO: Replace with actual API endpoint when backend is ready
-        // For now, return mock data based on tier info
-        const tierInfo = await api.getTierInfo()
-        
+        // Fetch real usage from API
+        const [tierInfoRes, usageRes] = await Promise.all([
+          api.getTierInfo(),
+          api.checkUsage()
+        ])
+
         // Map backend tier to pricing tier
         const tierMap: Record<string, PricingTier> = {
+          'free': 'free', // API might return 'free' directly now
           'guest': 'free',
           'starter': 'starter',
           'indie': 'indie',
           'pro': 'pro',
           'agency': 'pro',
         }
-        
-        const currentTier = tierMap[tierInfo.tier] || 'free'
-        
-        // Mock usage - in production, this would come from the API
-        const mockUsage: UsageStats = {
-          totalTests: 0, // TODO: Get from API
-          visualTests: 0, // TODO: Get from API
-          totalTestsLimit: 0, // Will be set based on tier
-          visualTestsLimit: 0, // Will be set based on tier
-          remainingTests: 0,
-          remainingVisualTests: 0,
+
+        const currentTier = (tierMap[usageRes.tier] || tierMap[tierInfoRes.tier] || 'free') as PricingTier
+
+        // Set limits based on tier (import from pricing.ts)
+        const { PRICING_TIERS } = await import('../pricing')
+        const tierInfo_pricing = PRICING_TIERS[currentTier]
+
+        const realUsage: UsageStats = {
+          totalTests: usageRes.testsUsed,
+          visualTests: 0, // Not yet tracked separately in this endpoint
+          totalTestsLimit: usageRes.testsLimit,
+          visualTestsLimit: tierInfo_pricing.limits.maxVisualTests,
+          remainingTests: usageRes.testsRemaining,
+          remainingVisualTests: tierInfo_pricing.limits.maxVisualTests,
           currentTier,
           periodStart: new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString(),
           periodEnd: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).toISOString(),
         }
-        
-        // Set limits based on tier (import from pricing.ts)
-        const { PRICING_TIERS } = await import('../pricing')
-        const tierInfo_pricing = PRICING_TIERS[currentTier]
-        mockUsage.totalTestsLimit = tierInfo_pricing.limits.totalTestsPerMonth
-        mockUsage.visualTestsLimit = tierInfo_pricing.limits.maxVisualTests
-        mockUsage.remainingTests = Math.max(0, mockUsage.totalTestsLimit - mockUsage.totalTests)
-        mockUsage.remainingVisualTests = Math.max(0, mockUsage.visualTestsLimit - mockUsage.visualTests)
-        
-        setUsage(mockUsage)
+
+        setUsage(realUsage)
         setError(null)
       } catch (err: any) {
         setError(err.message || 'Failed to fetch usage')

@@ -14,13 +14,6 @@ type NavItem = {
   disabled?: boolean
 }
 
-const mainNav: NavItem[] = [
-  { id: 'dashboard', label: 'Dashboard', href: '/dashboard', icon: '📊' },
-  { id: 'runs', label: 'Test Runs', href: '/runs', icon: '🔬' },
-  { id: 'projects', label: 'Projects', href: '#', icon: '📁', disabled: true },
-  { id: 'settings', label: 'Settings', href: '/settings', icon: '⚙️' },
-]
-
 const bottomNav: NavItem[] = [
   { id: 'pricing', label: 'Pricing', href: '/pricing', icon: '💰' },
 ]
@@ -32,14 +25,55 @@ export default function Navigation() {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [isCollapsed, setIsCollapsed] = useState(false)
+  const [isAdmin, setIsAdmin] = useState(false)
+  const [userTier, setUserTier] = useState<string>('free')
   const expandedWidth = 280
   const collapsedWidth = 72
   const sidebarWidth = isCollapsed ? collapsedWidth : expandedWidth
+
+  // Build nav items dynamically based on admin status
+  const mainNav: NavItem[] = useMemo(() => {
+    const items: NavItem[] = [
+      { id: 'dashboard', label: 'Dashboard', href: '/dashboard', icon: '📊' },
+      { id: 'runs', label: 'Test Runs', href: '/runs', icon: '🔬' },
+      { id: 'projects', label: 'Projects', href: '#', icon: '📁', disabled: true },
+      { id: 'profile', label: 'Profile', href: '/profile', icon: '👤' },
+    ]
+
+    // Add admin link if user is admin
+    if (isAdmin) {
+      items.push({ id: 'admin', label: 'Admin', href: '/admin', icon: '🛡️' })
+    }
+
+    return items
+  }, [isAdmin])
 
   useEffect(() => {
     const getUser = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       setUser(user)
+      // Check if user has admin role
+      if (user) {
+        const userIsAdmin = user.app_metadata?.role === 'admin' || user.user_metadata?.role === 'admin'
+        setIsAdmin(userIsAdmin)
+
+        // Fetch user's subscription tier
+        try {
+          const { data: { session } } = await supabase.auth.getSession()
+          if (session?.access_token) {
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
+            const res = await fetch(`${apiUrl}/api/billing/subscription`, {
+              headers: { Authorization: `Bearer ${session.access_token}` },
+            })
+            if (res.ok) {
+              const data = await res.json()
+              setUserTier(data.subscription?.tier || 'free')
+            }
+          }
+        } catch (err) {
+          console.warn('Failed to fetch subscription:', err)
+        }
+      }
       setLoading(false)
     }
     getUser()
@@ -313,7 +347,7 @@ export default function Navigation() {
                   }}>
                     {user.email?.split('@')[0]}
                   </div>
-                  <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Pro Plan</div>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'capitalize' }}>{userTier} Plan</div>
                 </div>
               )}
             </div>

@@ -165,6 +165,11 @@ export default function DashboardPage() {
       if (user) {
         setUserId(user.id)
         setTeamId(user.id)
+
+        // Reconcile subscription with Polar (self-healing for webhook failures)
+        api.reconcileSubscription().catch((err) => {
+          console.warn('Subscription reconciliation failed:', err.message)
+        })
       }
     }
     getUserInfo()
@@ -483,11 +488,11 @@ export default function DashboardPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {testRuns.slice(0, 8).map((run, i) => (
+                  {testRuns.slice(0, 5).map((run, i) => (
                     <tr
                       key={run.id}
                       style={{
-                        borderBottom: i < testRuns.slice(0, 8).length - 1 ? '1px solid var(--border-light)' : 'none',
+                        borderBottom: i < testRuns.slice(0, 5).length - 1 ? '1px solid var(--border-light)' : 'none',
                         cursor: 'pointer',
                       }}
                       onClick={() => window.location.href = `/test/run/${run.id}`}
@@ -529,7 +534,7 @@ export default function DashboardPage() {
             )}
           </div>
 
-          {/* Projects */}
+          {/* Subscription Status */}
           <div>
             <div style={{
               display: 'flex',
@@ -538,28 +543,78 @@ export default function DashboardPage() {
               marginBottom: '1rem',
             }}>
               <h2 style={{ fontSize: '1rem', fontWeight: 600, margin: 0, color: 'var(--text-primary)' }}>
-                Projects
+                Subscription Status
               </h2>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-              {projects.slice(0, 4).map(p => (
-                <ProjectCard
-                  key={p.id}
-                  name={p.name}
-                  id={p.id}
-                  runCount={testRuns.filter(r => r.projectId === p.id).length}
-                />
-              ))}
-              {projects.length === 0 && (
-                <div className="glass-card" style={{
-                  padding: '2rem',
-                  textAlign: 'center',
-                  color: 'var(--text-muted)',
-                }}>
-                  <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>📁</div>
-                  No projects yet
+            <div className="glass-card" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '1rem', borderBottom: '1px solid var(--border-light)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <div style={{
+                    width: '40px',
+                    height: '40px',
+                    borderRadius: '50%',
+                    background: 'var(--bg-tertiary)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '1.2rem'
+                  }}>
+                    💎
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 500 }}>CURRENT PLAN</div>
+                    <div style={{ fontSize: '1rem', fontWeight: 700, textTransform: 'capitalize', color: 'var(--text-primary)' }}>
+                      {currentTier}
+                    </div>
+                  </div>
                 </div>
-              )}
+                {currentTier === 'free' && (
+                  <Link href="/pricing" style={{ fontSize: '0.8rem', color: 'var(--primary)', fontWeight: 600, textDecoration: 'none' }}>
+                    Upgrade
+                  </Link>
+                )}
+              </div>
+
+              {/* Usage Stats */}
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                  <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 500 }}>Monthly Usage</span>
+                  <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                    {usage?.totalTests || 0} <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>/ {usage?.totalTestsLimit || 3} runs</span>
+                  </span>
+                </div>
+                <div style={{ height: '8px', background: 'var(--beige-200)', borderRadius: '4px', overflow: 'hidden' }}>
+                  <div style={{
+                    height: '100%',
+                    width: `${Math.min(100, ((usage?.totalTests || 0) / (usage?.totalTestsLimit || 1)) * 100)}%`,
+                    background: 'linear-gradient(90deg, var(--primary) 0%, var(--maroon-600) 100%)',
+                    borderRadius: '4px',
+                  }} />
+                </div>
+                <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.5rem' }}>
+                  Resets on {new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1).toLocaleDateString()}
+                </p>
+              </div>
+
+              {/* Quick Link */}
+              <Link href="/profile" style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.5rem',
+                padding: '0.75rem',
+                background: 'var(--bg-tertiary)',
+                borderRadius: 'var(--radius-md)',
+                color: 'var(--text-primary)',
+                textDecoration: 'none',
+                fontSize: '0.85rem',
+                fontWeight: 500,
+                transition: 'background 0.2s'
+              }}>
+                <span>⚙️</span> Manage Subscription
+              </Link>
+
             </div>
           </div>
         </div>

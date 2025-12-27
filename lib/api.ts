@@ -843,5 +843,37 @@ export const api = {
   }> {
     return request('/api/fix-prompts/models')
   },
+
+  // Billing & Usage
+  async reconcileSubscription(): Promise<{
+    synced: boolean
+    updated?: boolean
+    previousTier?: string
+    tier: string
+    message?: string
+  }> {
+    return request('/api/billing/reconcile', { method: 'POST' })
+  },
+
+  async checkUsage(): Promise<{
+    canRun: boolean
+    testsUsed: number
+    testsLimit: number
+    testsRemaining: number
+    tier: string
+  }> {
+    return request('/api/billing/usage')
+  },
+
+  async incrementUsage(type: 'test' | 'visual' = 'test'): Promise<{
+    success: boolean
+    newCount: number
+    tier: string
+  }> {
+    return request('/api/billing/usage/increment', {
+      method: 'POST',
+      body: JSON.stringify({ type }),
+    })
+  },
 }
 
