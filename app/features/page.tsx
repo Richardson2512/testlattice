@@ -74,7 +74,7 @@ export default function FeaturesPage() {
                                         flex: 1, height: '26px', background: '#000', borderRadius: '4px', display: 'flex',
                                         alignItems: 'center', justifyContent: 'center', color: '#666', fontSize: '0.8rem', fontFamily: 'monospace'
                                     }}>
-                                        🔒 test-lattice-cloud-runner-v2.us-east-1.internal
+                                        🔒 rihario-cloud-runner-v2.us-east-1.internal
                                     </div>
                                 </div>
                                 {/* Browser Content */}

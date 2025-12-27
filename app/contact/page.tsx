@@ -36,19 +36,19 @@ export default function ContactPage() {
                                 icon="📧"
                                 title="Email Us"
                                 desc="For general inquiries and support."
-                                action="support@Rihario.com"
+                                action="support@rihario.com"
                             />
                             <ContactInfoBlock
                                 icon="💼"
                                 title="Enterprise Sales"
                                 desc="For high-volume custom contracts."
-                                action="sales@Rihario.com"
+                                action="sales@rihario.com"
                             />
                             <ContactInfoBlock
                                 icon="💬"
                                 title="Community"
                                 desc="Join our Discord for real-time help."
-                                action="discord.gg/Rihario"
+                                action="discord.gg/rihario"
                             />
                         </div>
                     </div>
