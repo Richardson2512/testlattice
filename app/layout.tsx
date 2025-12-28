@@ -29,9 +29,9 @@ export const metadata: Metadata = {
     description: 'Stop writing flaky scripts. Start Vibe Testing with autonomous AI agents.',
   },
   icons: {
-    icon: '/image/R-favicon.png',
-    shortcut: '/image/R-favicon.png',
-    apple: '/image/R-favicon.png',
+    icon: '/image/favicon.png',
+    shortcut: '/image/favicon.png',
+    apple: '/image/favicon.png',
   },
   alternates: {
     canonical: 'https://testlattice.vercel.app',
