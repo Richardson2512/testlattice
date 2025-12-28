@@ -75,6 +75,41 @@ export default async function RootLayout({
             }),
           }}
         />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              // Suppress browser extension errors
+              if (typeof window !== 'undefined') {
+                const originalError = console.error;
+                console.error = (...args) => {
+                  // Suppress known extension-related errors
+                  const errorString = args.join(' ');
+                  if (
+                    errorString.includes('message channel closed') ||
+                    errorString.includes('Extension context invalidated') ||
+                    errorString.includes('chrome.runtime')
+                  ) {
+                    // Silently ignore extension errors
+                    return;
+                  }
+                  // Log all other errors normally
+                  originalError.apply(console, args);
+                };
+
+                // Also handle unhandled promise rejections from extensions
+                window.addEventListener('unhandledrejection', (event) => {
+                  const errorString = event.reason?.message || String(event.reason);
+                  if (
+                    errorString.includes('message channel closed') ||
+                    errorString.includes('Extension context invalidated')
+                  ) {
+                    event.preventDefault(); // Suppress the error
+                  }
+                });
+              }
+            `,
+          }}
+        />
         <ErrorBoundary>
           {isAuthenticated && <Navigation />}
           <main
