@@ -14,7 +14,7 @@ interface DeviceAuthFrameProps {
 
 export function DeviceAuthFrame({ children, title, subtitle, showMobile = false }: DeviceAuthFrameProps) {
     const [typedText, setTypedText] = useState('')
-    const fullText = "Vuerifying credentials via automated agent..."
+    const fullText = "Verifying credentials via automated agent..."
 
     useEffect(() => {
         let i = 0
