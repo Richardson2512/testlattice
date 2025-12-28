@@ -21,8 +21,8 @@ export function BehaviorAddOnCard() {
                 position: 'absolute',
                 top: '12px',
                 right: '12px',
-                background: 'var(--maroon-100)',
-                color: 'var(--maroon-900)',
+                background: 'var(--success)',
+                color: 'white',
                 fontSize: '0.65rem',
                 fontWeight: 700,
                 padding: '0.25rem 0.5rem',
@@ -30,7 +30,7 @@ export function BehaviorAddOnCard() {
                 textTransform: 'uppercase',
                 letterSpacing: '0.05em'
             }}>
-                Coming Soon
+                Live
             </div>
 
             <div>
@@ -66,22 +66,23 @@ export function BehaviorAddOnCard() {
             </div>
 
             <button
-                disabled
                 style={{
                     width: '100%',
                     padding: '0.75rem 1.5rem',
                     textAlign: 'center',
-                    background: 'var(--text-muted)', // Disabled look
-                    color: 'var(--text-inverse)',
+                    background: 'var(--maroon-600)',
+                    color: 'white',
                     border: 'none',
                     borderRadius: 'var(--radius-md)',
                     fontWeight: 600,
-                    cursor: 'not-allowed',
-                    opacity: 0.8,
-                    fontSize: '0.875rem'
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    fontSize: '0.875rem',
+                    boxShadow: 'var(--shadow-sm)'
                 }}
+                onClick={() => alert('Behavior Credits Checkout - Coming in next step!')}
             >
-                Available for Indie & Pro
+                Add Credits
             </button>
 
             <p style={{

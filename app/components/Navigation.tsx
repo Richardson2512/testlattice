@@ -41,13 +41,18 @@ export default function Navigation() {
       { id: 'profile', label: 'Profile', href: '/profile', icon: '👤' },
     ]
 
+    // Add behavior reports for Indie/Pro
+    if (['indie', 'pro'].includes(userTier)) {
+      items.push({ id: 'behavior', label: 'Behavior Reports', href: '/dashboard/behavior-reports', icon: '🧠' })
+    }
+
     // Add admin link if user is admin
     if (isAdmin) {
       items.push({ id: 'admin', label: 'Admin', href: '/admin', icon: '🛡️' })
     }
 
     return items
-  }, [isAdmin])
+  }, [isAdmin, userTier])
 
   useEffect(() => {
     const getUser = async () => {
