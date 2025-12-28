@@ -148,7 +148,7 @@ export default function Navigation() {
           alignItems: 'center',
           gap: '0.5rem',
         }}>
-          <Image src="/image/R-logo.png" alt="Rihario Logo" width={24} height={24} style={{ objectFit: 'contain' }} />
+          <Image src="/image/logo.png" alt="Rihario Logo" width={24} height={24} style={{ objectFit: 'contain' }} />
           {!isCollapsed && 'Rihario'}
         </Link>
         {!isCollapsed && (

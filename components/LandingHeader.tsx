@@ -69,7 +69,7 @@ export function LandingHeader() {
       <nav className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '60px' }}>
         {/* Logo */}
         <Link href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <Image src="/image/R-logo.png" alt="Rihario Logo" width={32} height={32} style={{ objectFit: 'contain' }} />
+          <Image src="/image/logo.png" alt="Rihario Logo" width={32} height={32} style={{ objectFit: 'contain' }} />
           <span className="text-gradient" style={{ fontSize: '1.25rem', fontWeight: 700 }}>Rihario</span>
         </Link>
 
