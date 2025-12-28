@@ -6,12 +6,12 @@ import { createPortal } from 'react-dom'
 
 // Test type options
 const TEST_TYPES = [
-    { id: 'visual', label: 'Visual Testing', icon: '👁️', description: 'UI exploration & screenshots' },
-    { id: 'login', label: 'Login Flow', icon: '🔐', description: 'Test login with credentials' },
-    { id: 'signup', label: 'Sign Up Flow', icon: '📝', description: 'Test registration flow' },
-    { id: 'navigation', label: 'Navigation', icon: '🔗', description: 'Test page links & routes' },
-    { id: 'form', label: 'Form Testing', icon: '📋', description: 'Test form inputs & validation' },
-    { id: 'accessibility', label: 'Accessibility', icon: '♿', description: 'Basic a11y audit' },
+    { id: 'visual', label: 'Visual Testing', icon: '👁️', description: 'UI exploration & screenshots', tooltip: 'Detects layout shifts, broken images, and visual regressions across browsers.' },
+    { id: 'login', label: 'Login Flow', icon: '🔐', description: 'Test login with credentials', tooltip: 'Verifies authentication mechanisms including valid/invalid credentials and session handling.' },
+    { id: 'signup', label: 'Sign Up Flow', icon: '📝', description: 'Test registration flow', tooltip: 'Tests the complete registration process, form validation, and successful account creation.' },
+    { id: 'navigation', label: 'Navigation', icon: '🔗', description: 'Test page links & routes', tooltip: 'Crawls internal links to ensure no broken paths and proper routing behavior.' },
+    { id: 'form', label: 'Form Testing', icon: '📋', description: 'Test form inputs & validation', tooltip: 'Validates input fields, error states, and submission handling on contact/data forms.' },
+    { id: 'accessibility', label: 'Accessibility', icon: '♿', description: 'Basic a11y audit', tooltip: 'Checks for WCAG compliance, ARIA attributes, and screen reader compatibility.' },
 ]
 
 interface GuestTestModalProps {
@@ -145,7 +145,7 @@ export function GuestTestModal({ isOpen, onClose }: GuestTestModalProps) {
                     {/* URL Input */}
                     <div style={{ marginBottom: '1.25rem' }}>
                         <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.5rem', color: 'var(--text-primary)' }}>
-                            Target URL
+                            Target URL <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 400, marginLeft: '4px' }}>(URL should start from https)</span>
                         </label>
                         <input
                             type="url"
@@ -177,6 +177,7 @@ export function GuestTestModal({ isOpen, onClose }: GuestTestModalProps) {
                                     type="button"
                                     onClick={() => setTestType(type.id)}
                                     style={{
+                                        position: 'relative',
                                         padding: '0.75rem 0.5rem',
                                         borderRadius: 'var(--radius-md)',
                                         border: testType === type.id ? '2px solid var(--primary)' : '2px solid var(--border-light)',
@@ -186,6 +187,12 @@ export function GuestTestModal({ isOpen, onClose }: GuestTestModalProps) {
                                         transition: 'all 0.15s ease',
                                     }}
                                 >
+                                    <div className="info-icon" style={{ position: 'absolute', top: '4px', right: '4px', fontSize: '0.85rem', color: 'var(--text-muted)', zIndex: 5 }} onClick={(e) => e.stopPropagation()}>
+                                        ⓘ
+                                        <div className="tooltip">
+                                            {type.tooltip}
+                                        </div>
+                                    </div>
                                     <div style={{ fontSize: '1.5rem', marginBottom: '0.25rem' }}>{type.icon}</div>
                                     <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-primary)' }}>{type.label}</div>
                                 </button>
@@ -291,6 +298,45 @@ export function GuestTestModal({ isOpen, onClose }: GuestTestModalProps) {
                 <style jsx>{`
                     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
                     @keyframes scaleIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+                    
+                    .tooltip {
+                        position: absolute;
+                        bottom: 100%;
+                        left: 50%;
+                        transform: translateX(-50%) translateY(-8px);
+                        background: #333;
+                        color: white;
+                        padding: 0.5rem 0.75rem;
+                        border-radius: 4px;
+                        font-size: 0.7rem;
+                        line-height: 1.4;
+                        width: 180px;
+                        visibility: hidden;
+                        opacity: 0;
+                        transition: all 0.2s ease;
+                        pointer-events: none;
+                        z-index: 20;
+                        font-weight: 400;
+                        text-align: center;
+                        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+                    }
+                    
+                    .tooltip::after {
+                        content: '';
+                        position: absolute;
+                        top: 100%;
+                        left: 50%;
+                        margin-left: -5px;
+                        border-width: 5px;
+                        border-style: solid;
+                        border-color: #333 transparent transparent transparent;
+                    }
+
+                    .info-icon:hover .tooltip {
+                        visibility: visible;
+                        opacity: 1;
+                        transform: translateX(-50%) translateY(-5px);
+                    }
                 `}</style>
             </div>
         </div>,
