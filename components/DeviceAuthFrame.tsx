@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { theme } from '@/lib/theme'
 
 interface DeviceAuthFrameProps {
@@ -57,9 +58,7 @@ export function DeviceAuthFrame({ children, title, subtitle, showMobile = false 
                     boxShadow: theme.shadows.sm,
                     border: `1px solid ${theme.border.subtle}`
                 }}>
-                    <div style={{ width: '2rem', height: '2rem', background: `linear-gradient(135deg, ${theme.accent.primary} 0%, ${theme.accent.primaryDark} 100%)`, borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '1.2rem' }}>
-                        RH
-                    </div>
+                    <Image src="/image/logo.png" alt="Rihario Logo" width={32} height={32} style={{ objectFit: 'contain' }} />
                     Rihario
                 </Link>
             </div>
