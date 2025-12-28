@@ -104,15 +104,13 @@ export function GuestTestModal({ isOpen, onClose }: GuestTestModalProps) {
             <div
                 style={{
                     width: '100%',
-                    maxWidth: '560px',
+                    maxWidth: '800px',
                     background: 'var(--bg-card)',
                     borderRadius: 'var(--radius-lg)',
-                    padding: '2rem',
+                    padding: '3rem',
                     position: 'relative',
                     boxShadow: 'var(--shadow-lg)',
                     animation: 'scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-                    maxHeight: '90vh',
-                    overflowY: 'auto',
                 }}
                 onClick={(e) => e.stopPropagation()}
             >
@@ -170,7 +168,7 @@ export function GuestTestModal({ isOpen, onClose }: GuestTestModalProps) {
                         <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.75rem', color: 'var(--text-primary)' }}>
                             Test Type
                         </label>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem' }}>
                             {TEST_TYPES.map((type) => (
                                 <button
                                     key={type.id}
