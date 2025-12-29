@@ -12,6 +12,7 @@ const TEST_TYPES = [
     { id: 'navigation', label: 'Navigation', icon: '🔗', description: 'Test page links & routes', tooltip: 'Crawls internal links to ensure no broken paths and proper routing behavior.' },
     { id: 'form', label: 'Form Testing', icon: '📋', description: 'Test form inputs & validation', tooltip: 'Validates input fields, error states, and submission handling on contact/data forms.' },
     { id: 'accessibility', label: 'Accessibility', icon: '♿', description: 'Basic a11y audit', tooltip: 'Checks for WCAG compliance, ARIA attributes, and screen reader compatibility.' },
+    { id: 'rage_bait', label: 'Rage Bait', icon: '🔥', description: 'Edge case stress tests', tooltip: 'Tests 5 common MVP-breaking scenarios: Back button, session timeout, Enter key, special chars, and input overflow.' },
 ]
 
 interface GuestTestModalProps {

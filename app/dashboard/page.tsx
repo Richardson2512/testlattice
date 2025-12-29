@@ -108,12 +108,15 @@ export default function DashboardPage() {
 
   // Create Test State
   const [testMode, setTestMode] = useState<TestMode>('single')
+  const [selectedTestTypes, setSelectedTestTypes] = useState<Set<string>>(new Set()) // Multi-select: visual, login, signup, navigation, form, accessibility, rage_bait
   const [singlePageUrl, setSinglePageUrl] = useState('')
   const [multiPageUrls, setMultiPageUrls] = useState<string[]>([''])
   const [extraInstructions, setExtraInstructions] = useState('')
   const [device, setDevice] = useState('chrome-latest')
   const [browserMatrix, setBrowserMatrix] = useState<Array<'chromium' | 'firefox' | 'webkit'>>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [loginUsername, setLoginUsername] = useState('')
+  const [loginPassword, setLoginPassword] = useState('')
 
   // Use optimized data fetching hook with caching and auto-refresh
   const {
@@ -259,6 +262,12 @@ export default function DashboardPage() {
           testMode: testMode,
           browserMatrix: browserMatrix.length > 0 ? browserMatrix : undefined,
           approvalPolicy: { mode: 'manual' },
+          // Selected test types for registered users (multi-select)
+          selectedTestTypes: selectedTestTypes.size > 0 ? Array.from(selectedTestTypes) : undefined,
+          // Credentials for login/signup tests
+          guestCredentials: (selectedTestTypes.has('login') || selectedTestTypes.has('signup')) && loginUsername
+            ? { email: loginUsername, password: loginPassword }
+            : undefined,
         },
       })
 
@@ -904,6 +913,131 @@ export default function DashboardPage() {
                   </div>
                 )}
               </div>
+
+              {/* Test Type Selector */}
+              <div>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', fontWeight: 500, color: 'var(--text-secondary)' }}>
+                  Test Types <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>(select one or more)</span>
+                </label>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.5rem' }}>
+                  {[
+                    { id: 'visual', label: 'Visual', icon: '👁️', desc: 'UI & screenshots' },
+                    { id: 'login', label: 'Login', icon: '🔐', desc: 'Auth testing' },
+                    { id: 'signup', label: 'Sign Up', icon: '📝', desc: 'Registration' },
+                    { id: 'form', label: 'Form', icon: '📋', desc: 'Input validation' },
+                    { id: 'navigation', label: 'Navigation', icon: '🔗', desc: 'Link testing' },
+                    { id: 'accessibility', label: 'A11y', icon: '♿', desc: 'WCAG audit' },
+                    { id: 'rage_bait', label: 'Rage Bait', icon: '🔥', desc: 'Edge cases' },
+                  ].map((type) => {
+                    const isSelected = selectedTestTypes.has(type.id)
+                    return (
+                      <button
+                        key={type.id}
+                        type="button"
+                        onClick={() => {
+                          const newSet = new Set(selectedTestTypes)
+                          if (newSet.has(type.id)) {
+                            newSet.delete(type.id)
+                          } else {
+                            newSet.add(type.id)
+                          }
+                          setSelectedTestTypes(newSet)
+                        }}
+                        style={{
+                          padding: '0.5rem',
+                          background: isSelected ? 'rgba(92, 15, 15, 0.08)' : 'var(--bg-primary)',
+                          border: `2px solid ${isSelected ? 'var(--primary)' : 'var(--border-medium)'}`,
+                          borderRadius: 'var(--radius-md)',
+                          cursor: 'pointer',
+                          textAlign: 'center',
+                          fontSize: '0.75rem',
+                          fontWeight: isSelected ? 600 : 400,
+                          color: isSelected ? 'var(--primary)' : 'var(--text-secondary)',
+                          position: 'relative',
+                        }}
+                      >
+                        {isSelected && (
+                          <div style={{
+                            position: 'absolute',
+                            top: '-4px',
+                            right: '-4px',
+                            width: '16px',
+                            height: '16px',
+                            background: 'var(--primary)',
+                            borderRadius: '50%',
+                            color: 'white',
+                            fontSize: '10px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}>✓</div>
+                        )}
+                        <div style={{ fontSize: '1.25rem' }}>{type.icon}</div>
+                        <div style={{ fontWeight: 600 }}>{type.label}</div>
+                      </button>
+                    )
+                  })}
+                </div>
+                {selectedTestTypes.size > 0 && (
+                  <div style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                    Selected: {Array.from(selectedTestTypes).join(', ')}
+                  </div>
+                )}
+              </div>
+
+              {/* Login/Signup Credentials (when login or signup selected) */}
+              {(selectedTestTypes.has('login') || selectedTestTypes.has('signup')) && (
+                <div style={{
+                  padding: '1rem',
+                  background: 'rgba(217, 119, 6, 0.05)',
+                  border: '1px solid rgba(217, 119, 6, 0.2)',
+                  borderRadius: 'var(--radius-md)'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem', color: 'var(--warning)', fontSize: '0.8rem' }}>
+                    <span>⚠️</span> <strong>Demo credentials only!</strong> Do not enter real passwords.
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 500, marginBottom: '0.375rem', color: 'var(--text-secondary)' }}>
+                        Email / Username
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="demo@example.com"
+                        value={loginUsername}
+                        onChange={e => setLoginUsername(e.target.value)}
+                        style={{
+                          width: '100%',
+                          padding: '0.6rem',
+                          fontSize: '0.85rem',
+                          borderRadius: 'var(--radius-sm)',
+                          border: '1px solid var(--border-medium)',
+                          background: 'var(--bg-primary)',
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 500, marginBottom: '0.375rem', color: 'var(--text-secondary)' }}>
+                        Password
+                      </label>
+                      <input
+                        type="password"
+                        placeholder="••••••••"
+                        value={loginPassword}
+                        onChange={e => setLoginPassword(e.target.value)}
+                        style={{
+                          width: '100%',
+                          padding: '0.6rem',
+                          fontSize: '0.85rem',
+                          borderRadius: 'var(--radius-sm)',
+                          border: '1px solid var(--border-medium)',
+                          background: 'var(--bg-primary)',
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Configuration */}
               <div style={{ borderTop: '1px solid var(--border-light)', paddingTop: '1.5rem' }}>

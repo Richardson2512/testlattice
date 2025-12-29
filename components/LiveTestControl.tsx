@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useRef } from 'react'
+import { VerificationInputModal } from './VerificationInputModal'
 
 interface LiveTestControlProps {
   testRunId: string
@@ -28,6 +29,7 @@ interface PageState {
  * - Clickable element overlay
  * - Manual action injection
  * - Test pause/resume control
+ * - Verification input modal (email link / OTP)
  */
 export function LiveTestControl({ testRunId, onClose }: LiveTestControlProps) {
   const [connected, setConnected] = useState(false)
@@ -42,6 +44,11 @@ export function LiveTestControl({ testRunId, onClose }: LiveTestControlProps) {
   const [livePreviewUrl, setLivePreviewUrl] = useState<string | null>(null)
   const wsRef = useRef<WebSocket | null>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
+
+  // Verification input state
+  const [verificationRequired, setVerificationRequired] = useState(false)
+  const [verificationType, setVerificationType] = useState<'email' | 'magic_link' | 'otp' | 'sms'>('email')
+  const [verificationTimeoutMs, setVerificationTimeoutMs] = useState(120000)
 
   // WebSocket connection with reconnection logic
   useEffect(() => {
@@ -245,6 +252,18 @@ export function LiveTestControl({ testRunId, onClose }: LiveTestControlProps) {
           setStuckMessage('')
         }
         break
+      case 'verification_required':
+        // Handle verification required for signup flows
+        console.log('[LiveTestControl] Verification required:', message.context)
+        setVerificationRequired(true)
+        setVerificationType(message.context.verificationType || 'email')
+        setVerificationTimeoutMs(message.context.timeoutMs || 120000)
+        break
+      case 'verification_input_received':
+        // Close verification modal
+        console.log('[LiveTestControl] Verification input received')
+        setVerificationRequired(false)
+        break
       case 'pong':
         // Keep-alive response
         break
@@ -403,6 +422,23 @@ export function LiveTestControl({ testRunId, onClose }: LiveTestControlProps) {
       }
       setInjecting(false)
     }
+  }
+
+  // Handle verification input submission (email link or OTP)
+  const handleVerificationSubmit = async (inputType: 'link' | 'otp', value: string) => {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
+    const response = await fetch(`${apiUrl}/api/tests/${testRunId}/verification-input`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ inputType, value }),
+    })
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ error: 'Failed to submit' }))
+      throw new Error(error.error || 'Failed to submit verification')
+    }
+
+    setVerificationRequired(false)
   }
 
   const handlePauseResume = () => {
@@ -689,6 +725,14 @@ export function LiveTestControl({ testRunId, onClose }: LiveTestControlProps) {
           </div>
         </div>
       </div>
+
+      {/* Verification Input Modal */}
+      <VerificationInputModal
+        isOpen={verificationRequired}
+        verificationType={verificationType}
+        timeoutMs={verificationTimeoutMs}
+        onSubmit={handleVerificationSubmit}
+      />
     </div>
   )
 }

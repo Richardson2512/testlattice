@@ -238,10 +238,13 @@ export interface TestOptions {
   }
   environment?: TestEnvironment
   approvalPolicy?: ApprovalPolicy
-  // Guest test options
+  // Registered user test options (multi-select test types)
+  selectedTestTypes?: string[]  // Array of selected test types: visual, login, signup, navigation, form, accessibility, rage_bait
+  // Guest test options (single test type - SEPARATE FLOW)
   isGuestRun?: boolean
   guestSessionId?: string
   guestTestType?: string
+  guestCredentials?: { email?: string; username?: string; password?: string }
   userTier?: string
 }
 

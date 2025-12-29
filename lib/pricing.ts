@@ -159,7 +159,7 @@ export const PRICING_TIERS: Record<PricingTier, PricingTierInfo> = {
     priceLabel: '$99',
     description: 'For power users and advanced workflows',
     limits: {
-      totalTestsPerMonth: 1000,
+      totalTestsPerMonth: 750,
       maxVisualTests: 250,
       browsers: ['chromium', 'firefox', 'webkit'],
       mobileSupported: true,
@@ -175,7 +175,7 @@ export const PRICING_TIERS: Record<PricingTier, PricingTierInfo> = {
       teamMembers: 1,
     },
     features: [
-      '1,000 tests / month',
+      '750 tests / month',
       'Max 250 Visual Tests',
       'Unlimited projects',
       'Advanced API Access',

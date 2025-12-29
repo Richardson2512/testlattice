@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { api, TestRun } from '../../../../lib/api'
 import LiveStreamPlayer from '../../../../components/LiveStreamPlayer'
+import { VerificationInputModal } from '../../../../components/VerificationInputModal'
 
 // --- ICONS ---
 const Icons = {
@@ -22,6 +23,7 @@ const StepIcons = {
     Check: () => <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#22c55e"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>,
     Error: () => <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#ef4444"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>,
     Chevron: () => <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" opacity="0.4"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>,
+    Verification: () => <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#f59e0b"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>,
 }
 
 // --- STEP LOG COMPONENT (Antigravity Style) ---
@@ -33,8 +35,11 @@ const StepLog = ({ steps, status }: { steps: any[], status?: string }) => {
         if (step.action === 'click') return <StepIcons.Click />
         if (step.action === 'type') return <StepIcons.Type />
         if (step.action === 'wait') return <StepIcons.Wait />
+        if (step.action === 'wait_verification') return <StepIcons.Verification />
         if (step.action === 'preflight') return <StepIcons.Check />
         if (step.action === 'error') return <StepIcons.Error />
+        if (step.action === 'rage_bait_test') return step.success ? <StepIcons.Check /> : <StepIcons.Error />
+        if (step.action === 'summary') return <StepIcons.Thought />
         return <StepIcons.Thought />
     }
 
@@ -53,6 +58,15 @@ const StepLog = ({ steps, status }: { steps: any[], status?: string }) => {
         }
         if (step.action === 'wait') {
             return `Wait for ${step.value || '1'}s`
+        }
+        if (step.action === 'wait_verification') {
+            return step.target || 'Waiting for verification...'
+        }
+        if (step.action === 'rage_bait_test') {
+            return `🔥 ${step.target}`
+        }
+        if (step.action === 'summary') {
+            return `📊 ${step.target}`
         }
         return step.description || step.action
     }
@@ -157,6 +171,11 @@ export default function GuestTestRunPage() {
     const wsRef = useRef<WebSocket | null>(null)
     const [lastFrame, setLastFrame] = useState<string | undefined>(undefined)
 
+    // Verification input state
+    const [verificationRequired, setVerificationRequired] = useState(false)
+    const [verificationType, setVerificationType] = useState<'email' | 'magic_link' | 'otp' | 'sms'>('email')
+    const [verificationTimeoutMs, setVerificationTimeoutMs] = useState(120000)
+
     // Polling & Data Load
     useEffect(() => {
         loadData()
@@ -195,6 +214,23 @@ export default function GuestTestRunPage() {
         }
     }
 
+    // Handle verification input submission
+    async function handleVerificationSubmit(inputType: 'link' | 'otp', value: string) {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
+        const response = await fetch(`${apiUrl}/api/tests/${testId}/verification-input`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ inputType, value }),
+        })
+
+        if (!response.ok) {
+            const error = await response.json().catch(() => ({ error: 'Failed to submit' }))
+            throw new Error(error.error || 'Failed to submit verification')
+        }
+
+        setVerificationRequired(false)
+    }
+
     // WebSocket
     useEffect(() => {
         if (!testRun || testRun.status !== 'running') return
@@ -211,6 +247,18 @@ export default function GuestTestRunPage() {
                 }
                 if (msg.type === 'test_step' && msg.step) {
                     setTestRun(prev => prev ? ({ ...prev, steps: [...(prev.steps || []), msg.step] }) : null)
+                }
+                // Handle verification required event
+                if (msg.type === 'verification_required') {
+                    console.log('[Guest Test] Verification required:', msg.context)
+                    setVerificationType(msg.context.verificationType || 'email')
+                    setVerificationTimeoutMs(msg.context.timeoutMs || 120000)
+                    setVerificationRequired(true)
+                }
+                // Handle verification input received (close modal)
+                if (msg.type === 'verification_input_received') {
+                    console.log('[Guest Test] Verification input received')
+                    setVerificationRequired(false)
                 }
             } catch (e) {
                 console.error('WS Parse Error', e)
@@ -466,6 +514,14 @@ export default function GuestTestRunPage() {
                     to { transform: rotate(360deg); }
                 }
             `}</style>
+
+            {/* Verification Input Modal */}
+            <VerificationInputModal
+                isOpen={verificationRequired}
+                verificationType={verificationType}
+                timeoutMs={verificationTimeoutMs}
+                onSubmit={handleVerificationSubmit}
+            />
         </div>
     )
 }
