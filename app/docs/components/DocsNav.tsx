@@ -90,6 +90,7 @@ export function DocsNav() {
     {
       title: 'Resources',
       items: [
+        { href: '/docs/rage-bait-test', label: 'Rage Bait Test: Stress-Test Your Forms' },
         { href: '/docs/behavior-analysis', label: 'Behavior Analysis Testing' },
       ]
     },
