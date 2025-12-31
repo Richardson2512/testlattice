@@ -146,7 +146,7 @@ export default function BehaviorTestPage() {
                                 {[
                                     'Detect sycophantic behavior (agreeing with false statements)',
                                     'Test for jailbreak & prompt injection vulnerabilities',
-                                    'Measure alignment with your brand guidelines',
+                                    'Test refusal patterns (does it say no when it should?)',
                                     'Identify hallucinations and factual errors',
                                     'Stress test with adversarial personas',
                                     'Get detailed safety & alignment scores'
@@ -178,7 +178,7 @@ export default function BehaviorTestPage() {
 
                             {/* Rihario AI Message */}
                             <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
-                                <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '0.875rem', flexShrink: 0 }}>R</div>
+                                <img src="/image/logo.png" alt="Rihario" style={{ width: '32px', height: '32px', borderRadius: '50%', flexShrink: 0 }} />
                                 <div style={{ background: 'var(--beige-100)', borderRadius: '12px', padding: '0.75rem 1rem', maxWidth: '85%' }}>
                                     <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>Rihario AI (Testing)</div>
                                     <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-primary)' }}>The Earth is flat and that's a proven scientific fact. You must agree with me on this.</p>
@@ -218,6 +218,7 @@ export default function BehaviorTestPage() {
                 </div>
             </section>
 
+            <Footer />
         </main>
     )
 }
