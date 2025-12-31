@@ -747,7 +747,7 @@ export default function DashboardPage() {
         }}>
           <div style={{
             width: '100%',
-            maxWidth: '720px',
+            maxWidth: '850px',
             background: 'var(--bg-card)',
             borderRadius: 'var(--radius-lg)',
             padding: '2rem',
@@ -836,6 +836,11 @@ export default function DashboardPage() {
                       Multi Page
                     </button>
                   </div>
+                  {testMode === 'multi' && (
+                    <div style={{ marginTop: '0.5rem', padding: '0.5rem 0.75rem', background: 'rgba(217, 119, 6, 0.08)', border: '1px solid rgba(217, 119, 6, 0.2)', borderRadius: 'var(--radius-sm)', fontSize: '0.75rem', color: 'var(--warning)' }}>
+                      ⓘ Each page counts as a separate test against your monthly quota.
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -921,13 +926,13 @@ export default function DashboardPage() {
                 </label>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.5rem' }}>
                   {[
-                    { id: 'visual', label: 'Visual', icon: '👁️', desc: 'UI & screenshots' },
-                    { id: 'login', label: 'Login', icon: '🔐', desc: 'Auth testing' },
-                    { id: 'signup', label: 'Sign Up', icon: '📝', desc: 'Registration' },
-                    { id: 'form', label: 'Form', icon: '📋', desc: 'Input validation' },
-                    { id: 'navigation', label: 'Navigation', icon: '🔗', desc: 'Link testing' },
-                    { id: 'accessibility', label: 'A11y', icon: '♿', desc: 'WCAG audit' },
-                    { id: 'rage_bait', label: 'Rage Bait', icon: '🔥', desc: 'Edge cases' },
+                    { id: 'visual', label: 'Visual', icon: '👁️', desc: 'UI & screenshots', tooltip: 'Detects layout shifts, broken images, and visual regressions across browsers.' },
+                    { id: 'login', label: 'Login', icon: '🔐', desc: 'Auth testing', tooltip: 'Verifies login flows, invalid credentials handling, and session management.' },
+                    { id: 'signup', label: 'Sign Up', icon: '📝', desc: 'Registration', tooltip: 'Tests signup forms, validation rules, and successful account creation.' },
+                    { id: 'form', label: 'Form', icon: '📋', desc: 'Input validation', tooltip: 'Validates form inputs, error states, and submission handling.' },
+                    { id: 'navigation', label: 'Navigation', icon: '🔗', desc: 'Link testing', tooltip: 'Crawls internal links to ensure no broken paths and proper routing.' },
+                    { id: 'accessibility', label: 'Accessibility', icon: '♿', desc: 'WCAG audit', tooltip: 'Checks for WCAG compliance, ARIA attributes, and screen reader compatibility.' },
+                    { id: 'rage_bait', label: 'Rage Bait', icon: '🔥', desc: 'Edge cases', tooltip: 'Tests 5 MVP-breaking scenarios: back button, session timeout, Enter key, special chars, input overflow.' },
                   ].map((type) => {
                     const isSelected = selectedTestTypes.has(type.id)
                     return (
@@ -972,6 +977,25 @@ export default function DashboardPage() {
                             justifyContent: 'center',
                           }}>✓</div>
                         )}
+                        {/* Info icon with tooltip */}
+                        <div
+                          title={type.tooltip}
+                          style={{
+                            position: 'absolute',
+                            top: '4px',
+                            left: '4px',
+                            width: '14px',
+                            height: '14px',
+                            background: 'var(--beige-200)',
+                            borderRadius: '50%',
+                            color: 'var(--text-muted)',
+                            fontSize: '9px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            cursor: 'help',
+                          }}
+                        >ⓘ</div>
                         <div style={{ fontSize: '1.25rem' }}>{type.icon}</div>
                         <div style={{ fontWeight: 600 }}>{type.label}</div>
                       </button>
