@@ -128,7 +128,7 @@ export default async function Home() {
 
       {/* Replaced Final CTA with Test Once Section */}
       <section style={{
-        padding: '8rem 0',
+        padding: '4rem 0 8rem',
         background: 'linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 100%)',
         position: 'relative',
         overflow: 'hidden'
@@ -161,16 +161,24 @@ export default async function Home() {
               maxWidth: '600px',
               margin: '0 auto 4rem'
             }}>
-              {['Chrome', 'Firefox', 'Safari'].map((browser) => (
-                <div key={browser} className="glass-card" style={{
+              {[
+                { name: 'Chrome', icon: '/browsers/chrome.svg' },
+                { name: 'Firefox', icon: '/browsers/firefox.svg' },
+                { name: 'Safari', icon: '/browsers/safari.svg' }
+              ].map((browser) => (
+                <div key={browser.name} className="glass-card" style={{
                   padding: '1.5rem',
                   background: 'var(--bg-card)',
                   border: '1px solid var(--border-light)',
                   borderRadius: 'var(--radius-lg)',
                   textAlign: 'center'
                 }}>
-                  <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>🌐</div>
-                  <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{browser}</div>
+                  <img
+                    src={browser.icon}
+                    alt={browser.name}
+                    style={{ width: '48px', height: '48px', marginBottom: '0.75rem' }}
+                  />
+                  <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{browser.name}</div>
                 </div>
               ))}
             </div>
