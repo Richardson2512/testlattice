@@ -52,6 +52,16 @@ export default function RunsPage() {
         }
     }
 
+    const handleCancelRun = async (runId: string) => {
+        if (!confirm('Are you sure you want to cancel this test run?')) return
+        try {
+            await api.cancelTestRun(runId)
+            refetch()
+        } catch (error: any) {
+            alert(`Failed to cancel run: ${error.message}`)
+        }
+    }
+
     const getStatusColor = (status: string) => {
         switch (status) {
             case 'completed': return 'var(--success)'
@@ -184,7 +194,22 @@ export default function RunsPage() {
                                             </td>
                                             <td style={{ padding: '1rem 1.5rem', textAlign: 'right', verticalAlign: 'middle' }}>
                                                 <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
-                                                    {expired ? (
+                                                    {['running', 'queued', 'pending', 'diagnosing'].includes(run.status) ? (
+                                                        <button
+                                                            onClick={() => handleCancelRun(run.id)}
+                                                            className="btn"
+                                                            style={{
+                                                                padding: '0.4rem 0.8rem',
+                                                                fontSize: '0.8rem',
+                                                                background: 'var(--error)',
+                                                                color: 'white',
+                                                                border: 'none'
+                                                            }}
+                                                            title="Cancel Test Run"
+                                                        >
+                                                            ⏹ Cancel
+                                                        </button>
+                                                    ) : expired ? (
                                                         <span style={{
                                                             fontSize: '0.8rem',
                                                             color: 'var(--text-muted)',

@@ -90,7 +90,7 @@ export default function TestRunPage() {
       if (testRun?.status === 'running' || testRun?.status === 'queued' || testRun?.status === 'diagnosing') {
         loadData()
       }
-    }, 1000)
+    }, 5000)
     return () => clearInterval(interval)
   }, [testId, testRun?.status])
 
@@ -114,6 +114,7 @@ export default function TestRunPage() {
 
   // Handlers
   const handleStop = async () => { if (confirm('Stop this test run?')) { await api.stopTestRun(testId); loadData(); } }
+  const handleCancel = async () => { if (confirm('Cancel this test run?')) { await api.cancelTestRun(testId); loadData(); } }
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -201,26 +202,45 @@ export default function TestRunPage() {
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           {testRun?.status === 'running' && (
-            <>
-              <button
-                onClick={handleStop}
-                style={{
-                  background: 'var(--error)',
-                  border: 'none',
-                  padding: '6px 14px',
-                  borderRadius: 'var(--radius-md)',
-                  color: 'white',
-                  cursor: 'pointer',
-                  fontSize: '0.8rem',
-                  fontWeight: 600,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                }}
-              >
-                <Icons.Stop /> Stop Test
-              </button>
-            </>
+            <button
+              onClick={handleStop}
+              style={{
+                background: 'var(--error)',
+                border: 'none',
+                padding: '6px 14px',
+                borderRadius: 'var(--radius-md)',
+                color: 'white',
+                cursor: 'pointer',
+                fontSize: '0.8rem',
+                fontWeight: 600,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+              }}
+            >
+              <Icons.Stop /> Stop Test
+            </button>
+          )}
+
+          {['queued', 'pending', 'diagnosing'].includes(testRun?.status || '') && (
+            <button
+              onClick={handleCancel}
+              style={{
+                background: 'var(--warning)',
+                border: 'none',
+                padding: '6px 14px',
+                borderRadius: 'var(--radius-md)',
+                color: 'white',
+                cursor: 'pointer',
+                fontSize: '0.8rem',
+                fontWeight: 600,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+              }}
+            >
+              <Icons.Stop /> Cancel Test
+            </button>
           )}
         </div>
       </header>

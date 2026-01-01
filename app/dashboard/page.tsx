@@ -331,6 +331,19 @@ export default function DashboardPage() {
     ? Math.round(testRuns.filter(r => r.duration).reduce((acc, r) => acc + (r.duration || 0), 0) / testRuns.filter(r => r.duration).length / 1000)
     : 0
 
+  async function handleCancelRun(e: React.MouseEvent, runId: string) {
+    e.stopPropagation()
+    if (!confirm('Are you sure you want to cancel this test run?')) return
+    
+    try {
+      // Optimistic update could go here, but refetch is safer for consistency
+      await api.cancelTestRun(runId)
+      loadData() // Trigger refetch to update UI
+    } catch (error: any) {
+      alert(`Failed to cancel run: ${error.message}`)
+    }
+  }
+
   return (
     <div style={{
       minHeight: '100vh',
@@ -494,6 +507,7 @@ export default function DashboardPage() {
                     <th style={{ padding: '0.75rem 1.25rem', textAlign: 'left', fontWeight: 600, color: 'var(--text-secondary)', fontSize: '0.75rem', textTransform: 'uppercase' }}>Project</th>
                     <th style={{ padding: '0.75rem 1.25rem', textAlign: 'left', fontWeight: 600, color: 'var(--text-secondary)', fontSize: '0.75rem', textTransform: 'uppercase' }}>URL</th>
                     <th style={{ padding: '0.75rem 1.25rem', textAlign: 'right', fontWeight: 600, color: 'var(--text-secondary)', fontSize: '0.75rem', textTransform: 'uppercase' }}>Date</th>
+                    <th style={{ padding: '0.75rem 1.25rem', width: '80px' }}></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -535,6 +549,35 @@ export default function DashboardPage() {
                       </td>
                       <td style={{ padding: '0.75rem 1.25rem', textAlign: 'right', color: 'var(--text-muted)' }}>
                         {new Date(run.createdAt).toLocaleDateString()}
+                      </td>
+                      <td style={{ padding: '0.75rem 1.25rem', textAlign: 'right' }}>
+                        {['running', 'queued', 'pending', 'diagnosing'].includes(run.status) && (
+                          <button
+                            onClick={(e) => handleCancelRun(e, run.id)}
+                            style={{
+                              padding: '4px 8px',
+                              background: 'rgba(239, 68, 68, 0.1)',
+                              color: 'var(--error)',
+                              border: '1px solid rgba(239, 68, 68, 0.2)',
+                              borderRadius: '4px',
+                              fontSize: '0.7rem',
+                              fontWeight: 600,
+                              cursor: 'pointer',
+                              whiteSpace: 'nowrap',
+                              transition: 'all 0.2s',
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.background = 'var(--error)';
+                              e.currentTarget.style.color = 'white';
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)';
+                              e.currentTarget.style.color = 'var(--error)';
+                            }}
+                          >
+                            Cancel
+                          </button>
+                        )}
                       </td>
                     </tr>
                   ))}

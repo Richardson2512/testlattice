@@ -1,11 +1,13 @@
 'use client'
 
-import React, { useEffect, useState, useRef } from 'react'
+import React from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import { api, TestRun } from '../../../../lib/api'
 import LiveStreamPlayer from '../../../../components/LiveStreamPlayer'
 import { VerificationInputModal } from '../../../../components/VerificationInputModal'
+import { SignupPromptModal } from '../../../../components/SignupPromptModal'
+import { StepLog } from '../../../../components/StepLog'
+import { useGuestTestRun } from '../../../../lib/hooks/useGuestTestRun'
 
 // --- ICONS ---
 const Icons = {
@@ -13,261 +15,19 @@ const Icons = {
     Globe: () => <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" /></svg>,
 }
 
-// --- ICONS ---
-const StepIcons = {
-    Thought: () => <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" opacity="0.6"><circle cx="12" cy="12" r="10" strokeWidth={2} /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 16v-4m0-4h.01" /></svg>,
-    Browser: () => <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2" strokeWidth={2} /><path strokeWidth={2} d="M3 9h18" /></svg>,
-    Click: () => <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" /></svg>,
-    Type: () => <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>,
-    Wait: () => <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="10" strokeWidth={2} /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6l4 2" /></svg>,
-    Check: () => <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#22c55e"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>,
-    Error: () => <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#ef4444"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>,
-    Chevron: () => <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" opacity="0.4"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>,
-    Verification: () => <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#f59e0b"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>,
-}
-
-// --- STEP LOG COMPONENT (Antigravity Style) ---
-const StepLog = ({ steps, status }: { steps: any[], status?: string }) => {
-    const isRunning = status === 'RUNNING' || status === 'PENDING'
-
-    const getStepIcon = (step: any) => {
-        if (step.action === 'navigate') return <StepIcons.Browser />
-        if (step.action === 'click') return <StepIcons.Click />
-        if (step.action === 'type') return <StepIcons.Type />
-        if (step.action === 'wait') return <StepIcons.Wait />
-        if (step.action === 'wait_verification') return <StepIcons.Verification />
-        if (step.action === 'preflight') return <StepIcons.Check />
-        if (step.action === 'error') return <StepIcons.Error />
-        if (step.action === 'rage_bait_test') return step.success ? <StepIcons.Check /> : <StepIcons.Error />
-        if (step.action === 'summary') return <StepIcons.Thought />
-        return <StepIcons.Thought />
-    }
-
-    const getStepDescription = (step: any) => {
-        if (step.action === 'navigate') {
-            return `Opened URL in Browser`
-        }
-        if (step.action === 'click') {
-            return `Clicking ${step.target || step.selector || 'element'}`
-        }
-        if (step.action === 'type') {
-            return `Typed '${step.value || '...'}' in Browser`
-        }
-        if (step.action === 'preflight') {
-            return 'Running preflight checks (cookies, popups)'
-        }
-        if (step.action === 'wait') {
-            return `Wait for ${step.value || '1'}s`
-        }
-        if (step.action === 'wait_verification') {
-            return step.target || 'Waiting for verification...'
-        }
-        if (step.action === 'rage_bait_test') {
-            return `🔥 ${step.target}`
-        }
-        if (step.action === 'summary') {
-            return `📊 ${step.target}`
-        }
-        return step.description || step.action
-    }
-
-    const getSubtitle = (step: any) => {
-        if (step.action === 'navigate' && step.value) {
-            return step.value
-        }
-        if (step.selector) {
-            return step.selector
-        }
-        return null
-    }
-
-    const getDuration = (step: any, index: number, allSteps: any[]) => {
-        if (index === 0) return null
-        const prevStep = allSteps[index - 1]
-        if (prevStep?.timestamp && step?.timestamp) {
-            const diff = new Date(step.timestamp).getTime() - new Date(prevStep.timestamp).getTime()
-            const seconds = Math.round(diff / 1000)
-            return seconds < 1 ? '<1s' : `${seconds}s`
-        }
-        return '<1s'
-    }
-
-    return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
-            {steps.map((step, i) => (
-                <React.Fragment key={i}>
-                    {/* Thought indicator (timing between steps) */}
-                    {i > 0 && (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '4px 8px', color: 'var(--text-muted)', fontSize: '12px' }}>
-                            <StepIcons.Chevron />
-                            <StepIcons.Thought />
-                            <span>Thought for {getDuration(step, i, steps)}</span>
-                        </div>
-                    )}
-
-                    {/* Main Step Entry */}
-                    <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                        padding: '8px',
-                        borderRadius: '6px',
-                        background: step.success === false ? 'rgba(239, 68, 68, 0.1)' : 'transparent',
-                        color: step.success === false ? '#ef4444' : 'var(--text-primary)',
-                    }}>
-                        <StepIcons.Chevron />
-                        {getStepIcon(step)}
-                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                            <span style={{ fontSize: '13px', fontWeight: 500 }}>{getStepDescription(step)}</span>
-                            {getSubtitle(step) && (
-                                <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontFamily: 'monospace', opacity: 0.7 }}>
-                                    {getSubtitle(step)}
-                                </span>
-                            )}
-                        </div>
-                        {/* View button for clickable steps */}
-                        {(step.action === 'click' || step.action === 'navigate' || step.action === 'type') && step.screenshotUrl && (
-                            <button style={{
-                                background: '#3b82f6',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '4px',
-                                padding: '4px 10px',
-                                fontSize: '11px',
-                                fontWeight: 600,
-                                cursor: 'pointer'
-                            }}>View</button>
-                        )}
-                    </div>
-                </React.Fragment>
-            ))}
-
-            {/* Initializing State */}
-            {steps.length === 0 && isRunning && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px', color: 'var(--text-muted)', fontSize: '12px' }}>
-                    <StepIcons.Chevron />
-                    <StepIcons.Thought />
-                    <span>Thought for &lt;1s</span>
-                </div>
-            )}
-
-            {/* Processing State */}
-            {isRunning && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px', color: 'var(--text-muted)', fontSize: '12px' }}>
-                    <StepIcons.Chevron />
-                    <div className="spinner" style={{ width: '14px', height: '14px', border: '2px solid var(--text-muted)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
-                    <span style={{ fontStyle: 'italic' }}>Processing...</span>
-                </div>
-            )}
-        </div>
-    )
-}
-
 export default function GuestTestRunPage() {
     const params = useParams()
     const testId = params.testId as string
-    const [testRun, setTestRun] = useState<TestRun | null>(null)
-    const [loading, setLoading] = useState(true)
-    const wsRef = useRef<WebSocket | null>(null)
-    const [lastFrame, setLastFrame] = useState<string | undefined>(undefined)
-
-    // Verification input state
-    const [verificationRequired, setVerificationRequired] = useState(false)
-    const [verificationType, setVerificationType] = useState<'email' | 'magic_link' | 'otp' | 'sms'>('email')
-    const [verificationTimeoutMs, setVerificationTimeoutMs] = useState(120000)
-
-    // Polling & Data Load
-    useEffect(() => {
-        loadData()
-        const interval = setInterval(() => {
-            // Retry if test run doesn't exist yet (404) or if it's in an active state
-            if (!testRun || (testRun?.status && ['running', 'queued', 'diagnosing', 'pending'].includes(testRun.status))) {
-                loadData()
-            }
-        }, 3000)
-        return () => clearInterval(interval)
-    }, [testId, testRun?.status])
-
-    async function loadData() {
-        try {
-            const { testRun } = await api.getTestRun(testId)
-            setTestRun(testRun)
-            setLoading(false)
-
-            // If we have steps but no live frame, try to use the last step's screenshot as fallback
-            if (testRun?.steps && testRun.steps.length > 0 && !lastFrame) {
-                const lastStepWithScreenshot = [...testRun.steps].reverse().find(s => s.screenshotUrl)
-                if (lastStepWithScreenshot?.screenshotUrl) {
-                    console.log('[Guest Test] Using last step screenshot as fallback:', lastStepWithScreenshot.screenshotUrl)
-                    setLastFrame(lastStepWithScreenshot.screenshotUrl)
-                }
-            }
-        } catch (e: any) {
-            console.error('Load failed', e)
-            // If 404, test run might not exist yet - keep loading and retry
-            if (e.message?.includes('404') || e.message?.includes('not found')) {
-                // Don't set loading to false yet - will retry on next interval
-                console.log(`[Guest Test] Test run ${testId} not found yet, will retry...`)
-            } else {
-                setLoading(false)
-            }
-        }
-    }
-
-    // Handle verification input submission
-    async function handleVerificationSubmit(inputType: 'link' | 'otp', value: string) {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
-        const response = await fetch(`${apiUrl}/api/tests/${testId}/verification-input`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ inputType, value }),
-        })
-
-        if (!response.ok) {
-            const error = await response.json().catch(() => ({ error: 'Failed to submit' }))
-            throw new Error(error.error || 'Failed to submit verification')
-        }
-
-        setVerificationRequired(false)
-    }
-
-    // WebSocket
-    useEffect(() => {
-        if (!testRun || testRun.status !== 'running') return
-        const wsUrl = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:3001'
-        const ws = new WebSocket(`${wsUrl}/ws/test-control?runId=${testId}`)
-
-        ws.onopen = () => console.log('Guest Stream Connected')
-
-        ws.onmessage = (event) => {
-            try {
-                const msg = JSON.parse(event.data)
-                if (msg.type === 'page_state' && msg.state?.screenshot) {
-                    setLastFrame(msg.state.screenshot)
-                }
-                if (msg.type === 'test_step' && msg.step) {
-                    setTestRun(prev => prev ? ({ ...prev, steps: [...(prev.steps || []), msg.step] }) : null)
-                }
-                // Handle verification required event
-                if (msg.type === 'verification_required') {
-                    console.log('[Guest Test] Verification required:', msg.context)
-                    setVerificationType(msg.context.verificationType || 'email')
-                    setVerificationTimeoutMs(msg.context.timeoutMs || 120000)
-                    setVerificationRequired(true)
-                }
-                // Handle verification input received (close modal)
-                if (msg.type === 'verification_input_received') {
-                    console.log('[Guest Test] Verification input received')
-                    setVerificationRequired(false)
-                }
-            } catch (e) {
-                console.error('WS Parse Error', e)
-            }
-        }
-
-        wsRef.current = ws
-        return () => { ws.close(); wsRef.current = null; }
-    }, [testId, testRun?.status])
+    
+    const { 
+        testRun, 
+        loading, 
+        lastFrame, 
+        verificationRequired, 
+        verificationType, 
+        verificationTimeoutMs, 
+        submitVerification 
+    } = useGuestTestRun(testId)
 
     // Loading State
     if (loading) return (
@@ -440,18 +200,59 @@ export default function GuestTestRunPage() {
                                 display: 'flex',
                                 flexDirection: 'column',
                                 alignItems: 'center',
+                                justifyContent: 'center',
                                 gap: '16px',
-                                color: 'var(--beige-500)'
+                                color: 'var(--beige-500)',
+                                padding: '32px',
+                                textAlign: 'center'
                             }}>
-                                <div style={{
-                                    width: '32px',
-                                    height: '32px',
-                                    border: '3px solid var(--beige-400)',
-                                    borderTopColor: 'var(--beige-200)',
-                                    borderRadius: '50%',
-                                    animation: 'spin 1s linear infinite'
-                                }} />
-                                <div style={{ fontSize: '14px' }}>Waiting for browser...</div>
+                                {(['pending', 'queued', 'waiting_approval', undefined].includes(testRun?.status)) && (
+                                    <div style={{
+                                        width: '32px',
+                                        height: '32px',
+                                        border: '3px solid var(--beige-400)',
+                                        borderTopColor: 'var(--beige-200)',
+                                        borderRadius: '50%',
+                                        animation: 'spin 1s linear infinite'
+                                    }} />
+                                )}
+
+                                {testRun?.status === 'failed' ? (
+                                    <div style={{ color: '#ef4444' }}>
+                                        <div style={{ fontSize: '48px', marginBottom: '16px' }}>❌</div>
+                                        <div style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '8px' }}>Test Failed</div>
+                                        <div style={{ fontSize: '14px', maxWidth: '400px', margin: '0 auto', opacity: 0.8 }}>
+                                            {testRun.error || 'An unexpected error occurred during the test run.'}
+                                        </div>
+                                        {/* Show last step error if available and main error is generic */}
+                                        {testRun?.steps && testRun.steps.length > 0 && testRun.steps[testRun.steps.length - 1].error && (
+                                            <div style={{ 
+                                                marginTop: '16px', 
+                                                fontSize: '12px', 
+                                                fontFamily: 'monospace', 
+                                                background: 'rgba(239, 68, 68, 0.1)', 
+                                                padding: '12px', 
+                                                borderRadius: '6px',
+                                                textAlign: 'left'
+                                            }}>
+                                                <strong>Step {testRun.steps.length} Error:</strong><br/>
+                                                {testRun.steps[testRun.steps.length - 1].error}
+                                            </div>
+                                        )}
+                                    </div>
+                                ) : testRun?.status === 'cancelled' ? (
+                                    <div style={{ color: 'var(--text-secondary)' }}>
+                                        <div style={{ fontSize: '48px', marginBottom: '16px' }}>🛑</div>
+                                        <div style={{ fontSize: '18px', fontWeight: 'bold' }}>Test Cancelled</div>
+                                    </div>
+                                ) : (
+                                    <div style={{ fontSize: '14px' }}>
+                                        {testRun?.status === 'queued' && 'Test queued... waiting for worker'}
+                                        {testRun?.status === 'pending' && 'Initializing test environment...'}
+                                        {testRun?.status === 'waiting_approval' && 'Waiting for approval...'}
+                                        {!testRun?.status && 'Waiting for browser...'}
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>
@@ -483,7 +284,25 @@ export default function GuestTestRunPage() {
                     }}>
                         <Icons.Terminal />
                         <span>EXECUTION LOG</span>
-                        <span style={{
+                        
+                        {/* Real-time Progress Bar */}
+                        {testRun?.steps?.length ? (() => {
+                           const progress = Math.min(testRun.steps.length, 10)
+                           const percent = (progress / 10) * 100
+                           
+                           return (
+                             <div style={{ flex: 1, marginLeft: '16px', marginRight: '16px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px', color: 'var(--text-muted)' }}>
+                                  <span>Visual Inspection</span>
+                                  <span>{progress}/10 Checks</span>
+                                </div>
+                                <div style={{ width: '100%', height: '4px', background: 'var(--beige-200)', borderRadius: '2px', overflow: 'hidden' }}>
+                                  <div style={{ width: `${percent}%`, height: '100%', background: 'var(--success)', transition: 'width 0.5s ease-out' }} />
+                                </div>
+                             </div>
+                           )
+                        })() : (
+                          <span style={{
                             marginLeft: 'auto',
                             background: 'var(--beige-200)',
                             padding: '2px 8px',
@@ -491,9 +310,10 @@ export default function GuestTestRunPage() {
                             fontSize: '11px',
                             fontWeight: 600,
                             color: 'var(--text-muted)'
-                        }}>
+                          }}>
                             {testRun?.steps?.length || 0} steps
-                        </span>
+                          </span>
+                        )}
                     </div>
 
                     {/* Logs Content */}
@@ -520,9 +340,14 @@ export default function GuestTestRunPage() {
                 isOpen={verificationRequired}
                 verificationType={verificationType}
                 timeoutMs={verificationTimeoutMs}
-                onSubmit={handleVerificationSubmit}
+                onSubmit={submitVerification}
+            />
+
+            {/* Signup Prompt Modal - Shows when test completes or fails */}
+            <SignupPromptModal 
+                isOpen={testRun?.status === 'completed' || testRun?.status === 'failed'} 
+                title={testRun?.status === 'failed' ? 'Test Failed' : 'Test Complete!'}
             />
         </div>
     )
 }
-
