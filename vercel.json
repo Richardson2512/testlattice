@@ -1,0 +1,12 @@
+{
+    "rewrites": [
+        {
+            "source": "/waitlist",
+            "destination": "https://rihario-waitlist.vercel.app"
+        },
+        {
+            "source": "/waitlist/(.*)",
+            "destination": "https://rihario-waitlist.vercel.app/$1"
+        }
+    ]
+}
