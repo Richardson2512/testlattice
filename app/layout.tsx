@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { League_Spartan } from 'next/font/google'
+import Script from 'next/script'
 import './globals.css'
 import Navigation from './components/Navigation'
 import { ErrorBoundary } from '../components/ErrorBoundary'
@@ -64,6 +65,19 @@ export default async function RootLayout({
   return (
     <html lang="en" data-scroll-behavior="smooth">
       <body className={leagueSpartan.variable} style={{ background: 'var(--bg-primary)' }}>
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-D4E4CRWZ6F"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+
+            gtag('config', 'G-D4E4CRWZ6F');
+          `}
+        </Script>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
