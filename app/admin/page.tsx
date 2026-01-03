@@ -54,6 +54,37 @@ interface AdminUser {
     }
 }
 
+interface TokenUsageStats {
+    totalPromptTokens: number
+    totalCompletionTokens: number
+    totalTokens: number
+    totalApiCalls: number
+    totalCostUsd: number
+    byTestMode: Array<{
+        testMode: string
+        testCount: number
+        promptTokens: number
+        completionTokens: number
+        totalTokens: number
+        apiCalls: number
+        costUsd: number
+    }>
+    byModel: Array<{
+        model: string
+        promptTokens: number
+        completionTokens: number
+        totalTokens: number
+        apiCalls: number
+        costUsd: number
+    }>
+    pricing: Record<string, { input: number; output: number }>
+    period: {
+        days: number
+        startDate: string
+        endDate: string
+    }
+}
+
 const StatCard = ({ title, value, subtext, color = 'var(--primary)' }: {
     title: string
     value: string | number
@@ -101,6 +132,7 @@ export default function AdminPage() {
     const [isAdmin, setIsAdmin] = useState<boolean | null>(null)
     const [stats, setStats] = useState<AdminStats | null>(null)
     const [users, setUsers] = useState<AdminUser[]>([])
+    const [tokenUsage, setTokenUsage] = useState<TokenUsageStats | null>(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
     const [search, setSearch] = useState('')
@@ -154,6 +186,15 @@ export default function AdminPage() {
             if (!usersRes.ok) throw new Error('Failed to load users')
             const usersData = await usersRes.json()
             setUsers(usersData.users)
+
+            // Load token usage stats
+            const tokenRes = await fetch(`${apiUrl}/api/admin/token-usage`, {
+                headers: { Authorization: `Bearer ${token}` },
+            })
+            if (tokenRes.ok) {
+                const tokenData = await tokenRes.json()
+                setTokenUsage(tokenData)
+            }
 
         } catch (err: any) {
             setError(err.message)
@@ -337,6 +378,122 @@ export default function AdminPage() {
                             </div>
                         </div>
                     </div>
+                </div>
+            )}
+
+            {/* Token Usage Statistics */}
+            {tokenUsage && (
+                <div className="glass-card" style={{ padding: '1.25rem', marginBottom: '2rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                        <h2 style={{ fontSize: '1rem', fontWeight: 600, margin: 0, color: 'var(--text-primary)' }}>
+                            📊 Token Usage Statistics
+                        </h2>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                            Last {tokenUsage.period.days} days
+                        </span>
+                    </div>
+
+                    {/* Summary Cards */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
+                        <div style={{ padding: '1rem', background: 'var(--beige-50)', borderRadius: 'var(--radius-md)' }}>
+                            <div style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Total Tokens</div>
+                            <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--text-primary)' }}>{tokenUsage.totalTokens.toLocaleString()}</div>
+                            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                                {tokenUsage.totalPromptTokens.toLocaleString()} in / {tokenUsage.totalCompletionTokens.toLocaleString()} out
+                            </div>
+                        </div>
+                        <div style={{ padding: '1rem', background: 'var(--beige-50)', borderRadius: 'var(--radius-md)' }}>
+                            <div style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase' }}>API Calls</div>
+                            <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--text-primary)' }}>{tokenUsage.totalApiCalls.toLocaleString()}</div>
+                            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                                Across all test types
+                            </div>
+                        </div>
+                        <div style={{ padding: '1rem', background: 'var(--beige-50)', borderRadius: 'var(--radius-md)' }}>
+                            <div style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Total Cost</div>
+                            <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--success)' }}>${tokenUsage.totalCostUsd.toFixed(4)}</div>
+                            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                                Estimated USD
+                            </div>
+                        </div>
+                        <div style={{ padding: '1rem', background: 'var(--beige-50)', borderRadius: 'var(--radius-md)' }}>
+                            <div style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Avg Cost/Test</div>
+                            <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--info)' }}>
+                                ${tokenUsage.byTestMode.reduce((sum, m) => sum + m.testCount, 0) > 0
+                                    ? (tokenUsage.totalCostUsd / tokenUsage.byTestMode.reduce((sum, m) => sum + m.testCount, 0)).toFixed(4)
+                                    : '0.0000'}
+                            </div>
+                            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                                Per test run
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Breakdown by Test Mode */}
+                    {tokenUsage.byTestMode.length > 0 && (
+                        <>
+                            <h3 style={{ fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.75rem', color: 'var(--text-secondary)' }}>
+                                Usage by Test Mode
+                            </h3>
+                            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem' }}>
+                                <thead>
+                                    <tr style={{ borderBottom: '1px solid var(--border-light)' }}>
+                                        <th style={{ padding: '0.5rem 0.75rem', textAlign: 'left', fontWeight: 600, color: 'var(--text-muted)', fontSize: '0.7rem', textTransform: 'uppercase' }}>Test Mode</th>
+                                        <th style={{ padding: '0.5rem', textAlign: 'right', fontWeight: 600, color: 'var(--text-muted)', fontSize: '0.7rem', textTransform: 'uppercase' }}>Tests</th>
+                                        <th style={{ padding: '0.5rem', textAlign: 'right', fontWeight: 600, color: 'var(--text-muted)', fontSize: '0.7rem', textTransform: 'uppercase' }}>Input Tokens</th>
+                                        <th style={{ padding: '0.5rem', textAlign: 'right', fontWeight: 600, color: 'var(--text-muted)', fontSize: '0.7rem', textTransform: 'uppercase' }}>Output Tokens</th>
+                                        <th style={{ padding: '0.5rem', textAlign: 'right', fontWeight: 600, color: 'var(--text-muted)', fontSize: '0.7rem', textTransform: 'uppercase' }}>Total</th>
+                                        <th style={{ padding: '0.5rem', textAlign: 'right', fontWeight: 600, color: 'var(--text-muted)', fontSize: '0.7rem', textTransform: 'uppercase' }}>API Calls</th>
+                                        <th style={{ padding: '0.5rem 0.75rem', textAlign: 'right', fontWeight: 600, color: 'var(--text-muted)', fontSize: '0.7rem', textTransform: 'uppercase' }}>Cost (USD)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {tokenUsage.byTestMode.map((mode, i) => (
+                                        <tr key={mode.testMode} style={{ borderBottom: i < tokenUsage.byTestMode.length - 1 ? '1px solid var(--border-light)' : 'none' }}>
+                                            <td style={{ padding: '0.5rem 0.75rem' }}>
+                                                <span style={{
+                                                    padding: '3px 8px',
+                                                    borderRadius: '4px',
+                                                    background: mode.testMode === 'guest' ? 'rgba(107, 114, 128, 0.1)' :
+                                                        mode.testMode === 'behavior' ? 'rgba(139, 92, 246, 0.1)' :
+                                                            mode.testMode === 'single' ? 'rgba(59, 130, 246, 0.1)' :
+                                                                mode.testMode === 'multi' ? 'rgba(245, 158, 11, 0.1)' : 'rgba(107, 114, 128, 0.1)',
+                                                    color: mode.testMode === 'guest' ? '#6B7280' :
+                                                        mode.testMode === 'behavior' ? '#8B5CF6' :
+                                                            mode.testMode === 'single' ? '#3B82F6' :
+                                                                mode.testMode === 'multi' ? '#F59E0B' : '#6B7280',
+                                                    fontWeight: 600,
+                                                    fontSize: '0.7rem',
+                                                    textTransform: 'uppercase'
+                                                }}>
+                                                    {mode.testMode}
+                                                </span>
+                                            </td>
+                                            <td style={{ padding: '0.5rem', textAlign: 'right', fontWeight: 600 }}>{mode.testCount}</td>
+                                            <td style={{ padding: '0.5rem', textAlign: 'right', color: 'var(--text-secondary)' }}>{mode.promptTokens.toLocaleString()}</td>
+                                            <td style={{ padding: '0.5rem', textAlign: 'right', color: 'var(--text-secondary)' }}>{mode.completionTokens.toLocaleString()}</td>
+                                            <td style={{ padding: '0.5rem', textAlign: 'right', fontWeight: 600 }}>{mode.totalTokens.toLocaleString()}</td>
+                                            <td style={{ padding: '0.5rem', textAlign: 'right', color: 'var(--text-secondary)' }}>{mode.apiCalls}</td>
+                                            <td style={{ padding: '0.5rem 0.75rem', textAlign: 'right', fontWeight: 600, color: 'var(--success)' }}>${mode.costUsd.toFixed(4)}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </>
+                    )}
+
+                    {/* Model Pricing Reference */}
+                    {tokenUsage.pricing && Object.keys(tokenUsage.pricing).length > 0 && (
+                        <div style={{ marginTop: '1rem', padding: '0.75rem', background: 'var(--beige-50)', borderRadius: 'var(--radius-md)', fontSize: '0.75rem' }}>
+                            <span style={{ fontWeight: 600, color: 'var(--text-secondary)' }}>Model Pricing: </span>
+                            {Object.entries(tokenUsage.pricing).map(([model, price], i) => (
+                                <span key={model} style={{ color: 'var(--text-muted)' }}>
+                                    {i > 0 && ' • '}
+                                    {model}: ${price.input}/1M in, ${price.output}/1M out
+                                </span>
+                            ))}
+                        </div>
+                    )}
                 </div>
             )}
 

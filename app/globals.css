@@ -57,7 +57,7 @@
   --radius-full: 9999px;
 
   /* Typography */
-  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-sans: var(--font-sans), 'League Spartan', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 
   /* Layout */

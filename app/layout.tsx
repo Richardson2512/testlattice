@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { League_Spartan } from 'next/font/google'
 import './globals.css'
 import Navigation from './components/Navigation'
 import { ErrorBoundary } from '../components/ErrorBoundary'
@@ -6,6 +7,12 @@ import { ScrollToTop } from '../components/ScrollToTop'
 import { createClient } from '@/lib/supabase/server'
 import { Analytics } from '@vercel/analytics/react'
 import { SpeedInsights } from '@vercel/speed-insights/next'
+
+const leagueSpartan = League_Spartan({
+  subsets: ['latin'],
+  variable: '--font-sans',
+  display: 'swap',
+})
 
 export const metadata: Metadata = {
   title: {
@@ -56,7 +63,7 @@ export default async function RootLayout({
 
   return (
     <html lang="en" data-scroll-behavior="smooth">
-      <body style={{ background: 'var(--bg-primary)' }}>
+      <body className={leagueSpartan.variable} style={{ background: 'var(--bg-primary)' }}>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
