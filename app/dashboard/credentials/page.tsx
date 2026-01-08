@@ -9,8 +9,45 @@ interface Credential {
     name: string
     username?: string
     email?: string
-    password_encrypted: string // We display this masked
+    password_encrypted: string
     created_at: string
+}
+
+// Simple Toast Component
+const Toast = ({ message, type, onClose }: { message: string, type: 'success' | 'error', onClose: () => void }) => {
+    useEffect(() => {
+        const timer = setTimeout(onClose, 3000)
+        return () => clearTimeout(timer)
+    }, [onClose])
+
+    return (
+        <div style={{
+            position: 'fixed',
+            bottom: '24px',
+            right: '24px',
+            padding: '1rem 1.5rem',
+            background: type === 'success' ? '#10B981' : '#EF4444',
+            color: 'white',
+            borderRadius: 'var(--radius-md)',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+            zIndex: 1000,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.75rem',
+            animation: 'slideIn 0.3s ease-out forwards',
+            fontWeight: 500,
+            fontSize: '0.95rem',
+        }}>
+            <span>{type === 'success' ? '✅' : '❌'}</span>
+            {message}
+            <style jsx>{`
+                @keyframes slideIn {
+                    from { transform: translateY(100%); opacity: 0; }
+                    to { transform: translateY(0); opacity: 1; }
+                }
+            `}</style>
+        </div>
+    )
 }
 
 export default function CredentialsPage() {
@@ -19,9 +56,16 @@ export default function CredentialsPage() {
     const [showAddForm, setShowAddForm] = useState(false)
     const [newCred, setNewCred] = useState({ name: '', username: '', email: '', password: '' })
 
+    // Toast State
+    const [toast, setToast] = useState<{ message: string, type: 'success' | 'error' } | null>(null)
+
     useEffect(() => {
         fetchCredentials()
     }, [])
+
+    const showToast = (message: string, type: 'success' | 'error' = 'success') => {
+        setToast({ message, type })
+    }
 
     const fetchCredentials = async () => {
         try {
@@ -30,7 +74,7 @@ export default function CredentialsPage() {
             setCredentials(res.credentials || [])
         } catch (error) {
             console.error('Failed to fetch credentials', error)
-            alert('Failed to load credentials')
+            showToast('Failed to load credentials', 'error')
         } finally {
             setLoading(false)
         }
@@ -40,17 +84,17 @@ export default function CredentialsPage() {
         e.preventDefault()
         try {
             if (!newCred.password) {
-                alert('Password is required')
+                showToast('Password is required', 'error')
                 return
             }
 
             await api.createCredential(newCred)
-            alert('Credential created')
+            showToast('Credential created successfully!', 'success')
             setShowAddForm(false)
             setNewCred({ name: '', username: '', email: '', password: '' })
             fetchCredentials()
         } catch (error) {
-            alert('Failed to create credential')
+            showToast('Failed to create credential', 'error')
         }
     }
 
@@ -58,10 +102,10 @@ export default function CredentialsPage() {
         if (!confirm('Are you sure you want to delete this credential?')) return
         try {
             await api.deleteCredential(id)
-            alert('Credential deleted')
+            showToast('Credential deleted', 'success')
             setCredentials(prev => prev.filter(c => c.id !== id))
         } catch (error) {
-            alert('Failed to delete credential')
+            showToast('Failed to delete credential', 'error')
         }
     }
 
@@ -71,6 +115,9 @@ export default function CredentialsPage() {
             fontFamily: 'var(--font-sans)',
             padding: '2rem',
         }}>
+            {/* Toast Container */}
+            {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+
             <div style={{ width: '100%', maxWidth: '1000px', margin: '0 auto' }}>
 
                 {/* Header */}
@@ -242,8 +289,8 @@ export default function CredentialsPage() {
                             animation: 'spin 1s linear infinite'
                         }}></div>
                         <style jsx>{`
-                    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-                `}</style>
+                            @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+                        `}</style>
                     </div>
                 ) : credentials.length === 0 ? (
                     <div style={{
