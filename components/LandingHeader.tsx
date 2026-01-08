@@ -1,14 +1,17 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import type { User } from '@supabase/supabase-js'
+import { NAV_ITEMS } from '@/lib/navigation-config'
 
 export function LandingHeader() {
   const [user, setUser] = useState<User | null>(null)
   const [mounted, setMounted] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
   const supabase = createClient()
 
   useEffect(() => {
@@ -66,87 +69,103 @@ export function LandingHeader() {
       <nav className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '60px' }}>
         {/* Logo */}
         <Link href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <span style={{ fontSize: '1.5rem' }}>🧪</span>
-          <span className="text-gradient" style={{ fontSize: '1.25rem', fontWeight: 700 }}>TestLattice</span>
+          <Image src="/image/logo.png" alt="Rihario Logo" width={32} height={32} style={{ objectFit: 'contain' }} />
+          <span className="text-gradient" style={{ fontSize: '1.25rem', fontWeight: 700 }}>Rihario</span>
         </Link>
 
         {/* Navigation Links (Desktop) */}
         <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }} className="desktop-nav">
 
           {/* Features Dropdown */}
-          <div className="nav-dropdown-trigger" style={{ position: 'relative', cursor: 'pointer' }}>
+          <div
+            className="nav-dropdown-trigger"
+            style={{ position: 'relative', cursor: 'pointer', padding: '10px 0' }}
+            onMouseEnter={() => setActiveDropdown('features')}
+            onMouseLeave={() => setActiveDropdown(null)}
+          >
             <span style={{ color: 'var(--text-secondary)', fontWeight: 500, fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
               Features <span style={{ fontSize: '0.7rem' }}>▼</span>
             </span>
             <div className="nav-dropdown-content" style={{
               position: 'absolute',
               top: '100%',
-              left: '-20px',
-              width: '240px',
-              background: '#fff',
-              border: '1px solid var(--border-subtle)',
-              borderRadius: '8px',
-              boxShadow: '0 10px 30px -5px rgba(0,0,0,0.1)',
+              left: '-1rem',
+              background: 'var(--bg-glass)',
+              backdropFilter: 'blur(12px)',
+              border: '1px solid var(--border-light)',
+              borderRadius: 'var(--radius-lg)',
               padding: '0.5rem',
-              display: 'none', // Controlled by CSS class usually, but for simplicity here strictly reliant on CSS hover in globals or standard styles
-              opacity: 0,
-              transform: 'translateY(10px)',
-              transition: 'all 0.2s ease',
-              pointerEvents: 'none'
+              minWidth: '220px',
+              boxShadow: 'var(--shadow-glass)',
+              display: activeDropdown === 'features' ? 'block' : 'none',
+              zIndex: 100
             }}>
-              {[
-                { label: 'Self-Healing Tests', href: '/features#healing' },
-                { label: 'Live Browser Control', href: '/features#browser' },
-                { label: 'Smart Analytics', href: '/features#analytics' },
-                { label: 'CI/CD Native', href: '/features#cicd' },
-                { label: 'Mobile Testing', href: '/features#mobile' },
-                { label: 'Parallel Execution', href: '/features#parallel' },
-                { label: 'Visual Regression', href: '/features#visual' },
-                { label: 'Video Replay', href: '/features#video' },
-              ].map((item, i) => (
-                <Link key={i} href={item.href} style={{
-                  display: 'block', padding: '0.5rem 0.75rem',
-                  borderRadius: '6px', textDecoration: 'none', color: 'var(--text-primary)',
-                  transition: 'background 0.1s', fontSize: '0.9rem'
-                }} className="dropdown-item">
-                  {item.label}
+              {NAV_ITEMS.features.map((item) => (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className="dropdown-item"
+                  style={{
+                    padding: '0.5rem 0.75rem',
+                    borderRadius: '6px',
+                    color: 'var(--text-primary)',
+                    textDecoration: 'none',
+                    fontSize: '0.9rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between'
+                  }}
+                >
+                  {item.name}
+                  {(item as any).isNew && (
+                    <span style={{ fontSize: '0.6rem', background: 'var(--maroon-100)', color: 'var(--maroon-900)', padding: '2px 6px', borderRadius: '4px', fontWeight: 700 }}>NEW</span>
+                  )}
                 </Link>
               ))}
             </div>
           </div>
 
           {/* Resources Dropdown */}
-          <div className="nav-dropdown-trigger" style={{ position: 'relative', cursor: 'pointer' }}>
+          <div
+            className="nav-dropdown-trigger"
+            style={{ position: 'relative', cursor: 'pointer', padding: '10px 0' }}
+            onMouseEnter={() => setActiveDropdown('resources')}
+            onMouseLeave={() => setActiveDropdown(null)}
+          >
             <span style={{ color: 'var(--text-secondary)', fontWeight: 500, fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
               Resources <span style={{ fontSize: '0.7rem' }}>▼</span>
             </span>
             <div className="nav-dropdown-content" style={{
               position: 'absolute',
               top: '100%',
-              left: '-20px',
-              width: '200px',
-              background: '#fff',
-              border: '1px solid var(--border-subtle)',
-              borderRadius: '8px',
-              boxShadow: '0 10px 30px -5px rgba(0,0,0,0.1)',
+              left: '-1rem',
+              background: 'var(--bg-glass)',
+              backdropFilter: 'blur(12px)',
+              border: '1px solid var(--border-light)',
+              borderRadius: 'var(--radius-lg)',
               padding: '0.5rem',
-              opacity: 0,
-              transform: 'translateY(10px)',
-              transition: 'all 0.2s ease',
-              pointerEvents: 'none'
+              minWidth: '180px',
+              boxShadow: 'var(--shadow-glass)',
+              display: activeDropdown === 'resources' ? 'block' : 'none',
+              zIndex: 100
             }}>
-              <Link href="/docs" className="dropdown-item" style={{ display: 'block', padding: '0.5rem 0.75rem', borderRadius: '6px', color: 'var(--text-primary)', textDecoration: 'none' }}>Documentation</Link>
-              <Link href="/blog" className="dropdown-item" style={{ display: 'block', padding: '0.5rem 0.75rem', borderRadius: '6px', color: 'var(--text-primary)', textDecoration: 'none' }}>Blog</Link>
-              <Link href="/community" className="dropdown-item" style={{ display: 'block', padding: '0.5rem 0.75rem', borderRadius: '6px', color: 'var(--text-primary)', textDecoration: 'none' }}>Community</Link>
+              {NAV_ITEMS.resources.map((item) => (
+                <Link key={item.name} href={item.href} className="dropdown-item" style={{ display: 'block', padding: '0.5rem 0.75rem', borderRadius: '6px', color: 'var(--text-primary)', textDecoration: 'none' }}>{item.name}</Link>
+              ))}
             </div>
           </div>
 
-          <Link href="/why-testlattice" className="btn-shine" style={{
+          <Link href="/pricing" style={{
+            color: 'var(--text-secondary)', fontWeight: 500, fontSize: '0.95rem', textDecoration: 'none'
+          }}>
+            Pricing
+          </Link>
+          <Link href="/why-rihario" style={{
             color: 'var(--maroon-800)', fontWeight: 600, fontSize: '0.95rem', textDecoration: 'none',
             padding: '0.5rem 1rem', background: 'var(--bg-tertiary)', borderRadius: '50px',
             border: '1px solid var(--accent-red-subtle)'
           }}>
-            Why TestLattice?
+            Why Rihario?
           </Link>
         </div>
 
@@ -161,12 +180,6 @@ export function LandingHeader() {
         </div>
       </nav>
       <style jsx>{`
-        .nav-dropdown-trigger:hover .nav-dropdown-content {
-            display: block !important;
-            opacity: 1 !important;
-            transform: translateY(0) !important;
-            pointer-events: auto !important;
-        }
         .dropdown-item:hover {
             background: var(--bg-tertiary);
         }
