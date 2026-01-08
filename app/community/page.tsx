@@ -1,50 +1,32 @@
 'use client'
 
 import { LandingHeader } from '@/components/LandingHeader'
-import { Footer } from '@/components/Footer'
+
+const COLORS = {
+    primary: '#b91c1c', // maroon-700
+    bg: '#0f172a',      // slate-900
+    text: '#f8fafc',    // slate-50
+    textMuted: '#94a3b8', // slate-400
+}
 
 export default function CommunityPage() {
     return (
-        <div style={{ minHeight: '100vh', background: 'var(--bg-primary)', fontFamily: 'var(--font-sans)', display: 'flex', flexDirection: 'column' }}>
+        <main style={{ minHeight: '100vh', background: COLORS.bg, color: COLORS.text, fontFamily: 'var(--font-inter)' }}>
             <LandingHeader />
 
-            <section style={{
-                paddingTop: '140px',
-                paddingBottom: '80px',
-                flex: 1,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-            }}>
-                <div className="container" style={{ maxWidth: '600px', margin: '0 auto', textAlign: 'center' }}>
-                    <div style={{ fontSize: '4rem', marginBottom: '1.5rem' }}>👥</div>
-                    <h1 style={{
-                        fontSize: 'clamp(2rem, 4vw, 3rem)',
-                        fontWeight: 700,
-                        marginBottom: '1rem',
-                        color: 'var(--text-primary)'
-                    }}>
-                        Community
+            <div className="container" style={{ padding: '120px 20px 80px', maxWidth: '1200px', margin: '0 auto' }}>
+                <div style={{ textAlign: 'center', padding: '4rem 2rem' }}>
+                    <div style={{ color: COLORS.primary, fontWeight: 'bold', letterSpacing: '2px', fontSize: '0.85rem', textTransform: 'uppercase', marginBottom: '1rem' }}>
+                        RESOURCES
+                    </div>
+                    <h1 style={{ fontSize: '3rem', fontWeight: '800', marginBottom: '1.5rem', lineHeight: 1.1 }}>
+                        <span className="text-gradient">Community</span>
                     </h1>
-                    <p style={{
-                        fontSize: '1.125rem',
-                        color: 'var(--text-secondary)',
-                        marginBottom: '2rem',
-                        lineHeight: 1.6
-                    }}>
-                        Coming soon. Join our community of developers who ship with confidence
-                        using AI-powered testing.
-                    </p>
-                    <p style={{
-                        fontSize: '0.95rem',
-                        color: 'var(--text-muted)'
-                    }}>
-                        Discord and forum launching soon.
+                    <p style={{ fontSize: '1.25rem', color: COLORS.textMuted, lineHeight: 1.6, maxWidth: '600px', margin: '0 auto' }}>
+                        Coming soon. Join our community of testers and developers building the future of QA.
                     </p>
                 </div>
-            </section>
-
-            <Footer />
-        </div>
+            </div>
+        </main>
     )
 }

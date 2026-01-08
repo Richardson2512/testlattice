@@ -7,8 +7,8 @@ export const NAV_ITEMS = {
     ],
     resources: [
         { name: 'Documentation', href: '/docs' },
-        { name: 'Blog', href: '#' },
-        { name: 'Community', href: '#' },
+        { name: 'Blog', href: '/blog' },
+        { name: 'Community', href: '/community' },
         { name: 'Contact', href: '/contact' }, // Added in previous step
     ]
 } as const;

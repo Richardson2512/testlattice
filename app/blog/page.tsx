@@ -1,50 +1,32 @@
 'use client'
 
 import { LandingHeader } from '@/components/LandingHeader'
-import { Footer } from '@/components/Footer'
+
+const COLORS = {
+    primary: '#b91c1c', // maroon-700
+    bg: '#0f172a',      // slate-900
+    text: '#f8fafc',    // slate-50
+    textMuted: '#94a3b8', // slate-400
+}
 
 export default function BlogPage() {
     return (
-        <div style={{ minHeight: '100vh', background: 'var(--bg-primary)', fontFamily: 'var(--font-sans)', display: 'flex', flexDirection: 'column' }}>
+        <main style={{ minHeight: '100vh', background: COLORS.bg, color: COLORS.text, fontFamily: 'var(--font-inter)' }}>
             <LandingHeader />
 
-            <section style={{
-                paddingTop: '140px',
-                paddingBottom: '80px',
-                flex: 1,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-            }}>
-                <div className="container" style={{ maxWidth: '600px', margin: '0 auto', textAlign: 'center' }}>
-                    <div style={{ fontSize: '4rem', marginBottom: '1.5rem' }}>📝</div>
-                    <h1 style={{
-                        fontSize: 'clamp(2rem, 4vw, 3rem)',
-                        fontWeight: 700,
-                        marginBottom: '1rem',
-                        color: 'var(--text-primary)'
-                    }}>
-                        Blog
+            <div className="container" style={{ padding: '120px 20px 80px', maxWidth: '1200px', margin: '0 auto' }}>
+                <div style={{ textAlign: 'center', padding: '4rem 2rem' }}>
+                    <div style={{ color: COLORS.primary, fontWeight: 'bold', letterSpacing: '2px', fontSize: '0.85rem', textTransform: 'uppercase', marginBottom: '1rem' }}>
+                        RESOURCES
+                    </div>
+                    <h1 style={{ fontSize: '3rem', fontWeight: '800', marginBottom: '1.5rem', lineHeight: 1.1 }}>
+                        <span className="text-gradient">Blog</span>
                     </h1>
-                    <p style={{
-                        fontSize: '1.125rem',
-                        color: 'var(--text-secondary)',
-                        marginBottom: '2rem',
-                        lineHeight: 1.6
-                    }}>
-                        Coming soon. We're working on insightful articles about AI testing,
-                        vibe coding, and shipping with confidence.
-                    </p>
-                    <p style={{
-                        fontSize: '0.95rem',
-                        color: 'var(--text-muted)'
-                    }}>
-                        Stay tuned for updates.
+                    <p style={{ fontSize: '1.25rem', color: COLORS.textMuted, lineHeight: 1.6, maxWidth: '600px', margin: '0 auto' }}>
+                        Coming soon. Stay tuned for insights, tutorials, and updates from the TestLattice team.
                     </p>
                 </div>
-            </section>
-
-            <Footer />
-        </div>
+            </div>
+        </main>
     )
 }
