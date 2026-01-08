@@ -35,8 +35,8 @@ export function Footer() {
                     <div>
                         <h4 style={{ fontSize: '0.9rem', marginBottom: '1rem', color: 'var(--text-inverse)' }}>Legal</h4>
                         <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                            <li><Link href="#" style={{ color: 'var(--beige-300)', textDecoration: 'none' }}>Privacy Policy</Link></li>
-                            <li><Link href="#" style={{ color: 'var(--beige-300)', textDecoration: 'none' }}>Terms of Service</Link></li>
+                            <li><Link href="/privacy-policy" style={{ color: 'var(--beige-300)', textDecoration: 'none' }}>Privacy Policy</Link></li>
+                            <li><Link href="/terms-of-service" style={{ color: 'var(--beige-300)', textDecoration: 'none' }}>Terms of Service</Link></li>
                         </ul>
                     </div>
                 </div>

@@ -1,5 +1,7 @@
 'use client'
 
+import Link from 'next/link'
+
 export function ComparisonSection() {
     return (
         <section style={{ padding: '5rem 0', background: 'var(--bg-secondary)' }}>
@@ -14,7 +16,7 @@ export function ComparisonSection() {
                             Traditional testing frameworks require improved selectors every time a class name changes.
                             Rihario uses semantic understanding to find elements like a human would.
                         </p>
-                        <button className="btn btn-outline">Read the Technology Whitepaper</button>
+                        <Link href="/whitepaper" className="btn btn-outline">Read the Technology Whitepaper</Link>
                     </div>
 
                     <div className="glass-panel" style={{ padding: '0', overflow: 'hidden' }}>
