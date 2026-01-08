@@ -400,13 +400,80 @@ export default function FeaturesPage() {
                                     </div>
                                 </div>
 
-                                {/* Android */}
-                                <div style={{ width: '150px', height: '290px', background: '#000', borderRadius: '4px', border: '2px solid #333', overflow: 'hidden' }}>
-                                    <div style={{ background: '#fff', width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
-                                        <div style={{ height: '40px', background: '#f1f3f4', borderBottom: '1px solid #dadce0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                            <div style={{ background: '#fff', padding: '4px 12px', borderRadius: '20px', fontSize: '10px', boxShadow: '0 1px 2px rgba(0,0,0,0.1)' }}>your-app.com</div>
+                                {/* Samsung S25 Ultra */}
+                                <div style={{
+                                    width: '150px',
+                                    height: '315px',
+                                    position: 'relative',
+                                    // No overflow hidden on container if we want buttons to stick out, 
+                                    // but we need space. The parent flex container has gap 2rem so it should be fine.
+                                }}>
+                                    <div style={{
+                                        width: '976.55px',
+                                        height: '2048px',
+                                        position: 'absolute',
+                                        top: 0,
+                                        left: 0,
+                                        transform: 'scale(0.153)',
+                                        transformOrigin: 'top left',
+                                    }}>
+                                        {/* Body */}
+                                        <div style={{
+                                            position: 'absolute', left: 0, right: 0, top: 0, bottom: 0,
+                                            border: '4px solid #212121', borderRadius: '63.06px',
+                                            background: '#212121'
+                                        }} />
+
+                                        {/* Pen */}
+                                        <div style={{
+                                            position: 'absolute', width: '76.36px', height: '6.18px', left: '48.92px', bottom: '-6.14px',
+                                            border: '4px solid #212121', borderRadius: '0px 0px 14.84px 14.84px', background: '#212121'
+                                        }} />
+
+                                        {/* Volume Buttons */}
+                                        <div style={{
+                                            position: 'absolute', width: '7.73px', height: '264.31px', right: '-8.49px', top: '390.43px',
+                                            border: '4px solid #212121', borderRadius: '1.09px 0px 0px 1.09px', background: '#212121',
+                                            transform: 'matrix(-1, 0, 0, 1, 0, 0)'
+                                        }} />
+                                        <div style={{
+                                            position: 'absolute', width: '7.73px', height: '145.29px', right: '-8.49px', top: '773.45px',
+                                            border: '4px solid #212121', borderRadius: '1.09px 0px 0px 1.09px', background: '#212121',
+                                            transform: 'matrix(-1, 0, 0, 1, 0, 0)'
+                                        }} />
+
+                                        {/* Screen Frame */}
+                                        <div style={{
+                                            position: 'absolute', left: '14.15px', right: '14.6px', top: '11.44px', bottom: '12.06px',
+                                            border: '4px solid #3E3E3E', borderRadius: '50.7px',
+                                            background: '#000'
+                                        }} />
+
+                                        {/* Display Area */}
+                                        <div style={{
+                                            position: 'absolute', left: '13.36px', right: '13.22px', top: '13.29px', bottom: '13.29px',
+                                            borderRadius: '40.8px',
+                                            background: '#fff',
+                                            overflow: 'hidden',
+                                            display: 'flex',
+                                            flexDirection: 'column'
+                                        }}>
+                                            {/* Camera Punch-hole */}
+                                            <div style={{
+                                                position: 'absolute', width: '42.75px', height: '42.16px',
+                                                left: 'calc(50% - 42.75px/2 - 0.15px)', top: '20.87px',
+                                                background: '#3E3E3E', borderRadius: '53.3px', zIndex: 50
+                                            }} />
+
+                                            {/* Browser UI */}
+                                            <div style={{ height: '180px', background: '#f1f3f4', borderBottom: '1px solid #dadce0', display: 'flex', alignItems: 'center', justifyContent: 'center', paddingTop: '60px' }}>
+                                                <div style={{ background: '#fff', padding: '15px 40px', borderRadius: '40px', fontSize: '32px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)', color: '#3c4043' }}>your-app.com</div>
+                                            </div>
+                                            <div style={{ flex: 1, background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#5f6368', fontSize: '40px', flexDirection: 'column', gap: '20px' }}>
+                                                <div style={{ fontSize: '100px' }}>🌏</div>
+                                                <div>Chrome</div>
+                                            </div>
                                         </div>
-                                        <div style={{ flex: 1, background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#5f6368', fontSize: '12px' }}>Chrome</div>
                                     </div>
                                 </div>
                             </div>
