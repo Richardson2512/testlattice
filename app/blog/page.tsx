@@ -11,9 +11,49 @@ export const metadata: Metadata = {
 
 const blogPosts = [
     {
+        slug: 'top-10-ai-testing-tools',
+        title: 'Top 10 Best AI Testing Tools in 2024',
+        description: 'A comprehensive comparison of AI-powered testing tools—from indie-friendly to enterprise-grade.',
+        category: 'Comparison',
+        date: 'January 2024',
+        readTime: '12 min'
+    },
+    {
+        slug: 'best-ai-testing-tools',
+        title: 'Best AI Testing Tools 2024: Complete Buyer\'s Guide',
+        description: 'We tested every major AI testing tool. Here\'s which one to choose based on your needs.',
+        category: 'Buyer\'s Guide',
+        date: 'January 2024',
+        readTime: '8 min'
+    },
+    {
+        slug: 'top-10-software-testing-tools',
+        title: 'Top 10 Best Software Testing Tools for Indie Hackers',
+        description: 'From AI-powered no-code tools to open-source frameworks—find the right testing stack.',
+        category: 'Comparison',
+        date: 'January 2024',
+        readTime: '10 min'
+    },
+    {
+        slug: 'how-to-test-mvp',
+        title: 'How to Test Your MVP Before Launch: Complete Guide',
+        description: 'The 6-step checklist for testing your MVP. No QA team required.',
+        category: 'Guide',
+        date: 'January 2024',
+        readTime: '10 min'
+    },
+    {
+        slug: 'what-is-vibe-testing',
+        title: 'What is Vibe Testing? The New Way to Test Apps',
+        description: 'Vibe Testing explained: describe tests in plain English, AI executes them.',
+        category: 'Concept',
+        date: 'January 2024',
+        readTime: '6 min'
+    },
+    {
         slug: 'what-is-ai-testing',
         title: 'What is AI Testing? Complete Guide for Indie Hackers',
-        description: 'Learn what AI testing is, how it works, and why it\'s perfect for solo developers who don\'t want to write test code.',
+        description: 'Learn what AI testing is, how it works, and why it\'s perfect for solo developers.',
         category: 'Guide',
         date: 'January 2024',
         readTime: '8 min'
@@ -21,7 +61,7 @@ const blogPosts = [
     {
         slug: 'no-code-testing',
         title: 'No-Code Testing: How to Test Your App Without Writing Code',
-        description: 'Step-by-step guide to testing your web app without touching code. Perfect for no-code builders and non-technical founders.',
+        description: 'Step-by-step guide to testing your web app without touching code.',
         category: 'Tutorial',
         date: 'January 2024',
         readTime: '6 min'
