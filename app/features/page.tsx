@@ -3,10 +3,33 @@ import { LandingHeader } from '@/components/LandingHeader'
 import { InteractiveBrowserStack } from '@/components/InteractiveBrowserStack'
 import { Footer } from '@/components/Footer'
 
-// Reusable Components
+// SEO Metadata
+export const metadata = {
+    title: 'AI Testing Features | No-Code Functional, Visual & Security Testing',
+    description: 'Discover 9 types of automated testing: functional, visual regression, performance, security, accessibility, SEO, console errors, API monitoring, and cross-browser. Works on 50+ browser/device combos. No code required.',
+    keywords: ['AI testing features', 'no-code testing', 'visual regression testing', 'security testing', 'accessibility testing', 'cross-browser testing'],
+}
+
+
+// Reusable Components - Using semantic h2 as section intro label
 const SectionLabel = ({ text, color = 'var(--primary)' }: { text: string, color?: string }) => (
-    <div style={{ color, fontWeight: 'bold', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '1rem', fontSize: '0.85rem' }}>
+    <span style={{ color, fontWeight: 'bold', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '0.5rem', fontSize: '0.85rem', display: 'block' }} aria-hidden="true">
         {text}
+    </span>
+)
+
+// TL;DR block for GEO embedding chunking
+const TldrBlock = ({ children }: { children: React.ReactNode }) => (
+    <div style={{
+        padding: '1rem 1.5rem',
+        background: 'linear-gradient(135deg, #fef3c7 0%, #fff 100%)',
+        border: '1px solid #fcd34d',
+        borderRadius: '8px',
+        marginBottom: '2rem',
+        fontSize: '1rem',
+        lineHeight: 1.6
+    }}>
+        <strong style={{ color: '#92400e' }}>TL;DR:</strong> {children}
     </div>
 )
 
@@ -51,16 +74,47 @@ export default function FeaturesPage() {
                 </div>
             </section>
 
+            {/* TL;DR Summary for GEO */}
+            <section style={{ padding: '2rem 0 0' }}>
+                <div className="container" style={{ maxWidth: '800px' }}>
+                    <TldrBlock>
+                        Rihario is an AI testing platform that checks 9 things automatically: functional testing, visual bugs, performance, security, accessibility, SEO, console errors, API issues, and cross-browser compatibility. No coding required—just paste your URL.
+                    </TldrBlock>
+                </div>
+            </section>
+
             {/* What We Check For You */}
-            <section id="testing-types" style={{ padding: '5rem 0', background: 'var(--bg-secondary)' }}>
+            <section id="testing-types" style={{ padding: '3rem 0 5rem', background: 'var(--bg-secondary)' }}>
                 <div className="container">
                     <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
                         <SectionLabel text="COMPREHENSIVE TESTING" />
-                        <h2 style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>Everything We Check For You</h2>
+                        <h2 style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>What is Rihario Testing? Everything We Check For You</h2>
                         <p style={{ color: 'var(--text-secondary)', maxWidth: '600px', margin: '0 auto' }}>
                             One test run. Nine different checks. You get a complete picture of your app's health.
                         </p>
                     </div>
+
+                    {/* Definition List for GEO/AEO - screen reader accessible */}
+                    <dl className="sr-only" style={{ position: 'absolute', left: '-9999px' }}>
+                        <dt>Functional Testing</dt>
+                        <dd>Tests buttons, forms, and navigation to ensure everything works correctly in your web application.</dd>
+                        <dt>Visual Regression Testing</dt>
+                        <dd>Catches broken layouts, overlapping text, missing images and UI glitches across all browsers.</dd>
+                        <dt>Performance Testing</dt>
+                        <dd>Measures Core Web Vitals including LCP, FID, CLS and total page load time.</dd>
+                        <dt>Security Testing</dt>
+                        <dd>Tests for XSS, SQL injection, CSRF and other common web vulnerabilities before hackers find them.</dd>
+                        <dt>Accessibility Testing</dt>
+                        <dd>WCAG compliance checks ensure your app works for people using screen readers and assistive technology.</dd>
+                        <dt>SEO Testing</dt>
+                        <dd>Validates meta tags, heading structure, schema markup and other factors that affect Google rankings.</dd>
+                        <dt>Console Error Detection</dt>
+                        <dd>Finds JavaScript errors, 404 resources, and unhandled promise rejections you never noticed.</dd>
+                        <dt>API Monitoring</dt>
+                        <dd>Identifies slow or failing API calls that degrade user experience.</dd>
+                        <dt>Cross-Browser Testing</dt>
+                        <dd>Tests across Chrome, Safari, Firefox, Edge and mobile browsers on 50+ device combinations.</dd>
+                    </dl>
 
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem', marginBottom: '2rem' }}>
                         <TestingTypeCard

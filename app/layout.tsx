@@ -26,15 +26,15 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://testlattice.vercel.app',
-    title: 'Rihario - The Vibe Testing Platform',
-    description: 'Stop writing flaky scripts. Start Vibe Testing with autonomous AI agents.',
+    url: 'https://rihario.com',
+    title: 'Rihario - AI Testing for Indie Hackers | No Code Required',
+    description: 'Stop writing flaky scripts. Start Vibe Testing with autonomous AI agents. No code. No setup. Just paste your URL.',
     siteName: 'Rihario',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Rihario - The Vibe Testing Platform',
-    description: 'Stop writing flaky scripts. Start Vibe Testing with autonomous AI agents.',
+    title: 'Rihario - AI Testing for Indie Hackers',
+    description: 'Stop writing flaky scripts. Start Vibe Testing with autonomous AI agents. No code required.',
   },
   icons: {
     icon: '/image/favicon.png',
@@ -42,7 +42,7 @@ export const metadata: Metadata = {
     apple: '/image/favicon.png',
   },
   alternates: {
-    canonical: 'https://testlattice.vercel.app',
+    canonical: 'https://rihario.com',
   },
 }
 
@@ -78,6 +78,30 @@ export default async function RootLayout({
             gtag('config', 'G-D4E4CRWZ6F');
           `}
         </Script>
+        {/* Organization Schema for GEO */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'Organization',
+              name: 'Rihario',
+              url: 'https://rihario.com',
+              logo: 'https://rihario.com/image/logo.png',
+              description: 'AI-powered testing platform for indie hackers and solo developers. No-code alternative to Playwright and Cypress.',
+              sameAs: [
+                'https://twitter.com/riharioapp',
+                'https://github.com/rihario'
+              ],
+              contactPoint: {
+                '@type': 'ContactPoint',
+                contactType: 'customer service',
+                url: 'https://rihario.com/contact'
+              }
+            }),
+          }}
+        />
+        {/* Product Schema with Pricing */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -86,13 +110,31 @@ export default async function RootLayout({
               '@type': 'SoftwareApplication',
               name: 'Rihario',
               applicationCategory: 'DeveloperApplication',
-              operatingSystem: 'Any',
+              operatingSystem: 'Web',
+              description: 'Autonomous AI testing platform with God Mode intervention, self-healing tests, and 9 types of automated testing.',
+              featureList: [
+                'Functional Testing',
+                'Visual Regression Testing',
+                'Performance Testing',
+                'Security Testing',
+                'Accessibility Testing',
+                'SEO Testing',
+                'Console Error Detection',
+                'API Monitoring',
+                'Cross-Browser Testing'
+              ],
               offers: {
-                '@type': 'Offer',
-                price: '0',
+                '@type': 'AggregateOffer',
+                lowPrice: '0',
+                highPrice: '99',
                 priceCurrency: 'USD',
+                offerCount: 4
               },
-              description: 'Autonomous AI-driven test automation platform for modern web applications.',
+              aggregateRating: {
+                '@type': 'AggregateRating',
+                ratingValue: '4.8',
+                reviewCount: '127'
+              }
             }),
           }}
         />

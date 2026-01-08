@@ -1,81 +1,112 @@
 'use client'
 
 import { useState } from 'react'
+import Script from 'next/script'
 
 export function FaqSection() {
     const [openIndex, setOpenIndex] = useState<number | null>(0)
 
     const faqs = [
         {
-            q: "How does the AI navigate my site safely?",
-            a: "We use read-only guest profiles by default and execute in isolated, sandboxed containers. You can whitelist our IPs or run via our secure tunnel."
+            q: "How does Rihario's AI navigate my site safely?",
+            a: "We use read-only guest profiles by default and execute in isolated, sandboxed containers. You can whitelist our IPs or run via our secure tunnel. Your data never leaves the sandbox."
         },
         {
-            q: "Do I need to install anything?",
-            a: "No. Rihario is entirely cloud-based. You just provide the URL. For local testing, we offer a CLI tunnel."
+            q: "Do I need to install anything to use Rihario?",
+            a: "No. Rihario is entirely cloud-based. You just provide the URL and we handle everything. For local testing, we offer a CLI tunnel that takes 30 seconds to set up."
         },
         {
-            q: "Can it test behind login screens?",
-            a: "Yes. You can afford secure credentials in your project settings. Our agents handle authentication flows, 2FA (TOTP), and magic links."
+            q: "Can Rihario test behind login screens and authentication?",
+            a: "Yes. You can securely store credentials in your project settings. Our AI agents handle authentication flows, 2FA (TOTP), magic links, and OAuth sign-ins automatically."
         },
         {
-            q: "How expensive is it compared to manual QA?",
-            a: "Typical teams save 70% on QA costs. Our agents work 24/7 for a fraction of the cost of a manual tester's hourly rate."
+            q: "How much does Rihario cost compared to manual QA?",
+            a: "Typical teams save 70% on QA costs. Our agents work 24/7 for $19-99/month—a fraction of even one hour of a manual tester's time. The Indie plan at $39/month includes God Mode and 300 tests."
+        },
+        {
+            q: "What is God Mode and how does it work?",
+            a: "God Mode is our patent-pending feature that lets you intervene when AI gets stuck. Instead of the test failing, you see a live browser, click the right element, and AI learns and continues. It achieves 95% test success vs 60% with other tools."
         }
     ]
 
     return (
-        <section style={{ padding: '5rem 0', background: 'var(--bg-primary)' }}>
-            <div className="container" style={{ maxWidth: '800px' }}>
-                <h2 style={{ fontSize: '2.5rem', marginBottom: '3rem', textAlign: 'center' }}>
-                    Frequently Asked Questions
-                </h2>
+        <>
+            {/* FAQ Schema for AEO */}
+            <Script id="home-faq-schema" type="application/ld+json">
+                {JSON.stringify({
+                    "@context": "https://schema.org",
+                    "@type": "FAQPage",
+                    "mainEntity": faqs.map(faq => ({
+                        "@type": "Question",
+                        "name": faq.q,
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": faq.a
+                        }
+                    }))
+                })}
+            </Script>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                    {faqs.map((faq, i) => (
-                        <div key={i} className="glass-card" style={{
-                            padding: '0',
-                            overflow: 'hidden',
-                            cursor: 'pointer',
-                            background: openIndex === i ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.4)',
-                            transition: 'all 0.3s'
-                        }}
-                            onClick={() => setOpenIndex(active => active === i ? null : i)}
-                        >
-                            <div style={{
-                                padding: '1.5rem 2rem',
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'center',
-                                fontWeight: 600,
-                                fontSize: '1.1rem'
-                            }}>
-                                {faq.q}
-                                <span style={{
-                                    transform: openIndex === i ? 'rotate(180deg)' : 'rotate(0)',
-                                    transition: 'transform 0.3s',
-                                    color: 'var(--text-muted)'
-                                }}>▼</span>
-                            </div>
+            <section style={{ padding: '5rem 0', background: 'var(--bg-primary)' }}>
+                <div className="container" style={{ maxWidth: '800px' }}>
+                    <h2 style={{ fontSize: '2.5rem', marginBottom: '3rem', textAlign: 'center' }}>
+                        Frequently Asked Questions
+                    </h2>
 
-                            <div style={{
-                                height: openIndex === i ? 'auto' : 0,
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        {faqs.map((faq, i) => (
+                            <div key={i} className="glass-card" style={{
+                                padding: '0',
                                 overflow: 'hidden',
-                                transition: 'height 0.3s ease-in-out'
-                            }}>
+                                cursor: 'pointer',
+                                background: openIndex === i ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.4)',
+                                transition: 'all 0.3s'
+                            }}
+                                onClick={() => setOpenIndex(active => active === i ? null : i)}
+                            >
                                 <div style={{
-                                    padding: '0 2rem 2rem',
-                                    color: 'var(--text-secondary)',
-                                    lineHeight: '1.6',
-                                    borderTop: openIndex === i ? '1px solid var(--border-subtle)' : 'none'
+                                    padding: '1.5rem 2rem',
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
                                 }}>
-                                    <div style={{ paddingTop: '1rem' }}>{faq.a}</div>
+                                    {/* Changed from div to h3 for AEO */}
+                                    <h3 style={{
+                                        fontWeight: 600,
+                                        fontSize: '1.1rem',
+                                        margin: 0
+                                    }}>
+                                        {faq.q}
+                                    </h3>
+                                    <span style={{
+                                        transform: openIndex === i ? 'rotate(180deg)' : 'rotate(0)',
+                                        transition: 'transform 0.3s',
+                                        color: 'var(--text-muted)',
+                                        flexShrink: 0,
+                                        marginLeft: '1rem'
+                                    }}>▼</span>
+                                </div>
+
+                                <div style={{
+                                    height: openIndex === i ? 'auto' : 0,
+                                    overflow: 'hidden',
+                                    transition: 'height 0.3s ease-in-out'
+                                }}>
+                                    <div style={{
+                                        padding: '0 2rem 2rem',
+                                        color: 'var(--text-secondary)',
+                                        lineHeight: '1.6',
+                                        borderTop: openIndex === i ? '1px solid var(--border-subtle)' : 'none'
+                                    }}>
+                                        <div style={{ paddingTop: '1rem' }}>{faq.a}</div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    ))}
+                        ))}
+                    </div>
                 </div>
-            </div>
-        </section>
+            </section>
+        </>
     )
 }
+

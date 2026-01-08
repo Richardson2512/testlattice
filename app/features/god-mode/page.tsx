@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { LandingHeader } from '@/components/LandingHeader'
 import { Footer } from '@/components/Footer'
 
+
 export default function GodModePage() {
     return (
         <main style={{ minHeight: '100vh', background: 'var(--bg-primary)', overflowX: 'hidden' }}>

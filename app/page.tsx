@@ -80,8 +80,8 @@ export default async function Home() {
               </div>
 
               <h1 style={{ marginBottom: '1.5rem', lineHeight: 1.1 }}>
-                Feel Confident <br />
-                <span className="text-gradient">Before Shipping</span>
+                AI Testing for Indie Hackers<br />
+                <span className="text-gradient">Ship With Confidence</span>
               </h1>
 
               <p style={{
