@@ -1,14 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Sidebar } from '@/components/Sidebar' // Assuming there is a common layout or sidebar component, but I'll stick to a standalone page if needed or use a Layout wrapper if present.
 import { api } from '@/lib/api'
-import { Card } from '@/components/ui/card' // Assuming shadcn-like components exist
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Plus, Trash2, Key, Edit, Save, X } from 'lucide-react'
-import { toast } from 'sonner' // Assuming sonner is used for toasts based on typical next/shadcn stacks
 
 // Types
 interface Credential {
@@ -25,7 +18,6 @@ export default function CredentialsPage() {
     const [loading, setLoading] = useState(true)
     const [showAddForm, setShowAddForm] = useState(false)
     const [newCred, setNewCred] = useState({ name: '', username: '', email: '', password: '' })
-    const [editingId, setEditingId] = useState<string | null>(null)
 
     useEffect(() => {
         fetchCredentials()
@@ -34,11 +26,11 @@ export default function CredentialsPage() {
     const fetchCredentials = async () => {
         try {
             setLoading(true)
-            const res = await api.getCredentials() // We need to add this to lib/api
+            const res = await api.getCredentials()
             setCredentials(res.credentials || [])
         } catch (error) {
             console.error('Failed to fetch credentials', error)
-            toast.error('Failed to load credentials')
+            alert('Failed to load credentials')
         } finally {
             setLoading(false)
         }
@@ -48,17 +40,17 @@ export default function CredentialsPage() {
         e.preventDefault()
         try {
             if (!newCred.password) {
-                toast.error('Password is required')
+                alert('Password is required')
                 return
             }
 
             await api.createCredential(newCred)
-            toast.success('Credential created')
+            alert('Credential created')
             setShowAddForm(false)
             setNewCred({ name: '', username: '', email: '', password: '' })
             fetchCredentials()
         } catch (error) {
-            toast.error('Failed to create credential')
+            alert('Failed to create credential')
         }
     }
 
@@ -66,133 +58,257 @@ export default function CredentialsPage() {
         if (!confirm('Are you sure you want to delete this credential?')) return
         try {
             await api.deleteCredential(id)
-            toast.success('Credential deleted')
+            alert('Credential deleted')
             setCredentials(prev => prev.filter(c => c.id !== id))
         } catch (error) {
-            toast.error('Failed to delete credential')
+            alert('Failed to delete credential')
         }
     }
 
-    // Placeholder for api.createCredential and api.deleteCredential since I haven't added them to lib/api yet
-    // I will add them in the next step.
-
     return (
-        <div className="flex h-screen bg-[var(--bg-primary)]">
-            {/* Sidebar would typically be in a layout, but if I'm creating a page inside app/dashboard, it might inherit layout */}
+        <div style={{
+            minHeight: '100vh',
+            fontFamily: 'var(--font-sans)',
+            padding: '2rem',
+        }}>
+            <div style={{ width: '100%', maxWidth: '1000px', margin: '0 auto' }}>
 
-            <main className="flex-1 overflow-y-auto p-8">
-                <div className="max-w-4xl mx-auto">
-                    <div className="flex justify-between items-center mb-8">
-                        <div>
-                            <h1 className="text-3xl font-bold text-[var(--text-primary)] mb-2">Credentials</h1>
-                            <p className="text-[var(--text-secondary)]">Manage test accounts for login flows.</p>
-                        </div>
-                        <Button onClick={() => setShowAddForm(!showAddForm)} className="bg-[var(--primary)] text-white gap-2">
-                            <Plus size={16} /> Add Credential
-                        </Button>
+                {/* Header */}
+                <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: '2rem',
+                }}>
+                    <div>
+                        <h1 style={{
+                            fontSize: '1.75rem',
+                            fontWeight: 700,
+                            color: 'var(--text-primary)',
+                            margin: 0,
+                            marginBottom: '0.25rem',
+                        }}>Credentials</h1>
+                        <p style={{ color: 'var(--text-muted)', margin: 0, fontSize: '0.9rem' }}>
+                            Manage test accounts for login flows.
+                        </p>
                     </div>
-
-                    {/* Add Form */}
-                    {showAddForm && (
-                        <Card className="p-6 mb-8 border border-[var(--border-subtle)] bg-[var(--bg-secondary)]">
-                            <form onSubmit={handleCreate} className="space-y-4">
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="name">Name (e.g. Staging Admin)</Label>
-                                        <Input
-                                            id="name"
-                                            value={newCred.name}
-                                            onChange={e => setNewCred({ ...newCred, name: e.target.value })}
-                                            placeholder="My Test Account"
-                                            required
-                                            className="bg-[var(--bg-tertiary)] border-[var(--border-subtle)]"
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="email">Email</Label>
-                                        <Input
-                                            id="email"
-                                            type="email"
-                                            value={newCred.email}
-                                            onChange={e => setNewCred({ ...newCred, email: e.target.value })}
-                                            placeholder="admin@example.com"
-                                            className="bg-[var(--bg-tertiary)] border-[var(--border-subtle)]"
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="username">Username (Optional)</Label>
-                                        <Input
-                                            id="username"
-                                            value={newCred.username}
-                                            onChange={e => setNewCred({ ...newCred, username: e.target.value })}
-                                            placeholder="admin_user"
-                                            className="bg-[var(--bg-tertiary)] border-[var(--border-subtle)]"
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="password">Password</Label>
-                                        <Input
-                                            id="password"
-                                            type="password"
-                                            value={newCred.password}
-                                            onChange={e => setNewCred({ ...newCred, password: e.target.value })}
-                                            placeholder="••••••••"
-                                            required
-                                            className="bg-[var(--bg-tertiary)] border-[var(--border-subtle)]"
-                                        />
-                                    </div>
-                                </div>
-                                <div className="flex justify-end gap-2 pt-2">
-                                    <Button type="button" variant="outline" onClick={() => setShowAddForm(false)}>Cancel</Button>
-                                    <Button type="submit" className="bg-[var(--primary)] text-white">Save Credential</Button>
-                                </div>
-                            </form>
-                        </Card>
-                    )}
-
-                    {/* List */}
-                    {loading ? (
-                        <div className="flex justify-center p-12">
-                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--primary)]"></div>
-                        </div>
-                    ) : credentials.length === 0 ? (
-                        <div className="text-center p-12 border border-dashed border-[var(--border-subtle)] rounded-lg">
-                            <Key className="mx-auto h-12 w-12 text-[var(--text-muted)] mb-4" />
-                            <h3 className="text-lg font-medium text-[var(--text-primary)]">No credentials found</h3>
-                            <p className="text-[var(--text-muted)] mt-1">Add credentials manually or run a guest test to capture them automatically.</p>
-                        </div>
-                    ) : (
-                        <div className="grid gap-4">
-                            {credentials.map(cred => (
-                                <Card key={cred.id} className="p-4 flex items-center justify-between border border-[var(--border-subtle)] bg-[var(--bg-secondary)] hover:border-[var(--primary)] transition-colors">
-                                    <div className="flex items-center gap-4">
-                                        <div className="p-2 bg-[var(--bg-tertiary)] rounded-full">
-                                            <Key className="h-5 w-5 text-[var(--primary)]" />
-                                        </div>
-                                        <div>
-                                            <h3 className="font-semibold text-[var(--text-primary)]">{cred.name}</h3>
-                                            <div className="text-sm text-[var(--text-secondary)] flex gap-4 mt-1">
-                                                {cred.email && <span>{cred.email}</span>}
-                                                {cred.username && <span>@{cred.username}</span>}
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="flex gap-2">
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            onClick={() => handleDelete(cred.id)}
-                                            className="text-[var(--state-error-text)] hover:text-[var(--state-error-text)] hover:bg-[var(--state-error-bg)]"
-                                        >
-                                            <Trash2 size={18} />
-                                        </Button>
-                                    </div>
-                                </Card>
-                            ))}
-                        </div>
-                    )}
+                    <button
+                        onClick={() => setShowAddForm(!showAddForm)}
+                        style={{
+                            padding: '0.6rem 1.25rem',
+                            background: 'var(--primary)',
+                            border: 'none',
+                            borderRadius: 'var(--radius-md)',
+                            color: 'white',
+                            fontSize: '0.85rem',
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem',
+                        }}
+                    >
+                        <span>+</span> Add Credential
+                    </button>
                 </div>
-            </main>
+
+                {/* Add Form */}
+                {showAddForm && (
+                    <div className="glass-card" style={{ padding: '1.5rem', marginBottom: '2rem' }}>
+                        <form onSubmit={handleCreate} style={{ display: 'grid', gap: '1.25rem' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                <div>
+                                    <label htmlFor="name" style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', fontWeight: 500, color: 'var(--text-secondary)' }}>Name (e.g. Staging Admin)</label>
+                                    <input
+                                        id="name"
+                                        value={newCred.name}
+                                        onChange={e => setNewCred({ ...newCred, name: e.target.value })}
+                                        placeholder="My Test Account"
+                                        required
+                                        style={{
+                                            width: '100%',
+                                            padding: '0.75rem',
+                                            background: 'var(--bg-tertiary)',
+                                            border: '1px solid var(--border-medium)',
+                                            borderRadius: 'var(--radius-md)',
+                                            color: 'var(--text-primary)',
+                                            fontSize: '0.9rem',
+                                        }}
+                                    />
+                                </div>
+                                <div>
+                                    <label htmlFor="email" style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', fontWeight: 500, color: 'var(--text-secondary)' }}>Email</label>
+                                    <input
+                                        id="email"
+                                        type="email"
+                                        value={newCred.email}
+                                        onChange={e => setNewCred({ ...newCred, email: e.target.value })}
+                                        placeholder="admin@example.com"
+                                        style={{
+                                            width: '100%',
+                                            padding: '0.75rem',
+                                            background: 'var(--bg-tertiary)',
+                                            border: '1px solid var(--border-medium)',
+                                            borderRadius: 'var(--radius-md)',
+                                            color: 'var(--text-primary)',
+                                            fontSize: '0.9rem',
+                                        }}
+                                    />
+                                </div>
+                                <div>
+                                    <label htmlFor="username" style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', fontWeight: 500, color: 'var(--text-secondary)' }}>Username (Optional)</label>
+                                    <input
+                                        id="username"
+                                        value={newCred.username}
+                                        onChange={e => setNewCred({ ...newCred, username: e.target.value })}
+                                        placeholder="admin_user"
+                                        style={{
+                                            width: '100%',
+                                            padding: '0.75rem',
+                                            background: 'var(--bg-tertiary)',
+                                            border: '1px solid var(--border-medium)',
+                                            borderRadius: 'var(--radius-md)',
+                                            color: 'var(--text-primary)',
+                                            fontSize: '0.9rem',
+                                        }}
+                                    />
+                                </div>
+                                <div>
+                                    <label htmlFor="password" style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', fontWeight: 500, color: 'var(--text-secondary)' }}>Password</label>
+                                    <input
+                                        id="password"
+                                        type="password"
+                                        value={newCred.password}
+                                        onChange={e => setNewCred({ ...newCred, password: e.target.value })}
+                                        placeholder="••••••••"
+                                        required
+                                        style={{
+                                            width: '100%',
+                                            padding: '0.75rem',
+                                            background: 'var(--bg-tertiary)',
+                                            border: '1px solid var(--border-medium)',
+                                            borderRadius: 'var(--radius-md)',
+                                            color: 'var(--text-primary)',
+                                            fontSize: '0.9rem',
+                                        }}
+                                    />
+                                </div>
+                            </div>
+                            <div style={{ display: 'flex', justifySelf: 'end', gap: '0.75rem' }}>
+                                <button
+                                    type="button"
+                                    onClick={() => setShowAddForm(false)}
+                                    style={{
+                                        padding: '0.6rem 1.25rem',
+                                        background: 'transparent',
+                                        border: '1px solid var(--border-medium)',
+                                        borderRadius: 'var(--radius-md)',
+                                        color: 'var(--text-secondary)',
+                                        fontSize: '0.85rem',
+                                        cursor: 'pointer',
+                                    }}
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    style={{
+                                        padding: '0.6rem 1.25rem',
+                                        background: 'var(--primary)',
+                                        border: 'none',
+                                        borderRadius: 'var(--radius-md)',
+                                        color: 'white',
+                                        fontSize: '0.85rem',
+                                        fontWeight: 600,
+                                        cursor: 'pointer',
+                                    }}
+                                >
+                                    Save Credential
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                )}
+
+                {/* List */}
+                {loading ? (
+                    <div style={{ display: 'flex', justifyContent: 'center', padding: '3rem' }}>
+                        <div style={{
+                            width: '32px',
+                            height: '32px',
+                            borderRadius: '50%',
+                            border: '2px solid var(--primary)',
+                            borderBottomColor: 'transparent',
+                            animation: 'spin 1s linear infinite'
+                        }}></div>
+                        <style jsx>{`
+                    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+                `}</style>
+                    </div>
+                ) : credentials.length === 0 ? (
+                    <div style={{
+                        textAlign: 'center',
+                        padding: '3rem',
+                        border: '1px dashed var(--border-medium)',
+                        borderRadius: 'var(--radius-lg)',
+                        color: 'var(--text-muted)'
+                    }}>
+                        <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>🔑</div>
+                        <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.5rem' }}>No credentials found</h3>
+                        <p>Add credentials manually or run a guest test to capture them automatically.</p>
+                    </div>
+                ) : (
+                    <div style={{ display: 'grid', gap: '1rem' }}>
+                        {credentials.map(cred => (
+                            <div key={cred.id} className="glass-card" style={{
+                                padding: '1.25rem',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between'
+                            }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                    <div style={{
+                                        padding: '0.75rem',
+                                        background: 'var(--bg-tertiary)',
+                                        borderRadius: '50%',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        fontSize: '1.2rem'
+                                    }}>
+                                        🔑
+                                    </div>
+                                    <div>
+                                        <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 600, color: 'var(--text-primary)' }}>{cred.name}</h3>
+                                        <div style={{ display: 'flex', gap: '1rem', marginTop: '0.25rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                                            {cred.email && <span>📧 {cred.email}</span>}
+                                            {cred.username && <span>👤 @{cred.username}</span>}
+                                        </div>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={() => handleDelete(cred.id)}
+                                    style={{
+                                        background: 'transparent',
+                                        border: 'none',
+                                        color: 'var(--state-error-text)',
+                                        cursor: 'pointer',
+                                        padding: '0.5rem',
+                                        fontSize: '1.2rem',
+                                        opacity: 0.7,
+                                        transition: 'opacity 0.2s'
+                                    }}
+                                    onMouseEnter={e => e.currentTarget.style.opacity = '1'}
+                                    onMouseLeave={e => e.currentTarget.style.opacity = '0.7'}
+                                    title="Delete Credential"
+                                >
+                                    🗑️
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
         </div>
     )
 }
