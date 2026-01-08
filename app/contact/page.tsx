@@ -57,9 +57,9 @@ export default function ContactPage() {
         <div style={{ minHeight: '100vh', background: 'var(--bg-primary)', color: 'var(--text-primary)', fontFamily: 'var(--font-sans)', overflowX: 'hidden', position: 'relative', display: 'flex', flexDirection: 'column' }}>
             <LandingHeader />
 
-            {/* Background Gradients */}
+            {/* Background Gradients - contained within viewport */}
             <div style={{
-                position: 'absolute',
+                position: 'fixed',
                 top: '-20%',
                 right: '-10%',
                 width: '800px',
@@ -71,8 +71,8 @@ export default function ContactPage() {
                 pointerEvents: 'none'
             }} />
             <div style={{
-                position: 'absolute',
-                bottom: '-10%',
+                position: 'fixed',
+                bottom: '0',
                 left: '-5%',
                 width: '600px',
                 height: '600px',
