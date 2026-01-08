@@ -38,6 +38,7 @@ export default function Navigation() {
       { id: 'dashboard', label: 'Dashboard', href: '/dashboard', icon: '📊' },
       { id: 'runs', label: 'Test Runs', href: '/runs', icon: '🔬' },
       { id: 'projects', label: 'Projects', href: '#', icon: '📁', disabled: true },
+      { id: 'credentials', label: 'Credentials', href: '/dashboard/credentials', icon: '🔐' },
       { id: 'profile', label: 'Profile', href: '/profile', icon: '👤' },
     ]
 
