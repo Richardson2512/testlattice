@@ -32,21 +32,8 @@ export default function FeaturesPage() {
             <LandingHeader />
 
             {/* Hero - Clear Value Prop */}
-            <section style={{ paddingTop: '160px', paddingBottom: '60px', textAlign: 'center' }}>
+            <section style={{ paddingTop: '160px', paddingBottom: '20px', textAlign: 'center' }}>
                 <div className="container">
-                    <div style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        padding: '0.35rem 1rem',
-                        background: 'rgba(153, 27, 27, 0.08)',
-                        border: '1px solid rgba(153, 27, 27, 0.2)',
-                        borderRadius: 'var(--radius-full)',
-                        marginBottom: '1.5rem'
-                    }}>
-                        <span style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--maroon-800)' }}>
-                            No coding required
-                        </span>
-                    </div>
                     <h1 style={{ marginBottom: '1.5rem', fontSize: '3.5rem', lineHeight: 1.1 }}>
                         Find Out If Your App <span className="text-gradient">Actually Works</span>
                     </h1>
@@ -57,8 +44,8 @@ export default function FeaturesPage() {
                         <Link href="/signup" className="btn btn-primary btn-large">
                             Try It Free
                         </Link>
-                        <Link href="/why-rihario" className="btn btn-secondary btn-large">
-                            Why Rihario?
+                        <Link href="/pricing" className="btn btn-secondary btn-large">
+                            View Pricing
                         </Link>
                     </div>
                 </div>
