@@ -334,7 +334,7 @@ export default function DashboardPage() {
   async function handleCancelRun(e: React.MouseEvent, runId: string) {
     e.stopPropagation()
     if (!confirm('Are you sure you want to cancel this test run?')) return
-    
+
     try {
       // Optimistic update could go here, but refetch is safer for consistency
       await api.cancelTestRun(runId)
@@ -665,6 +665,23 @@ export default function DashboardPage() {
                 transition: 'background 0.2s'
               }}>
                 <span>⚙️</span> Manage Subscription
+              </Link>
+
+              <Link href="/dashboard/credentials" style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.5rem',
+                padding: '0.75rem',
+                background: 'var(--bg-tertiary)',
+                borderRadius: 'var(--radius-md)',
+                color: 'var(--text-primary)',
+                textDecoration: 'none',
+                fontSize: '0.85rem',
+                fontWeight: 500,
+                transition: 'background 0.2s'
+              }}>
+                <span>🔐</span> Manage Credentials
               </Link>
 
             </div>

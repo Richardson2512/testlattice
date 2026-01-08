@@ -478,6 +478,24 @@ export const api = {
     })
   },
 
+  // Credentials
+  async getCredentials(): Promise<{ credentials: any[] }> {
+    return request('/api/credentials')
+  },
+
+  async createCredential(data: any): Promise<{ credential: any }> {
+    return request('/api/credentials', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    })
+  },
+
+  async deleteCredential(id: string): Promise<{ success: boolean }> {
+    return request(`/api/credentials/${id}`, {
+      method: 'DELETE',
+    })
+  },
+
   async getTestRun(runId: string): Promise<{ testRun: TestRun; artifacts: TestArtifact[] }> {
     return request(`/api/tests/${runId}`)
   },
