@@ -167,7 +167,7 @@ export function IronManHUD({
       }
 
       // Draw label background
-      ctx.font = '12px monospace'
+      ctx.font = '600 12px "League Spartan", sans-serif'
       const textMetrics = ctx.measureText(label)
       const textHeight = 16
       const padding = 4
@@ -364,11 +364,13 @@ export function IronManHUD({
       />
 
       {/* Legend */}
-      <div className="absolute top-2 right-2 text-xs p-2 rounded space-y-1 font-mono" style={{
+      <div className="absolute top-2 right-2 text-xs p-2 rounded space-y-1" style={{
         backgroundColor: 'rgba(250, 249, 247, 0.95)',
         color: 'var(--text-primary)',
         border: '1px solid var(--beige-300)',
         boxShadow: 'var(--shadow-md)',
+        fontFamily: 'var(--font-sans)',
+        fontWeight: 600,
       }}>
         <div className="font-bold mb-1">🎯 Iron Man HUD</div>
         <div className="flex items-center gap-2">
@@ -404,6 +406,8 @@ export function IronManHUD({
             boxShadow: 'var(--shadow-md)',
             left: cursorPosition.x + 10,
             top: cursorPosition.y + 10,
+            fontFamily: 'var(--font-sans)',
+            fontWeight: 600,
           }}
         >
           <div className="font-bold">{hoveredElement.type.toUpperCase()}</div>

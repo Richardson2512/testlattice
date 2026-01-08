@@ -79,6 +79,22 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Ensure form elements inherit font */
+input,
+textarea,
+select,
+button {
+  font-family: inherit;
+}
+
+::placeholder {
+  font-family: inherit;
+  opacity: 1;
+  /* Firefox fix */
+  color: var(--text-muted);
+  /* Consistent placeholder color */
+}
+
 /* Glassmorphism Utilities */
 .glass-panel {
   background: var(--bg-glass);
@@ -130,6 +146,7 @@ h3 {
 .text-gradient {
   background: linear-gradient(135deg, var(--maroon-900) 0%, var(--maroon-600) 100%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
