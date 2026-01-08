@@ -239,38 +239,89 @@ const features: FeatureSlide[] = [
                         </div>
                     </div>
 
-                    {/* Samsung (Right) */}
+                    {/* Samsung S25 Ultra (Right) - Scaled Down */}
                     <div style={{
                         width: '145px',
                         height: '100%',
-                        border: '4px solid #1e293b',
-                        borderRadius: '12px',
-                        background: '#fff',
                         position: 'relative',
-                        overflow: 'hidden',
-                        boxShadow: '0 15px 30px rgba(0,0,0,0.2)',
                         transform: 'rotate(5deg)',
                         zIndex: 2
                     }}>
-                        {/* Punch-hole Camera */}
-                        <div style={{ position: 'absolute', top: '10px', left: '50%', transform: 'translateX(-50%)', width: '10px', height: '10px', background: '#1e293b', borderRadius: '50%', zIndex: 5 }} />
+                        <div style={{
+                            width: '976.55px',
+                            height: '2048px',
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            transform: 'scale(0.148)',
+                            transformOrigin: 'top left',
+                        }}>
+                            {/* Body */}
+                            <div style={{
+                                position: 'absolute', left: 0, right: 0, top: 0, bottom: 0,
+                                border: '4px solid #212121', borderRadius: '63.06px',
+                                background: '#212121' // Adding background to body to prevent transparency issues
+                            }} />
 
-                        {/* Content */}
-                        <div style={{ padding: '2rem 0.75rem 0.75rem', display: 'flex', flexDirection: 'column', gap: '0.6rem', height: '100%' }}>
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
-                                <div style={{ height: '40px', background: '#e2e8f0', borderRadius: '4px' }} />
-                                <div style={{ height: '40px', background: '#e2e8f0', borderRadius: '4px' }} />
-                            </div>
-                            <div style={{ height: '10px', width: '80%', background: '#cbd5e1', borderRadius: '2px', marginTop: '0.5rem' }} />
-                            <div style={{ height: '8px', width: '50%', background: '#e2e8f0', borderRadius: '2px' }} />
+                            {/* Pen */}
+                            <div style={{
+                                position: 'absolute', width: '76.36px', height: '6.18px', left: '48.92px', bottom: '-6.14px',
+                                border: '4px solid #212121', borderRadius: '0px 0px 14.84px 14.84px', background: '#212121'
+                            }} />
 
-                            {/* App Grid */}
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '6px', marginTop: '1rem' }}>
-                                {[...Array(6)].map((_, i) => <div key={i} style={{ aspectRatio: '1', background: '#f1f5f9', borderRadius: '6px' }} />)}
-                            </div>
+                            {/* Volume Buttons */}
+                            <div style={{
+                                position: 'absolute', width: '7.73px', height: '264.31px', right: '-8.49px', top: '390.43px',
+                                border: '4px solid #212121', borderRadius: '1.09px 0px 0px 1.09px', background: '#212121',
+                                transform: 'matrix(-1, 0, 0, 1, 0, 0)'
+                            }} />
+                            <div style={{
+                                position: 'absolute', width: '7.73px', height: '145.29px', right: '-8.49px', top: '773.45px',
+                                border: '4px solid #212121', borderRadius: '1.09px 0px 0px 1.09px', background: '#212121',
+                                transform: 'matrix(-1, 0, 0, 1, 0, 0)'
+                            }} />
 
-                            <div style={{ marginTop: 'auto', textAlign: 'center' }}>
-                                <div style={{ display: 'inline-block', padding: '0.2rem 0.5rem', background: '#ef4444', color: '#fff', fontSize: '0.6rem', borderRadius: '3px' }}>TESTING</div>
+                            {/* Screen Frame */}
+                            <div style={{
+                                position: 'absolute', left: '14.15px', right: '14.6px', top: '11.44px', bottom: '12.06px',
+                                border: '4px solid #3E3E3E', borderRadius: '50.7px',
+                                background: '#000'
+                            }} />
+
+                            {/* Display Area (Viewport) */}
+                            <div style={{
+                                position: 'absolute', left: '13.36px', right: '13.22px', top: '13.29px', bottom: '13.29px',
+                                borderRadius: '40.8px',
+                                background: '#fff',
+                                overflow: 'hidden',
+                                display: 'flex',
+                                flexDirection: 'column'
+                            }}>
+                                {/* Camera Punch-hole */}
+                                <div style={{
+                                    position: 'absolute', width: '42.75px', height: '42.16px',
+                                    left: 'calc(50% - 42.75px/2 - 0.15px)', top: '20.87px',
+                                    background: '#3E3E3E', borderRadius: '53.3px', zIndex: 50
+                                }} />
+
+                                {/* Scaled Up Content for Display */}
+                                <div style={{ padding: '120px 40px 40px', height: '100%', display: 'flex', flexDirection: 'column', gap: '30px' }}>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                                        <div style={{ height: '200px', background: '#e2e8f0', borderRadius: '20px' }} />
+                                        <div style={{ height: '200px', background: '#e2e8f0', borderRadius: '20px' }} />
+                                    </div>
+                                    <div style={{ height: '40px', width: '80%', background: '#cbd5e1', borderRadius: '10px', marginTop: '20px' }} />
+                                    <div style={{ height: '30px', width: '50%', background: '#e2e8f0', borderRadius: '10px' }} />
+
+                                    {/* App Grid */}
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '25px', marginTop: '40px' }}>
+                                        {[...Array(9)].map((_, i) => <div key={i} style={{ aspectRatio: '1', background: '#f1f5f9', borderRadius: '25px' }} />)}
+                                    </div>
+
+                                    <div style={{ marginTop: 'auto', textAlign: 'center' }}>
+                                        <div style={{ display: 'inline-block', padding: '15px 40px', background: '#ef4444', color: '#fff', fontSize: '32px', borderRadius: '15px', fontWeight: 'bold' }}>TESTING</div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
