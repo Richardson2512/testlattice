@@ -112,7 +112,7 @@ export default function TopSoftwareTestingToolsPage() {
                     "@type": "Article",
                     "headline": "Top 10 Best Software Testing Tools for Indie Hackers",
                     "author": { "@type": "Organization", "name": "Rihario" },
-                    "datePublished": "2024-01-08"
+                    "datePublished": "2024-10-05"
                 })}
             </Script>
 

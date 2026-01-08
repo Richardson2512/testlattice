@@ -22,7 +22,7 @@ export default function WhatIsAiTestingPost() {
                     "description": "Comprehensive guide to AI testing for solo developers and indie hackers",
                     "author": { "@type": "Organization", "name": "Rihario" },
                     "publisher": { "@type": "Organization", "name": "Rihario" },
-                    "datePublished": "2024-01-08",
+                    "datePublished": "2024-07-18",
                     "dateModified": "2024-01-08"
                 })}
             </Script>
@@ -63,7 +63,7 @@ export default function WhatIsAiTestingPost() {
                                 A plain-English explanation of AI testing, how it works, and why it's perfect for solo developers who don't want to write test code.
                             </p>
                             <div style={{ marginTop: '1rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-                                Updated January 2024 • 8 min read
+                                Updated July 2024 • 8 min read
                             </div>
                         </header>
 

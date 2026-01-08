@@ -63,7 +63,7 @@ export default function HowToTestMvpPage() {
                                 You've built your MVP. Now make sure it actually works before real users try it.
                             </p>
                             <div style={{ marginTop: '1rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-                                Updated January 2024 • 10 min read
+                                Updated September 2024 • 10 min read
                             </div>
                         </header>
 
