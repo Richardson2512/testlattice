@@ -24,6 +24,18 @@ export function FaqSection() {
             a: "Typical teams save 70% on QA costs. Our agents work 24/7 for $19-99/month—a fraction of even one hour of a manual tester's time. The Indie plan at $39/month includes God Mode and 300 tests."
         },
         {
+            q: "How do I smoke test my vibe coded app?",
+            a: "Rihario runs a 'Critical Path' smoke test automatically. We recommend checking 5 key things: Login, Core Value Action, Navigation routing, Mobile layout (375px), and API connectivity. Rihario can automate this entire checklist for you."
+        },
+        {
+            q: "Should I write unit tests for Cursor/AI-generated code?",
+            a: "Rihario suggests replacing brittle unit tests with high-level behavior tests. AI code changes too frequently for unit tests to be sustainable. Rihario verifies the functionality from the user's perspective, which is what actually matters."
+        },
+        {
+            q: "I use Cursor/Replit to 'Vibe Code'. Does Rihario work with AI-generated code?",
+            a: "Absolutely. In fact, Rihario was built for Vibe Coding. Since you don't write the code yourself, you shouldn't write the tests yourself either. Just tell Rihario 'Verify that the new signup flow works' and we test it instantly."
+        },
+        {
             q: "What is God Mode and how does it work?",
             a: "God Mode is our patent-pending feature that lets you intervene when AI gets stuck. Instead of the test failing, you see a live browser, click the right element, and AI learns and continues. It achieves 95% test success vs 60% with other tools."
         }

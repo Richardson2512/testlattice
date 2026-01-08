@@ -11,6 +11,46 @@ export const metadata: Metadata = {
 
 const blogPosts = [
     {
+        slug: 'smoke-test-checklist-vibe-coding',
+        title: 'Rihario\'s Smoke Test Checklist for Vibe Coded Apps',
+        description: 'A 5-point automated smoke test checklist for apps built with Cursor, Replit, or Windsurf. Verify your app in 3 minutes.',
+        category: 'Checklist',
+        date: 'January 2026',
+        readTime: '3 min'
+    },
+    {
+        slug: 'unit-testing-ai-code',
+        title: 'Why Rihario is Better Than Unit Tests for AI Generated Code',
+        description: 'Stop writing brittle unit tests for ephemeral AI code. Learn why behavior-driven testing is the superior strategy.',
+        category: 'Methodology',
+        date: 'January 2026',
+        readTime: '6 min'
+    },
+    {
+        slug: 'staging-for-vibe-projects',
+        title: 'Rihario\'s Guide to Staging Environments for Vibe Projects',
+        description: 'How to set up a lightweight staging workflow using ephemeral previews and Rihario quality gates.',
+        category: 'DevOps',
+        date: 'January 2026',
+        readTime: '5 min'
+    },
+    {
+        slug: 'what-is-vibe-coding',
+        title: 'What is Vibe Coding? The Rise of the AI-Native Developer',
+        description: 'Vibe Coding is the new flow state of building software with AI tools like Cursor and Replit. Learn what it is and why it matters.',
+        category: 'Trends',
+        date: 'January 2026',
+        readTime: '5 min'
+    },
+    {
+        slug: 'testing-for-vibe-coders',
+        title: 'How to Test While Vibe Coding: Keep Flow High, Bugs Low',
+        description: 'Practical guide for Cursor, Replit, and AI-native developers on how to automate testing without breaking your flow state.',
+        category: 'Guide',
+        date: 'January 2026',
+        readTime: '7 min'
+    },
+    {
         slug: 'top-10-ai-testing-tools',
         title: 'Top 10 Best AI Testing Tools in 2024',
         description: 'A comprehensive comparison of AI-powered testing tools—from indie-friendly to enterprise-grade.',

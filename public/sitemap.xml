@@ -51,6 +51,36 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://rihario.com/blog/what-is-vibe-coding</loc>
+    <lastmod>2026-01-08</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://rihario.com/blog/testing-for-vibe-coders</loc>
+    <lastmod>2026-01-08</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://rihario.com/blog/smoke-test-checklist-vibe-coding</loc>
+    <lastmod>2026-01-08</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://rihario.com/blog/unit-testing-ai-code</loc>
+    <lastmod>2026-01-08</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://rihario.com/blog/staging-for-vibe-projects</loc>
+    <lastmod>2026-01-08</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://rihario.com/community</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>

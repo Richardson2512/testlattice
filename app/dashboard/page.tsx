@@ -13,6 +13,10 @@ import { UpgradeModal } from '@/components/UpgradeModal'
 import { UpgradeBanner } from '@/components/UpgradeBanner'
 import { canCreateTest, isFeatureAvailable } from '@/lib/usageCheck'
 import { useUsage } from '@/lib/hooks/useUsage'
+import { SuggestedTests } from '@/components/dashboard/SuggestedTests'
+import { QuickTestInput } from '@/components/dashboard/QuickTestInput'
+import { ProjectsTable } from '@/components/dashboard/ProjectsTable'
+import { Greeting } from '@/components/dashboard/Greeting'
 import type { PricingTier } from '@/lib/pricing'
 
 type TestMode = 'single' | 'multi'
@@ -105,6 +109,7 @@ export default function DashboardPage() {
   // User State
   const [userId, setUserId] = useState<string | null>(null)
   const [teamId, setTeamId] = useState<string>('default-team')
+  const [userName, setUserName] = useState<string>('')
 
   // Create Test State
   const [testMode, setTestMode] = useState<TestMode>('single')
@@ -168,6 +173,7 @@ export default function DashboardPage() {
       if (user) {
         setUserId(user.id)
         setTeamId(user.id)
+        setUserName(user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || 'Indie Hacker')
 
         // Reconcile subscription with Polar (self-healing for webhook failures)
         api.reconcileSubscription().catch((err) => {
@@ -177,6 +183,44 @@ export default function DashboardPage() {
     }
     getUserInfo()
   }, [])
+
+  async function handleQuickRun(instructions: string, url: string) {
+    setIsSubmitting(true)
+    try {
+      const projectId = selectedProject !== 'none' ? selectedProject : projects[0]?.id
+
+      if (!projectId) {
+        alert('Please create a project first')
+        setIsSubmitting(false)
+        setShowCreateProjectModal(true)
+        return
+      }
+
+      const validation = validateTestUrl(url)
+      if (!validation.valid) {
+        alert(`Invalid URL: ${validation.error}`)
+        setIsSubmitting(false)
+        return
+      }
+
+      // Create test run
+      const response = await api.createTestRun({
+        projectId,
+        build: { type: 'web', url },
+        profile: { device: 'chrome-latest', maxMinutes: 10 },
+        options: {
+          coverage: [instructions],
+          testMode: 'single',
+          approvalPolicy: { mode: 'manual' }
+        }
+      })
+
+      window.location.href = `/test/run/${response.runId}`
+    } catch (error: any) {
+      alert(`Failed to start test: ${error.message}`)
+      setIsSubmitting(false)
+    }
+  }
 
   async function handleCreateProject(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -334,7 +378,7 @@ export default function DashboardPage() {
   async function handleCancelRun(e: React.MouseEvent, runId: string) {
     e.stopPropagation()
     if (!confirm('Are you sure you want to cancel this test run?')) return
-    
+
     try {
       // Optimistic update could go here, but refetch is safer for consistency
       await api.cancelTestRun(runId)
@@ -350,30 +394,33 @@ export default function DashboardPage() {
       fontFamily: 'var(--font-sans)',
       padding: '2rem',
     }}>
-      <div style={{ width: '100%' }}>
+      <div style={{ width: '100%', maxWidth: '1400px', margin: '0 auto' }}>
 
-        {/* Header */}
+        {/* Header - Always Visible */}
         <div style={{
           display: 'flex',
           justifyContent: 'space-between',
-          alignItems: 'flex-start',
+          alignItems: 'center',
           marginBottom: '2rem',
         }}>
           <div>
-            <h1 style={{
-              fontSize: '1.75rem',
-              fontWeight: 700,
-              color: 'var(--text-primary)',
-              margin: 0,
-              marginBottom: '0.25rem',
-            }}>Dashboard</h1>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              <p style={{ color: 'var(--text-muted)', margin: 0, fontSize: '0.9rem' }}>
-                Welcome back! Here's your testing overview.
-              </p>
-              <FetchingIndicator show={isFetching && !loading} />
+            {/* Breadcrumb / Title */}
+            <div className="flex items-center gap-2 text-sm text-[var(--text-muted)] mb-1">
+              <span>Application</span>
+              {selectedProject !== 'none' && (
+                <>
+                  <span>/</span>
+                  <span className="font-semibold text-[var(--text-primary)]">
+                    {projects.find(p => p.id === selectedProject)?.name}
+                  </span>
+                </>
+              )}
             </div>
+            {selectedProject !== 'none' && (
+              <h1 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--text-primary)' }}>Dashboard</h1>
+            )}
           </div>
+
           <div style={{ display: 'flex', gap: '0.75rem' }}>
             <select
               value={selectedProject}
@@ -386,290 +433,156 @@ export default function DashboardPage() {
                 color: 'var(--text-primary)',
                 fontSize: '0.85rem',
                 cursor: 'pointer',
+                minWidth: '200px',
               }}
             >
-              <option value="none">All Projects</option>
+              <option value="none">Overview (All Projects)</option>
               {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
             </select>
+
             <button
               onClick={() => setShowCreateProjectModal(true)}
-              style={{
-                padding: '0.6rem 1rem',
-                background: 'var(--bg-card)',
-                border: '1px solid var(--border-medium)',
-                borderRadius: 'var(--radius-md)',
-                color: 'var(--text-primary)',
-                fontSize: '0.85rem',
-                cursor: 'pointer',
-                fontWeight: 500,
-              }}
+              className="btn btn-secondary"
+              style={{ fontSize: '0.85rem' }}
             >
-              + Project
-            </button>
-            <button
-              onClick={() => setShowCreateTestModal(true)}
-              style={{
-                padding: '0.6rem 1.25rem',
-                background: 'var(--primary)',
-                border: 'none',
-                borderRadius: 'var(--radius-md)',
-                color: 'white',
-                fontSize: '0.85rem',
-                fontWeight: 600,
-                cursor: 'pointer',
-                boxShadow: '0 2px 4px rgba(92, 15, 15, 0.2)',
-              }}
-            >
-              New Test Run
+              + New Project
             </button>
           </div>
         </div>
 
-        {/* Stats Grid */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(4, 1fr)',
-          gap: '1rem',
-          marginBottom: '2rem',
-        }}>
-          <StatCard
-            title="Health Score"
-            value={`${passRate}%`}
-            subtext="Last 30 days"
-            icon="💚"
-            color={passRate > 80 ? 'var(--success)' : 'var(--error)'}
-          />
-          <StatCard
-            title="Total Runs"
-            value={totalRuns}
-            subtext="Lifetime"
-            icon="🧪"
-            color="var(--text-secondary)"
-          />
-          <StatCard
-            title="Active Tests"
-            value={activeNow}
-            subtext="Running now"
-            icon="⚡"
-            color="var(--warning)"
-          />
-          <StatCard
-            title="Avg Duration"
-            value={avgDuration > 0 ? `${avgDuration}s` : '-'}
-            subtext="Per test"
-            icon="⏱️"
-            color="var(--info)"
-          />
-        </div>
+        {selectedProject === 'none' ? (
+          // --- GLOBAL OVERVIEW ---
+          <div className="animate-enter">
+            <Greeting name={userName} />
 
-        {/* Split Content */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: '2fr 1fr',
-          gap: '1.5rem',
-        }}>
-          {/* Recent Runs */}
-          <div className="glass-card" style={{ overflow: 'hidden' }}>
-            <div style={{
-              padding: '1rem 1.25rem',
-              borderBottom: '1px solid var(--border-light)',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-            }}>
-              <h2 style={{ fontSize: '1rem', fontWeight: 600, margin: 0, color: 'var(--text-primary)' }}>
-                Recent Test Runs
-              </h2>
-              <Link href="/runs" style={{
-                color: 'var(--primary)',
-                fontSize: '0.85rem',
-                textDecoration: 'none',
-                fontWeight: 500,
-              }}>
-                View All →
-              </Link>
-            </div>
-
-            {testRuns.length === 0 ? (
-              <div style={{
-                padding: '3rem',
-                textAlign: 'center',
-                color: 'var(--text-muted)',
-              }}>
-                <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>🧪</div>
-                No test runs yet. Create your first test!
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+              <div className="lg:col-span-3 space-y-8">
+                <ProjectsTable
+                  projects={projects}
+                  testRuns={testRuns}
+                  onSelectProject={setSelectedProject}
+                  userName={userName}
+                />
               </div>
-            ) : (
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
-                <thead>
-                  <tr style={{ background: 'var(--beige-50)' }}>
-                    <th style={{ padding: '0.75rem 1.25rem', textAlign: 'left', fontWeight: 600, color: 'var(--text-secondary)', fontSize: '0.75rem', textTransform: 'uppercase' }}>Status</th>
-                    <th style={{ padding: '0.75rem 1.25rem', textAlign: 'left', fontWeight: 600, color: 'var(--text-secondary)', fontSize: '0.75rem', textTransform: 'uppercase' }}>Project</th>
-                    <th style={{ padding: '0.75rem 1.25rem', textAlign: 'left', fontWeight: 600, color: 'var(--text-secondary)', fontSize: '0.75rem', textTransform: 'uppercase' }}>URL</th>
-                    <th style={{ padding: '0.75rem 1.25rem', textAlign: 'right', fontWeight: 600, color: 'var(--text-secondary)', fontSize: '0.75rem', textTransform: 'uppercase' }}>Date</th>
-                    <th style={{ padding: '0.75rem 1.25rem', width: '80px' }}></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {testRuns.slice(0, 5).map((run, i) => (
-                    <tr
-                      key={run.id}
-                      style={{
-                        borderBottom: i < testRuns.slice(0, 5).length - 1 ? '1px solid var(--border-light)' : 'none',
-                        cursor: 'pointer',
-                      }}
-                      onClick={() => window.location.href = `/test/run/${run.id}`}
-                    >
-                      <td style={{ padding: '0.75rem 1.25rem' }}>
-                        <span style={{
-                          display: 'inline-block',
-                          padding: '3px 10px',
-                          borderRadius: 'var(--radius-full)',
-                          fontSize: '0.7rem',
-                          fontWeight: 600,
-                          textTransform: 'capitalize',
-                          background: getStatusBg(run.status),
-                          color: getStatusColor(run.status),
-                        }}>
-                          {run.status}
-                        </span>
-                      </td>
-                      <td style={{ padding: '0.75rem 1.25rem', color: 'var(--text-primary)', fontWeight: 500 }}>
-                        {projects.find(p => p.id === run.projectId)?.name || 'Unknown'}
-                      </td>
-                      <td style={{
-                        padding: '0.75rem 1.25rem',
-                        color: 'var(--text-muted)',
-                        maxWidth: '200px',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
-                      }}>
-                        {run.build?.url}
-                      </td>
-                      <td style={{ padding: '0.75rem 1.25rem', textAlign: 'right', color: 'var(--text-muted)' }}>
-                        {new Date(run.createdAt).toLocaleDateString()}
-                      </td>
-                      <td style={{ padding: '0.75rem 1.25rem', textAlign: 'right' }}>
-                        {['running', 'queued', 'pending', 'diagnosing'].includes(run.status) && (
-                          <button
-                            onClick={(e) => handleCancelRun(e, run.id)}
-                            style={{
-                              padding: '4px 8px',
-                              background: 'rgba(239, 68, 68, 0.1)',
-                              color: 'var(--error)',
-                              border: '1px solid rgba(239, 68, 68, 0.2)',
-                              borderRadius: '4px',
-                              fontSize: '0.7rem',
-                              fontWeight: 600,
-                              cursor: 'pointer',
-                              whiteSpace: 'nowrap',
-                              transition: 'all 0.2s',
-                            }}
-                            onMouseEnter={(e) => {
-                              e.currentTarget.style.background = 'var(--error)';
-                              e.currentTarget.style.color = 'white';
-                            }}
-                            onMouseLeave={(e) => {
-                              e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)';
-                              e.currentTarget.style.color = 'var(--error)';
-                            }}
-                          >
-                            Cancel
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </div>
 
-          {/* Subscription Status */}
-          <div>
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: '1rem',
-            }}>
-              <h2 style={{ fontSize: '1rem', fontWeight: 600, margin: 0, color: 'var(--text-primary)' }}>
-                Subscription Status
-              </h2>
-            </div>
-            <div className="glass-card" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '1rem', borderBottom: '1px solid var(--border-light)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                  <div style={{
-                    width: '40px',
-                    height: '40px',
-                    borderRadius: '50%',
-                    background: 'var(--bg-tertiary)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '1.2rem'
-                  }}>
-                    💎
+              <div className="lg:col-span-1 space-y-6">
+                {/* Recent Executions Sidebar */}
+                <div className="glass-card p-5">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="font-semibold text-xs text-[var(--text-muted)] uppercase tracking-wider">Recent Activity</h3>
+                    <Link href="/runs" className="text-xs text-[var(--primary)] font-medium hover:underline">View all</Link>
                   </div>
-                  <div>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 500 }}>CURRENT PLAN</div>
-                    <div style={{ fontSize: '1rem', fontWeight: 700, textTransform: 'capitalize', color: 'var(--text-primary)' }}>
-                      {currentTier}
+                  <div className="space-y-4">
+                    {testRuns.slice(0, 5).map(run => (
+                      <div key={run.id}
+                        onClick={() => window.location.href = `/test/run/${run.id}`}
+                        className="cursor-pointer group">
+                        <div className="flex justify-between items-center mb-1">
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide ${run.status === 'completed' ? 'bg-emerald-100 text-emerald-700' :
+                            run.status === 'failed' ? 'bg-red-100 text-red-700' :
+                              'bg-blue-100 text-blue-700'
+                            }`}>
+                            {run.status}
+                          </span>
+                          <span className="text-[10px] text-[var(--text-muted)]">
+                            {new Date(run.createdAt).toLocaleDateString()}
+                          </span>
+                        </div>
+                        <div className="text-sm font-medium text-[var(--text-primary)] truncate group-hover:text-[var(--primary)] transition-colors">
+                          {run.build?.url}
+                        </div>
+                        <div className="text-xs text-[var(--text-muted)] truncate">
+                          {projects.find(p => p.id === run.projectId)?.name}
+                        </div>
+                      </div>
+                    ))}
+                    {testRuns.length === 0 && <p className="text-sm text-[var(--text-muted)]">No recent activity.</p>}
+                  </div>
+                </div>
+
+                {/* Quick Stats Sidebar */}
+                <div className="glass-card p-5">
+                  <h3 className="font-semibold text-xs text-[var(--text-muted)] uppercase tracking-wider mb-4">You</h3>
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-10 h-10 rounded-full bg-[var(--bg-tertiary)] flex items-center justify-center text-lg">💎</div>
+                    <div>
+                      <div className="text-xs text-[var(--text-secondary)]">Plan</div>
+                      <div className="font-bold text-[var(--text-primary)] capitalize">{currentTier}</div>
                     </div>
                   </div>
-                </div>
-                {currentTier === 'free' && (
-                  <Link href="/pricing" style={{ fontSize: '0.8rem', color: 'var(--primary)', fontWeight: 600, textDecoration: 'none' }}>
-                    Upgrade
+                  <div className="text-xs text-[var(--text-muted)]">
+                    {usage?.totalTests || 0} / {usage?.totalTestsLimit || 3} monthly runs used
+                  </div>
+                  <Link href="/pricing" className="block mt-3 text-xs text-[var(--primary)] font-medium hover:underline">
+                    Manage Subscription →
                   </Link>
-                )}
-              </div>
-
-              {/* Usage Stats */}
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                  <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 500 }}>Monthly Usage</span>
-                  <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-                    {usage?.totalTests || 0} <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>/ {usage?.totalTestsLimit || 3} runs</span>
-                  </span>
                 </div>
-                <div style={{ height: '8px', background: 'var(--beige-200)', borderRadius: '4px', overflow: 'hidden' }}>
-                  <div style={{
-                    height: '100%',
-                    width: `${Math.min(100, ((usage?.totalTests || 0) / (usage?.totalTestsLimit || 1)) * 100)}%`,
-                    background: 'linear-gradient(90deg, var(--primary) 0%, var(--maroon-600) 100%)',
-                    borderRadius: '4px',
-                  }} />
-                </div>
-                <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.5rem' }}>
-                  Resets on {new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1).toLocaleDateString()}
-                </p>
               </div>
-
-              {/* Quick Link */}
-              <Link href="/profile" style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '0.5rem',
-                padding: '0.75rem',
-                background: 'var(--bg-tertiary)',
-                borderRadius: 'var(--radius-md)',
-                color: 'var(--text-primary)',
-                textDecoration: 'none',
-                fontSize: '0.85rem',
-                fontWeight: 500,
-                transition: 'background 0.2s'
-              }}>
-                <span>⚙️</span> Manage Subscription
-              </Link>
-
             </div>
           </div>
-        </div>
+        ) : (
+          // --- PROJECT VIEW ---
+          <div className="animate-enter">
+            {/* Project Insights Row */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
+              <StatCard
+                title="Executions"
+                value={totalRuns}
+                subtext="Total runs"
+                icon="⚡"
+                color="var(--text-primary)"
+              />
+              <StatCard
+                title="Pass Rate"
+                value={`${passRate}%`}
+                subtext="Last 30 days"
+                icon="💚"
+                color={passRate >= 80 ? 'var(--success)' : 'var(--error)'}
+              />
+              <div className="glass-card p-5 flex flex-col justify-between">
+                <div className="flex justify-between items-start">
+                  <span className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">Issues</span>
+                  <span className="text-xl">🐞</span>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-[var(--text-primary)]">{totalRuns - testRuns.filter(r => r.status === 'completed').length}</div>
+                  <div className="text-xs font-medium text-[var(--error)]">Failed/Flaky runs</div>
+                </div>
+              </div>
+              <div className="glass-card p-5 flex flex-col justify-between cursor-pointer hover:border-[var(--primary)] transition-colors"
+                onClick={() => setShowCreateTestModal(true)}>
+                <div className="flex justify-between items-start">
+                  <span className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">Advanced Run</span>
+                  <span className="text-xl">⚙️</span>
+                </div>
+                <div className="text-sm font-medium text-[var(--primary)] mt-auto">
+                  Configure details →
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Test Section */}
+            <div className="mb-16">
+              <QuickTestInput
+                defaultUrl={testRuns[0]?.build?.url || ''}
+                onRunTest={handleQuickRun}
+                isSubmitting={isSubmitting}
+              />
+            </div>
+
+            {/* Suggested Tests */}
+            <SuggestedTests
+              onSelectSuggestion={(prompt) => {
+                const projUrl = testRuns[0]?.build?.url;
+                if (!projUrl) {
+                  alert('No previous URL found. Please use the input above.');
+                  return;
+                }
+                handleQuickRun(prompt, projUrl);
+              }}
+            />
+          </div>
+        )}
       </div>
 
       {/* --- MODALS --- */}

@@ -19,11 +19,32 @@ const glossaryTerms = [
         relatedTerms: ['Self-Healing Tests', 'AI Testing']
     },
     {
+        term: 'Vibe Coding',
+        slug: 'vibe-coding',
+        definition: 'The practice of writing software primarily through natural language prompting and AI generation (Cursor, Replit), focusing on high-level intent and flow state rather than syntax.',
+        category: 'Methodology',
+        relatedTerms: ['Vibe Testing', 'AI-Native']
+    },
+    {
         term: 'Vibe Testing',
         slug: 'vibe-testing',
-        definition: 'A testing methodology where you describe what to test in plain English instead of writing code. The AI interprets your intent and executes the test automatically.',
+        definition: 'A testing methodology tailored for vibe coders where you describe tests in plain English. The AI executes them instantly, acting as a safety net for fast-paced AI development.',
         category: 'Methodology',
-        relatedTerms: ['No-Code Testing', 'AI Testing']
+        relatedTerms: ['Vibe Coding', 'No-Code Testing']
+    },
+    {
+        term: 'Vibe Coder',
+        slug: 'vibe-coder',
+        definition: 'A developer who prioritizes speed and flow ("the vibe") by using AI tools to handle implementation details. They focus on architecture and product, not boilerplate.',
+        category: 'Persona',
+        relatedTerms: ['Vibe Coding', 'Indie Hacker']
+    },
+    {
+        term: 'Flow State Testing',
+        slug: 'flow-state-testing',
+        definition: 'Automated testing that happens in the background without requiring context switching. It ensures that "staying in the vibe" doesn’t lead to broken production code.',
+        category: 'Methodology',
+        relatedTerms: ['Vibe Testing', 'CI/CD']
     },
     {
         term: 'Self-Healing Tests',
