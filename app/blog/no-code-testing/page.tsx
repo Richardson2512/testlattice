@@ -19,6 +19,7 @@ export default function NoCodeTestingPost() {
                     "@type": "HowTo",
                     "name": "How to Test Your App Without Writing Code",
                     "description": "Step-by-step guide to no-code testing",
+                    "datePublished": "2024-07-15",
                     "step": [
                         { "@type": "HowToStep", "name": "Sign up", "text": "Create a free account on Rihario" },
                         { "@type": "HowToStep", "name": "Add URL", "text": "Paste your website or app URL" },
@@ -62,6 +63,9 @@ export default function NoCodeTestingPost() {
                             <p style={{ fontSize: '1.2rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
                                 You built your app with Bubble, Webflow, or AI tools. Now learn how to test it the same way—without touching code.
                             </p>
+                            <div style={{ marginTop: '1rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
+                                Updated July 2024 • 6 min read
+                            </div>
                         </header>
 
                         {/* TL;DR */}

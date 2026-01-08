@@ -5,7 +5,7 @@ import { Footer } from '@/components/Footer'
 import Script from 'next/script'
 
 export const metadata: Metadata = {
-    title: 'Top 10 Best AI Testing Tools in 2024 | Complete Comparison',
+    title: 'Top 10 Best AI Testing Tools in 2025 | Complete Comparison',
     description: 'Compare the best AI testing tools: Rihario, Testim, Mabl, Functionize, and more. Features, pricing, pros/cons for each tool. Updated for 2024.',
     keywords: ['AI testing tools', 'best AI testing tools', 'AI testing tools 2024', 'automated testing AI', 'testing tools comparison'],
 }
@@ -130,10 +130,10 @@ export default function TopAiTestingToolsPage() {
                 {JSON.stringify({
                     "@context": "https://schema.org",
                     "@type": "Article",
-                    "headline": "Top 10 Best AI Testing Tools in 2024",
+                    "headline": "Top 10 Best AI Testing Tools in 2025",
                     "description": "Complete comparison of the best AI testing tools for developers",
                     "author": { "@type": "Organization", "name": "Rihario" },
-                    "datePublished": "2024-12-15",
+                    "datePublished": "2025-12-15",
                     "dateModified": "2024-01-08"
                 })}
             </Script>
@@ -165,13 +165,13 @@ export default function TopAiTestingToolsPage() {
                                 Comparison
                             </div>
                             <h1 style={{ fontSize: '2.5rem', marginBottom: '1rem', lineHeight: 1.2 }}>
-                                Top 10 Best AI Testing Tools in 2024
+                                Top 10 Best AI Testing Tools in 2025
                             </h1>
                             <p style={{ fontSize: '1.2rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
                                 A comprehensive comparison of AI-powered testing tools—from indie-friendly to enterprise-grade—to help you choose the right one.
                             </p>
                             <div style={{ marginTop: '1rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-                                Updated December 2024 • 12 min read
+                                Updated December 2025 • 12 min read
                             </div>
                         </header>
 

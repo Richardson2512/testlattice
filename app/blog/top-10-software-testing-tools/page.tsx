@@ -5,7 +5,7 @@ import { Footer } from '@/components/Footer'
 import Script from 'next/script'
 
 export const metadata: Metadata = {
-    title: 'Top 10 Best Software Testing Tools for Indie Hackers [2024]',
+    title: 'Top 10 Best Software Testing Tools for Indie Hackers [2025]',
     description: 'The best software testing tools for solo developers and indie hackers. Compare Rihario, Playwright, Cypress, and more. Features, pricing, and which to choose.',
     keywords: ['software testing tools', 'testing tools for indie hackers', 'best testing tools 2024', 'automated testing tools', 'QA tools for startups'],
 }
@@ -112,7 +112,7 @@ export default function TopSoftwareTestingToolsPage() {
                     "@type": "Article",
                     "headline": "Top 10 Best Software Testing Tools for Indie Hackers",
                     "author": { "@type": "Organization", "name": "Rihario" },
-                    "datePublished": "2024-10-05"
+                    "datePublished": "2025-02-14"
                 })}
             </Script>
 

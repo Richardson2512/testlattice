@@ -19,6 +19,7 @@ export default function HowToTestMvpPage() {
                     "@type": "HowTo",
                     "name": "How to Test Your MVP Before Launch",
                     "description": "Complete guide to testing your MVP",
+                    "datePublished": "2024-10-05",
                     "step": [
                         { "@type": "HowToStep", "name": "Set up basic monitoring", "text": "Add error tracking and analytics before testing" },
                         { "@type": "HowToStep", "name": "Test core functionality", "text": "Verify all critical user flows work correctly" },
@@ -63,7 +64,7 @@ export default function HowToTestMvpPage() {
                                 You've built your MVP. Now make sure it actually works before real users try it.
                             </p>
                             <div style={{ marginTop: '1rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-                                Updated September 2024 • 10 min read
+                                Updated October 2024 • 10 min read
                             </div>
                         </header>
 

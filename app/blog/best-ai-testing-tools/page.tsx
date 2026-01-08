@@ -5,7 +5,7 @@ import { Footer } from '@/components/Footer'
 import Script from 'next/script'
 
 export const metadata: Metadata = {
-    title: 'Best AI Testing Tools 2024: Complete Buyer\'s Guide',
+    title: 'Best AI Testing Tools 2025: Complete Buyer\'s Guide',
     description: 'Looking for the best AI testing tool? Compare features, pricing, and use cases. Includes Rihario, Testim, Mabl, Functionize, and more.',
     keywords: ['best AI testing tools', 'AI testing tools comparison', 'AI QA tools', 'automated testing AI 2024', 'AI test automation'],
 }
@@ -45,9 +45,9 @@ export default function BestAiTestingToolsPage() {
                 {JSON.stringify({
                     "@context": "https://schema.org",
                     "@type": "Article",
-                    "headline": "Best AI Testing Tools 2024: Complete Buyer's Guide",
+                    "headline": "Best AI Testing Tools 2025: Complete Buyer's Guide",
                     "author": { "@type": "Organization", "name": "Rihario" },
-                    "datePublished": "2024-11-20"
+                    "datePublished": "2025-06-20"
                 })}
             </Script>
 
@@ -78,7 +78,7 @@ export default function BestAiTestingToolsPage() {
                                 Buyer's Guide
                             </div>
                             <h1 style={{ fontSize: '2.5rem', marginBottom: '1rem', lineHeight: 1.2 }}>
-                                Best AI Testing Tools 2024: Complete Buyer's Guide
+                                Best AI Testing Tools 2025: Complete Buyer's Guide
                             </h1>
                             <p style={{ fontSize: '1.2rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
                                 We tested every major AI testing tool. Here's which one to choose based on your specific needs.

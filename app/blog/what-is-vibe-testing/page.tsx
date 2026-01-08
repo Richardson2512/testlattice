@@ -19,7 +19,7 @@ export default function WhatIsVibeTestingPage() {
                     "@type": "Article",
                     "headline": "What is Vibe Testing? The New Way to Test Apps in 2024",
                     "author": { "@type": "Organization", "name": "Rihario" },
-                    "datePublished": "2024-08-12"
+                    "datePublished": "2024-09-12"
                 })}
             </Script>
 
