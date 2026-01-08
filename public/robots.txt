@@ -1,0 +1,24 @@
+# Rihario Robots.txt
+# https://rihario.com
+
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://rihario.com/sitemap.xml
+
+# Disallow admin/dashboard areas
+Disallow: /dashboard
+Disallow: /runs
+Disallow: /profile
+Disallow: /test/run/
+Disallow: /test/report/
+Disallow: /guest/run/
+
+# Disallow API endpoints
+Disallow: /api/
+
+# Allow all crawlers access to static assets
+Allow: /image/
+Allow: /browsers/
+Allow: /_next/static/

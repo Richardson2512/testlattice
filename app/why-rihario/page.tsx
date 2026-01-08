@@ -78,6 +78,46 @@ export default function WhyRihario() {
                                     "@type": "Answer",
                                     "text": "Absolutely. Rihario was designed for non-technical founders who built MVPs with no-code tools or AI assistance. The interface requires no coding knowledge, reports are in plain English, and God Mode lets you guide AI visually by clicking elements."
                                 }
+                            },
+                            {
+                                "@type": "Question",
+                                "name": "How long does a Rihario test take to run?",
+                                "acceptedAnswer": {
+                                    "@type": "Answer",
+                                    "text": "Most tests complete in 2-5 minutes depending on complexity. A comprehensive test covering functional, visual, performance, security, and accessibility checks typically takes 3-4 minutes across all chosen browser combinations."
+                                }
+                            },
+                            {
+                                "@type": "Question",
+                                "name": "Can Rihario test mobile apps?",
+                                "acceptedAnswer": {
+                                    "@type": "Answer",
+                                    "text": "Rihario tests mobile web apps (responsive websites) across iOS Safari and Android Chrome emulations. For native iOS or Android apps (.ipa/.apk files), you would need a dedicated mobile testing tool."
+                                }
+                            },
+                            {
+                                "@type": "Question",
+                                "name": "Does Rihario work with CI/CD pipelines?",
+                                "acceptedAnswer": {
+                                    "@type": "Answer",
+                                    "text": "Yes. The Pro plan ($99/month) includes API access for triggering tests from GitHub Actions, GitLab CI, or any CI/CD system. You can run tests on every commit and block deploys if tests fail."
+                                }
+                            },
+                            {
+                                "@type": "Question",
+                                "name": "What browsers does Rihario support?",
+                                "acceptedAnswer": {
+                                    "@type": "Answer",
+                                    "text": "Rihario tests on Chrome, Firefox, Safari, and Edge across Windows, macOS, and Linux. Mobile testing covers iOS Safari (iPhone) and Android Chrome (Pixel, Samsung). Over 50 browser/device combinations in total."
+                                }
+                            },
+                            {
+                                "@type": "Question",
+                                "name": "Can I run Rihario tests on localhost?",
+                                "acceptedAnswer": {
+                                    "@type": "Answer",
+                                    "text": "Yes. Install our CLI tunnel (30 seconds) and Rihario can access your local development server securely. This lets you test changes before deploying to staging or production."
+                                }
                             }
                         ]
                     })
