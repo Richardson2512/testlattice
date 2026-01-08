@@ -84,7 +84,7 @@ export default function ContactPage() {
             }} />
 
             <div className="container" style={{ padding: '160px 20px 60px', maxWidth: '1200px', margin: '0 auto', position: 'relative', zIndex: 1, flex: 1 }}>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '5rem', alignItems: 'start' }}>
+                <div className="contact-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4rem', alignItems: 'start' }}>
 
                     {/* LEFT: Info & Context */}
                     <div className="animate-enter">
@@ -200,6 +200,11 @@ export default function ContactPage() {
                     background: linear-gradient(135deg, var(--maroon-900) 0%, var(--maroon-600) 100%);
                     -webkit-background-clip: text;
                     -webkit-text-fill-color: transparent;
+                }
+                @media (max-width: 768px) {
+                    .contact-grid {
+                        grid-template-columns: 1fr !important;
+                    }
                 }
             `}</style>
         </div>
