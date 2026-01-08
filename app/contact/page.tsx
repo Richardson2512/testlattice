@@ -43,6 +43,7 @@ function FormInput({ label, placeholder, type = 'text' }: { label: string, place
                     borderRadius: 'var(--radius-md)',
                     color: 'var(--text-primary)',
                     fontSize: '1rem',
+                    fontFamily: 'inherit',
                     outline: 'none',
                     width: '100%'
                 }}
@@ -53,7 +54,7 @@ function FormInput({ label, placeholder, type = 'text' }: { label: string, place
 
 export default function ContactPage() {
     return (
-        <div style={{ minHeight: '100vh', background: 'var(--bg-primary)', color: 'var(--text-primary)', fontFamily: 'var(--font-sans)', overflowX: 'hidden', position: 'relative' }}>
+        <div style={{ minHeight: '100vh', background: 'var(--bg-primary)', color: 'var(--text-primary)', fontFamily: 'var(--font-sans)', overflowX: 'hidden', position: 'relative', display: 'flex', flexDirection: 'column' }}>
             <LandingHeader />
 
             {/* Background Gradients */}
@@ -82,7 +83,7 @@ export default function ContactPage() {
                 pointerEvents: 'none'
             }} />
 
-            <div className="container" style={{ padding: '160px 20px 100px', maxWidth: '1200px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
+            <div className="container" style={{ padding: '160px 20px 60px', maxWidth: '1200px', margin: '0 auto', position: 'relative', zIndex: 1, flex: 1 }}>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '5rem', alignItems: 'start' }}>
 
                     {/* LEFT: Info & Context */}
@@ -146,6 +147,7 @@ export default function ContactPage() {
                                     borderRadius: 'var(--radius-md)',
                                     color: 'var(--text-primary)',
                                     fontSize: '1rem',
+                                    fontFamily: 'inherit',
                                     outline: 'none',
                                     cursor: 'pointer',
                                     width: '100%'

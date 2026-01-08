@@ -12,24 +12,11 @@ export default function WhitepaperPage() {
             {/* Hero Section */}
             <section style={{
                 paddingTop: '140px',
-                paddingBottom: '60px',
+                paddingBottom: '40px',
                 background: 'linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 100%)'
             }}>
                 <div className="container" style={{ maxWidth: '800px', margin: '0 auto' }}>
-                    <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
-                        <div style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            padding: '0.35rem 1rem',
-                            background: 'rgba(153, 27, 27, 0.08)',
-                            border: '1px solid rgba(153, 27, 27, 0.2)',
-                            borderRadius: 'var(--radius-full)',
-                            marginBottom: '1.5rem'
-                        }}>
-                            <span style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--maroon-800)' }}>
-                                Technology Whitepaper
-                            </span>
-                        </div>
+                    <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
 
                         <h1 style={{
                             fontSize: 'clamp(2.5rem, 5vw, 3.5rem)',
@@ -56,7 +43,7 @@ export default function WhitepaperPage() {
             </section>
 
             {/* Content Section */}
-            <section style={{ padding: '4rem 0' }}>
+            <section style={{ padding: '2rem 0 4rem' }}>
                 <div className="container" style={{ maxWidth: '800px', margin: '0 auto' }}>
 
                     {/* Section 1: The Problem */}

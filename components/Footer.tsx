@@ -20,7 +20,6 @@ export function Footer() {
                         <h4 style={{ fontSize: '0.9rem', marginBottom: '1rem', color: 'var(--text-inverse)' }}>Product</h4>
                         <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                             <li><Link href="/features" style={{ color: 'var(--beige-300)', textDecoration: 'none' }}>Features</Link></li>
-                            <li><Link href="#" style={{ color: 'var(--beige-300)', textDecoration: 'none' }}>Integrations</Link></li>
                             <li><Link href="/pricing" style={{ color: 'var(--beige-300)', textDecoration: 'none' }}>Pricing</Link></li>
                         </ul>
                     </div>
@@ -28,7 +27,7 @@ export function Footer() {
                         <h4 style={{ fontSize: '0.9rem', marginBottom: '1rem', color: 'var(--text-inverse)' }}>Company</h4>
                         <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                             <li><Link href="/why-rihario" style={{ color: 'var(--beige-300)', textDecoration: 'none' }}>Why Rihario?</Link></li>
-                            <li><Link href="#" style={{ color: 'var(--beige-300)', textDecoration: 'none' }}>Blog</Link></li>
+                            <li><Link href="/blog" style={{ color: 'var(--beige-300)', textDecoration: 'none' }}>Blog</Link></li>
                             <li><Link href="/contact" style={{ color: 'var(--beige-300)', textDecoration: 'none' }}>Contact Us</Link></li>
                         </ul>
                     </div>

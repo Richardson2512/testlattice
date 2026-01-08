@@ -173,6 +173,17 @@ h3 {
   border-color: var(--primary);
 }
 
+.btn-outline {
+  background: transparent;
+  border: 2px solid var(--primary);
+  color: var(--primary);
+}
+
+.btn-outline:hover {
+  background: var(--primary);
+  color: var(--text-inverse);
+}
+
 .btn-large {
   padding: 1rem 2rem;
   font-size: 1.1rem;
