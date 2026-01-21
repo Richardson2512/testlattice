@@ -1,10 +1,12 @@
 import { MetadataRoute } from 'next'
 import { getAllDocsUrls } from '@/lib/docs-navigation'
+import { getAllBlogSlugs } from '@/lib/blog-discovery'
 
 const BASE_URL = 'https://rihario.com'
 
 export default function sitemap(): MetadataRoute.Sitemap {
     const docsUrls = getAllDocsUrls()
+    const blogSlugs = getAllBlogSlugs()
 
     // Main pages - highest priority
     const mainPages: MetadataRoute.Sitemap = [
@@ -68,44 +70,20 @@ export default function sitemap(): MetadataRoute.Sitemap {
         })),
     ]
 
-    // Blog pages
+    // Blog pages - dynamically generated from filesystem
     const blogPages: MetadataRoute.Sitemap = [
         {
             url: `${BASE_URL}/blog`,
             changeFrequency: 'weekly',
             priority: 0.7,
         },
-        {
-            url: `${BASE_URL}/blog/what-is-vibe-coding`,
-            lastModified: new Date('2026-01-08'),
-            changeFrequency: 'monthly',
+        ...blogSlugs.map(path => ({
+            url: `${BASE_URL}${path}`,
+            changeFrequency: 'monthly' as const,
             priority: 0.8,
-        },
-        {
-            url: `${BASE_URL}/blog/testing-for-vibe-coders`,
-            lastModified: new Date('2026-01-08'),
-            changeFrequency: 'monthly',
-            priority: 0.8,
-        },
-        {
-            url: `${BASE_URL}/blog/smoke-test-checklist-vibe-coding`,
-            lastModified: new Date('2026-01-08'),
-            changeFrequency: 'monthly',
-            priority: 0.8,
-        },
-        {
-            url: `${BASE_URL}/blog/unit-testing-ai-code`,
-            lastModified: new Date('2026-01-08'),
-            changeFrequency: 'monthly',
-            priority: 0.8,
-        },
-        {
-            url: `${BASE_URL}/blog/staging-for-vibe-projects`,
-            lastModified: new Date('2026-01-08'),
-            changeFrequency: 'monthly',
-            priority: 0.8,
-        },
+        })),
     ]
+
 
     // Community and contact
     const communityPages: MetadataRoute.Sitemap = [

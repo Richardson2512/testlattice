@@ -21,8 +21,86 @@ export default async function Home() {
     redirect('/dashboard')
   }
 
+  // FAQ data for schema - must match FaqSection content exactly
+  const faqSchemaData = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How does Rihario's AI navigate my site safely?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "We use read-only guest profiles by default and execute in isolated, sandboxed containers. You can whitelist our IPs or run via our secure tunnel. Your data never leaves the sandbox."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Do I need to install anything to use Rihario?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No. Rihario is entirely cloud-based. You just provide the URL and we handle everything. For local testing, we offer a CLI tunnel that takes 30 seconds to set up."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can Rihario test behind login screens and authentication?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. You can securely store credentials in your project settings. Our AI agents handle authentication flows, 2FA (TOTP), magic links, and OAuth sign-ins automatically."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How much does Rihario cost compared to manual QA?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Typical teams save 70% on QA costs. Our agents work 24/7 for $19-99/month—a fraction of even one hour of a manual tester's time. The Indie plan at $39/month includes God Mode and 300 tests."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I smoke test my vibe coded app?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Rihario runs a 'Critical Path' smoke test automatically. We recommend checking 5 key things: Login, Core Value Action, Navigation routing, Mobile layout (375px), and API connectivity. Rihario can automate this entire checklist for you."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Should I write unit tests for Cursor/AI-generated code?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Rihario suggests replacing brittle unit tests with high-level behavior tests. AI code changes too frequently for unit tests to be sustainable. Rihario verifies the functionality from the user's perspective, which is what actually matters."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "I use Cursor/Replit to 'Vibe Code'. Does Rihario work with AI-generated code?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Absolutely. In fact, Rihario was built for Vibe Coding. Since you don't write the code yourself, you shouldn't write the tests yourself either. Just tell Rihario 'Verify that the new signup flow works' and we test it instantly."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is God Mode and how does it work?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "God Mode is our patent-pending feature that lets you intervene when AI gets stuck. Instead of the test failing, you see a live browser, click the right element, and AI learns and continues. It achieves 95% test success vs 60% with other tools."
+        }
+      }
+    ]
+  }
+
   return (
     <main style={{ minHeight: '100vh', background: 'var(--bg-primary)', overflowX: 'hidden' }}>
+      {/* FAQPage schema - server-rendered for AI crawlers */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchemaData) }}
+      />
+
       <LandingHeader />
 
       {/* Hero Section */}
