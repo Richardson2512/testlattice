@@ -61,7 +61,8 @@ const glossaryTerms = [
         slug: 'ai-testing',
         definition: 'Automated software testing that uses artificial intelligence to generate, execute, and maintain tests without manual coding. Rihario uses LLMs like Llama and Qwen.',
         category: 'Concepts',
-        relatedTerms: ['Vibe Testing', 'Self-Healing Tests']
+        relatedTerms: ['Vibe Testing', 'Self-Healing Tests'],
+        canonicalUrl: '/docs/what-is-ai-testing'
     },
     {
         term: 'Visual Regression Testing',

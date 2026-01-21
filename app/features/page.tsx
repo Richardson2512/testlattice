@@ -172,6 +172,14 @@ export default function FeaturesPage() {
                         }}>
                             Learn more about each test type →
                         </Link>
+                        <span style={{ margin: '0 1rem', color: 'var(--text-muted)' }}>|</span>
+                        <Link href="/whitepaper" style={{
+                            color: 'var(--primary)',
+                            fontWeight: 600,
+                            textDecoration: 'none'
+                        }}>
+                            Read the technical architecture →
+                        </Link>
                     </div>
                 </div>
             </section>

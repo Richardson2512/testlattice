@@ -221,7 +221,7 @@ export default function PlaywrightComparisonPage() {
                             {[
                                 {
                                     q: "Can Rihario replace Playwright completely?",
-                                    a: "For most indie hackers and solo developers, yes. Rihario covers functional, visual, performance, security, and accessibility testing without code. However, if you need extremely custom test logic or are already invested in Playwright, it may complement rather than replace."
+                                    a: "For most indie hackers and solo developers, yes. Rihario covers functional, visual, performance, security, and accessibility testing without code. However, if you need extremely custom test logic or are already invested in Playwright, it may complement rather than replace. See the detailed comparison."
                                 },
                                 {
                                     q: "Is Playwright really free?",

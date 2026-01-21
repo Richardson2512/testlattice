@@ -250,6 +250,9 @@ export default function WhyRihario() {
                                 </button>
                             </div>
                         </div>
+                        <p style={{ marginTop: '1.5rem', textAlign: 'center' }}>
+                            <Link href="/features/god-mode" style={{ color: 'var(--primary)', fontWeight: 600 }}>Learn more about God Mode →</Link>
+                        </p>
                     </section>
 
                     <hr style={{ border: 0, borderTop: `1px solid ${theme.border.subtle}`, margin: '4rem 0' }} />
@@ -397,6 +400,9 @@ export default function WhyRihario() {
                                 <div style={{ fontWeight: 'bold' }}>- Alex R., CTO @ StartupX</div>
                             </div>
                         </div>
+                        <p style={{ marginTop: '2rem' }}>
+                            <Link href="/whitepaper" style={{ color: theme.accent.primary, fontWeight: 600 }}>Read our technical whitepaper →</Link>
+                        </p>
                     </section>
 
                     <hr style={{ border: 0, borderTop: `1px solid ${theme.border.subtle}`, margin: '4rem 0' }} />

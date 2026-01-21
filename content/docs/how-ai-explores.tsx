@@ -2,7 +2,7 @@ export default function HowAIExploresContent() {
   return (
     <article>
       <h1>How AI Explores Your App (Explained Simply)</h1>
-      
+
       <p style={{ fontSize: '1.125rem', color: 'var(--text-secondary)', marginBottom: '2rem', lineHeight: 1.7 }}>
         <strong>Rihario uses AI to explore your app like a curious user would.</strong> The AI looks at pages, understands what's there, decides what to interact with, and notices when something looks wrong. No scripts, no selectors - just intelligent exploration.
       </p>
@@ -221,6 +221,8 @@ export default function HowAIExploresContent() {
         <li><a href="/docs/what-happens-test-starts">See what happens when a test starts</a></li>
         <li><a href="/docs/pre-test-diagnosis">Learn about pre-test diagnosis</a></li>
         <li><a href="/docs/ai-accuracy">Understand AI accuracy and limitations</a></li>
+        <li><a href="/docs/behavior-analysis">Learn about behavior analysis testing</a></li>
+        <li><a href="/whitepaper">Read the technical whitepaper</a></li>
       </ul>
     </article>
   )

@@ -26,8 +26,12 @@ export default function WhatIsExploratoryTesting() {
                 Exploratory testing is a testing approach where testers actively explore an application without predefined test scripts, discovering issues through investigation rather than validation. Testers learn about the system while simultaneously designing and executing tests.
             </p>
 
-            <p style={{ marginBottom: '2rem' }}>
+            <p style={{ marginBottom: '1rem' }}>
                 Exploratory testing prioritizes discovery over confirmation.
+            </p>
+
+            <p style={{ marginBottom: '2rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                The methodology was formalized by <a href="https://www.satisfice.com/exploratory-testing" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)' }}>Cem Kaner and James Bach</a>, pioneers of context-driven testing.
             </p>
 
             <h2 style={{ fontSize: '1.75rem', marginTop: '2.5rem', marginBottom: '1rem', fontWeight: 600 }}>

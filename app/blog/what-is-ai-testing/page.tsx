@@ -76,7 +76,7 @@ export default function WhatIsAiTestingPost() {
                             marginBottom: '2rem'
                         }}>
                             <strong style={{ color: '#92400e' }}>TL;DR:</strong> AI testing uses artificial intelligence to generate, run, and maintain tests automatically.
-                            {' '}<Link href="/glossary#ai-testing" style={{ color: '#92400e', textDecoration: 'underline' }}>Full definition →</Link>
+                            {' '}<Link href="/docs/what-is-ai-testing" style={{ color: '#92400e', textDecoration: 'underline' }}>See the complete guide →</Link>
                         </div>
 
                         {/* Content */}
@@ -88,7 +88,7 @@ export default function WhatIsAiTestingPost() {
                             <p>
                                 <strong style={{ color: 'var(--text-primary)' }}>AI testing</strong> is automated software testing powered by artificial intelligence.
                                 Instead of writing test scripts, you describe what you want to test in plain English.
-                                {' '}<Link href="/glossary#ai-testing" style={{ color: 'var(--primary)' }}>See glossary definition →</Link>
+                                {' '}<Link href="/docs/what-is-ai-testing" style={{ color: 'var(--primary)' }}>See full documentation →</Link>
                             </p>
                             <p>
                                 For example, instead of writing:

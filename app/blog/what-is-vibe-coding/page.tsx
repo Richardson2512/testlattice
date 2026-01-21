@@ -81,7 +81,7 @@ export default function VibeCodingPost() {
                     <h2 style={{ fontSize: '2rem', marginTop: '3rem', marginBottom: '1rem', color: 'var(--text-primary)' }}>The Definition of Vibe Coding</h2>
                     <p>
                         <strong>Vibe Coding</strong> is developing software primarily through natural language prompting, focusing on flow state over syntax.
-                        {' '}<Link href="/glossary#vibe-coding" style={{ color: 'var(--primary)' }}>See glossary definition →</Link>
+                        {' '}<Link href="/docs/what-is-vibe-coding" style={{ color: 'var(--primary)' }}>See full documentation →</Link>
                     </p>
 
                     <div className="glass-panel" style={{ padding: '2rem', margin: '2rem 0', borderLeft: '4px solid var(--primary)' }}>

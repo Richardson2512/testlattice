@@ -2,7 +2,7 @@ export default function AIAccuracyContent() {
   return (
     <article>
       <h1>How Accurate Are AI Test Results?</h1>
-      
+
       <p style={{ fontSize: '1.125rem', color: 'var(--text-secondary)', marginBottom: '2rem', lineHeight: 1.7 }}>
         <strong>AI test results are probabilistic, not deterministic.</strong> The same exploration might find different issues or take different paths. AI testing is best for finding obvious problems quickly, not for guaranteeing 100% accuracy. Always verify findings manually.
       </p>
@@ -23,6 +23,10 @@ export default function AIAccuracyContent() {
 
       <p>
         This is different from scripted tests (Playwright, Selenium) which are deterministic - same input always produces same output.
+      </p>
+
+      <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginTop: '0.5rem' }}>
+        For background on probabilistic vs deterministic systems, see <a href="https://developers.google.com/machine-learning/crash-course/classification/thresholding" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)' }}>Google's ML Crash Course on classification thresholding</a>.
       </p>
 
       <h3>Best at Finding Obvious Issues</h3>

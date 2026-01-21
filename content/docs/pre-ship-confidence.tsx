@@ -2,7 +2,7 @@ export default function PreShipConfidenceContent() {
   return (
     <article>
       <h1>What "Pre-Ship Confidence" Actually Means</h1>
-      
+
       <p style={{ fontSize: '1.125rem', color: 'var(--text-secondary)', marginBottom: '2rem', lineHeight: 1.7 }}>
         <strong>Pre-ship confidence means knowing your app doesn't have obvious problems before deploying.</strong> It's not about achieving perfect test coverage or catching every possible bug. It's about avoiding the embarrassing mistakes that make you look bad in production.
       </p>
@@ -162,6 +162,10 @@ export default function PreShipConfidenceContent() {
           </div>
         </div>
       </div>
+
+      <p>
+        See <a href="/docs/quality-standards">quality and health standards</a> to understand how Rihario evaluates your app.
+      </p>
 
       <h2>What Rihario Provides</h2>
 

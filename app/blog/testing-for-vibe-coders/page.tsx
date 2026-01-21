@@ -86,14 +86,14 @@ export default function TestingForVibeCodersPost() {
                         The old way (writing Jest/Playwright tests by hand) is too slow. It breaks your flow. It kills the vibe.
                     </p>
 
-                    <h2 style={{ fontSize: '2rem', marginTop: '3rem', marginBottom: '1rem', color: 'var(--text-primary)' }}>The Vibe Testing Workflow</h2>
+                    <h2 style={{ fontSize: '2rem', marginTop: '3rem', marginBottom: '1rem', color: 'var(--text-primary)' }}>The <Link href="/docs/what-is-vibe-testing" style={{ color: 'var(--primary)' }}>Vibe Testing</Link> Workflow</h2>
 
                     <p>
                         To match the speed of Vibe Coding, you need a testing layer that works on **intent**, not script. Here is the 3-step workflow to keep your projects bug-free without leaving your editor.
                     </p>
 
                     <div className="glass-panel" style={{ padding: '2rem', marginTop: '2rem' }}>
-                        <h3 style={{ margin: 0, marginBottom: '1rem', color: 'var(--primary)' }}>Step 1: The "Sanity" Prompt</h3>
+                        <h3 style={{ margin: 0, marginBottom: '1rem', color: 'var(--primary)' }}>Step 1: The "Sanity" Prompt (<Link href="/docs/run-first-test" style={{ color: 'var(--primary)' }}>Get started</Link>)</h3>
                         <p>
                             Whenever you ask your AI coder to build a feature, immediately pop over to Rihario (or use our theoretical CLI 😉) and prompt a test for it.
                         </p>

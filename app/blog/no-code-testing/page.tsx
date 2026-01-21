@@ -86,6 +86,7 @@ export default function NoCodeTestingPost() {
                             </h2>
                             <p>
                                 <strong style={{ color: 'var(--text-primary)' }}>No-code testing means verifying your app works correctly without writing test scripts.</strong> You describe what to test, and AI or visual tools handle the technical execution.
+                                {' '}<Link href="/docs/what-is-ai-testing" style={{ color: 'var(--primary)' }}>See the complete guide →</Link>
                             </p>
 
                             <h2 style={{ color: 'var(--text-primary)', marginTop: '3rem', marginBottom: '1rem' }}>

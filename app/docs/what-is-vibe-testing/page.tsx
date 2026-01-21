@@ -143,6 +143,10 @@ export default function WhatIsVibeTesting() {
         <li>Qualitative feedback from small user samples</li>
       </ul>
 
+      <p style={{ marginBottom: '1rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+        For context on traditional usability study sample sizes, see <a href="https://www.nngroup.com/articles/why-you-only-need-to-test-with-5-users/" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)' }}>Nielsen Norman Group's research on usability testing</a>.
+      </p>
+
       <p style={{ marginBottom: '1rem' }}>
         Vibe testing is different.
       </p>
@@ -160,6 +164,10 @@ export default function WhatIsVibeTesting() {
 
       <p style={{ marginBottom: '2rem' }}>
         Vibe testing does not replace UX research, but it complements it by continuously testing experience in production-like environments.
+      </p>
+
+      <p style={{ marginBottom: '2rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+        It serves as a continuous check on the "vibe" of the application, similar to how <a href="https://www.nngroup.com/articles/usability-testing-101/" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)' }}>heuristic evaluation</a> complements user testing.
       </p>
 
       <h2 style={{ fontSize: '1.75rem', marginTop: '2.5rem', marginBottom: '1rem', fontWeight: 600 }}>

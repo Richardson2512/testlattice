@@ -2,7 +2,7 @@ export default function FAQWorthItContent() {
   return (
     <article>
       <h1>Is This Tool Worth It for Solo Developers?</h1>
-      
+
       <p style={{ fontSize: '1.125rem', color: 'var(--text-secondary)', marginBottom: '2rem', lineHeight: 1.7 }}>
         <strong>Yes, Rihario is worth it for solo developers who ship fast and want quick confidence checks before deploying.</strong> It saves time finding obvious issues, catches embarrassing bugs you might miss, and gives you confidence before shipping. It's not a replacement for manual testing, but it makes your testing more efficient. Start with the free tier to see if it works for you.
       </p>
@@ -161,6 +161,7 @@ export default function FAQWorthItContent() {
         <li><a href="/docs/run-first-test">Run your first test (no signup required)</a></li>
         <li><a href="/docs/pricing-plans">See pricing and plans</a></li>
         <li><a href="/docs/pre-ship-confidence">Learn about pre-ship confidence</a></li>
+        <li><a href="/community">Join our community</a></li>
       </ul>
     </article>
   )

@@ -2,7 +2,7 @@ export default function BrowserLimitationsContent() {
   return (
     <article>
       <h1>Browser & Device Limitations</h1>
-      
+
       <p style={{ fontSize: '1.125rem', color: 'var(--text-secondary)', marginBottom: '2rem', lineHeight: 1.7 }}>
         <strong>Rihario supports modern browsers (Chrome, Firefox, Safari) on desktop and mobile viewports.</strong> Some features work better on desktop, mobile testing has limitations, and certain browser-specific features may not be fully supported. Here's what works and what doesn't.
       </p>
@@ -153,6 +153,7 @@ export default function BrowserLimitationsContent() {
       <ul>
         <li><a href="/docs/pricing-plans">See pricing and plan limitations</a></li>
         <li><a href="/docs/credentials-handling">Learn about credential handling</a></li>
+        <li><a href="/docs/parallel-cross-browser-testing">Learn about parallel cross-browser testing</a></li>
       </ul>
     </article>
   )
