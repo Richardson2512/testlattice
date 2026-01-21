@@ -65,7 +65,8 @@ export default function WhatIsVibeTestingPage() {
                             borderRadius: '8px',
                             marginBottom: '2rem'
                         }}>
-                            <strong style={{ color: '#92400e' }}>TL;DR:</strong> Vibe Testing is testing your app by describing what to test in plain English, and letting AI handle the technical details. It's the testing equivalent of "vibe coding" with Cursor or Claude—you focus on intent, AI handles execution.
+                            <strong style={{ color: '#92400e' }}>TL;DR:</strong> Vibe Testing is describing tests in plain English, and letting AI handle execution.
+                            {' '}<Link href="/docs/what-is-vibe-testing" style={{ color: '#92400e', textDecoration: 'underline' }}>Full definition →</Link>
                         </div>
 
                         <div style={{ lineHeight: 1.8, color: 'var(--text-secondary)' }}>
@@ -74,7 +75,8 @@ export default function WhatIsVibeTestingPage() {
                                 What is Vibe Testing?
                             </h2>
                             <p>
-                                <strong style={{ color: 'var(--text-primary)' }}>Vibe Testing is a testing methodology where you describe what to test in natural language, and AI executes the test.</strong>
+                                <strong style={{ color: 'var(--text-primary)' }}>Vibe Testing</strong> is a testing methodology where you describe what to test in natural language, and AI executes the test.
+                                {' '}<Link href="/docs/what-is-vibe-testing" style={{ color: 'var(--primary)' }}>See full definition →</Link>
                             </p>
                             <p>
                                 Instead of writing test scripts like this:
@@ -177,19 +179,13 @@ await expect(page).toHaveURL('/dashboard');`}
                             </ul>
 
                             <h2 style={{ color: 'var(--text-primary)', marginTop: '3rem', marginBottom: '1rem' }}>
-                                Try Vibe Testing Now
+                                Related Reading
                             </h2>
-                            <p>
-                                <Link href="/" style={{ color: 'var(--primary)' }}>Rihario</Link> is the first platform built specifically for Vibe Testing:
-                            </p>
-                            <ol style={{ paddingLeft: '1.5rem' }}>
-                                <li>Paste your URL</li>
-                                <li>Describe what to test in plain English</li>
-                                <li>Get results in 3 minutes</li>
-                            </ol>
-                            <p style={{ marginTop: '1.5rem' }}>
-                                <Link href="/signup" style={{ color: 'var(--primary)', fontWeight: 600 }}>Try Vibe Testing free →</Link>
-                            </p>
+                            <ul style={{ paddingLeft: '1.5rem' }}>
+                                <li><Link href="/docs/what-is-vibe-testing" style={{ color: 'var(--primary)' }}>Full definition: What is Vibe Testing?</Link></li>
+                                <li><Link href="/docs/pre-ship-confidence" style={{ color: 'var(--primary)' }}>What is Pre-Ship Confidence?</Link></li>
+                                <li><Link href="/blog/what-is-vibe-coding" style={{ color: 'var(--primary)' }}>What is Vibe Coding?</Link></li>
+                            </ul>
                         </div>
                     </div>
                 </article>

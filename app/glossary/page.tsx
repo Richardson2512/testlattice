@@ -14,9 +14,10 @@ const glossaryTerms = [
     {
         term: 'God Mode',
         slug: 'god-mode',
-        definition: 'A real-time browser takeover feature that lets you manually intervene when AI gets stuck during testing. You click the correct element, the AI learns and continues automatically.',
+        definition: 'A real-time browser takeover feature that lets you manually intervene when AI gets stuck during testing.',
         category: 'Features',
-        relatedTerms: ['Self-Healing Tests', 'AI Testing']
+        relatedTerms: ['Self-Healing Tests', 'AI Testing'],
+        canonicalUrl: '/docs/god-mode'
     },
     {
         term: 'Vibe Coding',
@@ -28,9 +29,10 @@ const glossaryTerms = [
     {
         term: 'Vibe Testing',
         slug: 'vibe-testing',
-        definition: 'A testing methodology tailored for vibe coders where you describe tests in plain English. The AI executes them instantly, acting as a safety net for fast-paced AI development.',
+        definition: 'A testing methodology where you describe tests in plain English, and AI executes them.',
         category: 'Methodology',
-        relatedTerms: ['Vibe Coding', 'No-Code Testing']
+        relatedTerms: ['Vibe Coding', 'No-Code Testing'],
+        canonicalUrl: '/docs/what-is-vibe-testing'
     },
     {
         term: 'Vibe Coder',
@@ -49,9 +51,10 @@ const glossaryTerms = [
     {
         term: 'Self-Healing Tests',
         slug: 'self-healing-tests',
-        definition: 'Tests that automatically adapt when your UI changes. Instead of breaking when a button ID changes, the AI finds the element by its purpose and continues the test.',
+        definition: 'Tests that automatically adapt when your UI changes.',
         category: 'Features',
-        relatedTerms: ['God Mode', 'AI Testing']
+        relatedTerms: ['God Mode', 'AI Testing'],
+        canonicalUrl: '/docs/self-healing'
     },
     {
         term: 'AI Testing',
@@ -165,6 +168,9 @@ export default function GlossaryPage() {
                                     </dt>
                                     <dd style={{ color: 'var(--text-secondary)', lineHeight: 1.7, marginBottom: '1rem' }}>
                                         <strong style={{ color: 'var(--text-primary)' }}>{item.term}</strong> is {item.definition.charAt(0).toLowerCase() + item.definition.slice(1)}
+                                        {(item as any).canonicalUrl && (
+                                            <>{' '}<Link href={(item as any).canonicalUrl} style={{ color: 'var(--primary)' }}>Full definition →</Link></>
+                                        )}
                                     </dd>
                                     <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                                         <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Related:</span>

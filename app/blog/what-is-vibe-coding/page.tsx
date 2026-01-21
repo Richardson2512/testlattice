@@ -80,7 +80,8 @@ export default function VibeCodingPost() {
 
                     <h2 style={{ fontSize: '2rem', marginTop: '3rem', marginBottom: '1rem', color: 'var(--text-primary)' }}>The Definition of Vibe Coding</h2>
                     <p>
-                        <strong>Vibe Coding</strong> is the practice of developing software where the primary input is natural language and intent, rather than syntax. It prioritizes <strong>flow state</strong> and <strong>speed of iteration</strong> over manual implementation details.
+                        <strong>Vibe Coding</strong> is developing software primarily through natural language prompting, focusing on flow state over syntax.
+                        {' '}<Link href="/glossary#vibe-coding" style={{ color: 'var(--primary)' }}>See glossary definition →</Link>
                     </p>
 
                     <div className="glass-panel" style={{ padding: '2rem', margin: '2rem 0', borderLeft: '4px solid var(--primary)' }}>
@@ -131,15 +132,14 @@ export default function VibeCodingPost() {
 
                 </div>
 
-                {/* CTA */}
-                <div className="glass-panel" style={{ marginTop: '4rem', padding: '3rem', textAlign: 'center' }}>
-                    <h3 style={{ fontSize: '2rem', marginBottom: '1rem' }}>Don't Let Bugs Kill Your Vibe</h3>
-                    <p style={{ marginBottom: '2rem', color: 'var(--text-secondary)' }}>
-                        Rihario allows you to test your AI-generated code instantly.
-                    </p>
-                    <Link href="/signup" className="btn btn-primary btn-large">
-                        Start Vibe Testing Free
-                    </Link>
+                {/* Related Reading */}
+                <div className="glass-panel" style={{ marginTop: '4rem', padding: '2rem' }}>
+                    <h3 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>Related Reading</h3>
+                    <ul style={{ paddingLeft: '1.5rem', margin: 0, color: 'var(--text-secondary)' }}>
+                        <li><Link href="/blog/what-is-vibe-testing" style={{ color: 'var(--primary)' }}>What is Vibe Testing?</Link></li>
+                        <li><Link href="/docs/what-is-vibe-testing" style={{ color: 'var(--primary)' }}>Full definition: Vibe Testing</Link></li>
+                        <li><Link href="/glossary" style={{ color: 'var(--primary)' }}>Testing Glossary</Link></li>
+                    </ul>
                 </div>
 
             </article>

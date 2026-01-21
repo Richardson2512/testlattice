@@ -28,6 +28,10 @@ export const docsNavSections: DocsNavSection[] = [
         title: 'Core Concepts',
         items: [
             { href: '/docs/what-is-a-test', label: 'What Is a Test in This Platform?' },
+            { href: '/docs/what-is-ai-testing', label: 'What Is AI Testing?' },
+            { href: '/docs/what-is-self-healing', label: 'What Is Self-Healing Testing?' },
+            { href: '/docs/what-is-exploratory-testing', label: 'What Is Exploratory Testing?' },
+            { href: '/docs/what-is-vibe-coding', label: 'What Is Vibe Coding?' },
             { href: '/docs/how-ai-explores', label: 'How AI Explores Your App (Explained Simply)' },
             { href: '/docs/pre-ship-confidence', label: 'What "Pre-Ship Confidence" Actually Means' },
             { href: '/docs/human-in-the-loop', label: 'Human-in-the-Loop Testing Explained' },
