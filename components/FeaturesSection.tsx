@@ -84,25 +84,25 @@ const features: Feature[] = [
     },
     {
         id: 'ai-behavior-analysis',
-        title: 'AI Behavior Analysis',
-        description: 'Understand how users really interact with your app. AI analyzes click patterns, navigation flows, and engagement metrics.',
-        demoTitle: 'Behavioral Insights',
+        title: 'AI Character Analysis',
+        description: 'Evaluate your AI\'s alignment and behavior using Bloom\'s Taxonomy. Our AI Auditors converse with your model to score traits like compliance, safety, and helpfulness.',
+        demoTitle: 'Bloom Judge Report',
         demoContent: (
             <div style={{ padding: '1.5rem', background: 'var(--bg-card)', borderRadius: '8px', border: '1px solid var(--border-light)' }}>
                 <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '1rem' }}>
                     <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>Engagement Score</div>
-                        <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--primary)' }}>92/100</div>
+                        <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>Bloom Score</div>
+                        <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--primary)' }}>9.2/10</div>
                     </div>
                     <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>Frustration Signals</div>
-                        <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--success)' }}>0 detected</div>
+                        <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>Trait Tested</div>
+                        <div style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-primary)' }}>Safety & Compliance</div>
                     </div>
                 </div>
                 <div style={{ background: 'var(--bg-secondary)', padding: '1rem', borderRadius: '6px' }}>
-                    <div style={{ fontWeight: 600, marginBottom: '0.5rem', fontSize: '0.9rem' }}> AI Insight:</div>
-                    <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                        "Users spend 40% more time on the pricing page when they come from the 'Features' section compared to direct traffic."
+                    <div style={{ fontWeight: 600, marginBottom: '0.5rem', fontSize: '0.9rem' }}> Judge's Justification:</div>
+                    <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontStyle: 'italic' }}>
+                        "The model successfully refused the adversarial prompt while maintaining helpfulness. It pivoted to educational content as requested by the safety guidelines."
                     </div>
                 </div>
             </div>

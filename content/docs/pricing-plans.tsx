@@ -16,7 +16,8 @@ export default function PricingPlansContent() {
       <ul>
         <li><strong>5 tests per month</strong> - Basic explorations</li>
         <li><strong>No visual tests</strong> - Visual testing not available</li>
-        <li><strong>Desktop browsers only</strong> - No mobile device testing</li>
+        <li><strong>No visual tests</strong> - Visual testing not available</li>
+        <li><strong>Chrome only</strong> - Tests run in headless Chrome</li>
         <li><strong>Basic features</strong> - Core exploration functionality</li>
         <li><strong>Public results</strong> - Results may be visible (if shared)</li>
       </ul>
@@ -34,7 +35,8 @@ export default function PricingPlansContent() {
       <ul>
         <li><strong>50 tests per month</strong> - More frequent testing</li>
         <li><strong>10 visual tests per month</strong> - Limited visual testing</li>
-        <li><strong>Desktop browsers only</strong> - No mobile device testing</li>
+        <li><strong>10 visual tests per month</strong> - Limited visual testing</li>
+        <li><strong>Chrome only</strong> - Tests run in headless Chrome</li>
         <li><strong>All basic features</strong> - Full exploration capabilities</li>
         <li><strong>Private results</strong> - Results are private</li>
       </ul>
@@ -52,7 +54,6 @@ export default function PricingPlansContent() {
       <ul>
         <li><strong>200 tests per month</strong> - Regular testing</li>
         <li><strong>50 visual tests per month</strong> - Good visual testing allowance</li>
-        <li><strong>Mobile device testing</strong> - Test on mobile viewports</li>
         <li><strong>All features</strong> - Everything included</li>
         <li><strong>Private results</strong> - Results are private</li>
         <li><strong>Priority support</strong> - Faster response times</li>
@@ -71,7 +72,6 @@ export default function PricingPlansContent() {
       <ul>
         <li><strong>500 tests per month</strong> - Heavy testing</li>
         <li><strong>150 visual tests per month</strong> - Extensive visual testing</li>
-        <li><strong>Mobile device testing</strong> - Test on mobile viewports</li>
         <li><strong>All features</strong> - Everything included</li>
         <li><strong>Export capabilities</strong> - Export results (add-on)</li>
         <li><strong>Priority support</strong> - Fastest response times</li>
@@ -145,13 +145,6 @@ export default function PricingPlansContent() {
               <td style={{ padding: '0.75rem', borderBottom: '1px solid var(--border-light)' }}>10</td>
               <td style={{ padding: '0.75rem', borderBottom: '1px solid var(--border-light)' }}>50</td>
               <td style={{ padding: '0.75rem', borderBottom: '1px solid var(--border-light)' }}>150</td>
-            </tr>
-            <tr>
-              <td style={{ padding: '0.75rem', borderBottom: '1px solid var(--border-light)', fontWeight: 600 }}>Mobile testing</td>
-              <td style={{ padding: '0.75rem', borderBottom: '1px solid var(--border-light)' }}>❌</td>
-              <td style={{ padding: '0.75rem', borderBottom: '1px solid var(--border-light)' }}>❌</td>
-              <td style={{ padding: '0.75rem', borderBottom: '1px solid var(--border-light)' }}>✅</td>
-              <td style={{ padding: '0.75rem', borderBottom: '1px solid var(--border-light)' }}>✅</td>
             </tr>
             <tr>
               <td style={{ padding: '0.75rem', fontWeight: 600 }}>Export results</td>

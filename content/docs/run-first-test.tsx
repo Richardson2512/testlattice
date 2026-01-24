@@ -2,7 +2,7 @@ export default function RunFirstTestContent() {
   return (
     <article>
       <h1>Run Your First Test (No Signup)</h1>
-      
+
       <p style={{ fontSize: '1.125rem', color: 'var(--text-secondary)', marginBottom: '2rem', lineHeight: 1.7 }}>
         <strong>You can try Rihario immediately without creating an account.</strong> Run a guest test on any public website to see how AI-powered exploration works. No setup, no signup, no credit card - just point us at a URL and watch the AI explore.
       </p>
@@ -112,7 +112,6 @@ export default function RunFirstTestContent() {
         <li>More tests per month (even on free tier)</li>
         <li>Saved test history</li>
         <li>Project organization</li>
-        <li>Mobile testing</li>
         <li>Multiple browser testing</li>
         <li>Export options</li>
       </ul>

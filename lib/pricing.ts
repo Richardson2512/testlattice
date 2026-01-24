@@ -76,13 +76,13 @@ export const PRICING_TIERS: Record<PricingTier, PricingTierInfo> = {
     features: [
       '3 total tests / month',
       'Max 1 Visual Test',
+      'AI Self-Healing (1 retry)',
       'Chrome only',
       'Desktop only',
       'Single URL',
       'No exports',
       'No history',
       'No re-runs',
-      'No parallel cross-browser testing',
     ],
     cta: 'Get Started',
     polarProductId: undefined, // Free tier - no checkout
@@ -98,7 +98,7 @@ export const PRICING_TIERS: Record<PricingTier, PricingTierInfo> = {
       maxVisualTests: 15,
       maxBehaviorTests: 0,  // Not available on Starter
       browsers: ['chromium', 'firefox', 'webkit'],
-      mobileSupported: true,
+      mobileSupported: false,
       maxProjects: 1,
       exports: true,
       historyDays: 30,
@@ -114,11 +114,12 @@ export const PRICING_TIERS: Record<PricingTier, PricingTierInfo> = {
     features: [
       '100 tests / month',
       'Max 15 Visual Tests',
-      'Desktop + mobile',
+      'AI Self-Healing (1 retry)',
+      'Basic Performance Check',
+      'Desktop only',
       'Single project',
       'Full reports',
       'Test history (30 days)',
-      'No parallel cross-browser testing',
     ],
     cta: 'Upgrade to Starter',
     polarProductId: '84331781-6628-4f25-a1c4-81c9aff5c301',
@@ -134,7 +135,7 @@ export const PRICING_TIERS: Record<PricingTier, PricingTierInfo> = {
       maxVisualTests: 60,
       maxBehaviorTests: 30,  // Behavior add-on available
       browsers: ['chromium', 'firefox', 'webkit'],
-      mobileSupported: true,
+      mobileSupported: false,
       maxProjects: 10, // Multiple projects
       exports: true,
       historyDays: 90,
@@ -150,8 +151,10 @@ export const PRICING_TIERS: Record<PricingTier, PricingTierInfo> = {
     features: [
       '300 tests / month',
       'Max 60 Visual Tests',
+      'AI Self-Healing (3 retries)',
+      'God Mode Intervention',
+      'Security & Accessibility Scans',
       'Multiple projects',
-      'Desktop + mobile',
       'Full exports (PDF / JSON)',
       'Test history (90 days)',
       'Priority execution queue',
@@ -173,7 +176,7 @@ export const PRICING_TIERS: Record<PricingTier, PricingTierInfo> = {
       maxVisualTests: 250,
       maxBehaviorTests: 100,  // Behavior add-on available
       browsers: ['chromium', 'firefox', 'webkit'],
-      mobileSupported: true,
+      mobileSupported: false,
       maxProjects: 'unlimited',
       exports: true,
       historyDays: 365,
@@ -189,8 +192,10 @@ export const PRICING_TIERS: Record<PricingTier, PricingTierInfo> = {
     features: [
       '750 tests / month',
       'Max 250 Visual Tests',
+      'AI Self-Healing (5 retries)',
+      'Visual Regression Engine',
+      'SEO & Full Site Audits',
       'Unlimited projects',
-      'Advanced API Access',
       'Priority God Mode Support',
       'Scheduled tests',
       'Shared dashboards',

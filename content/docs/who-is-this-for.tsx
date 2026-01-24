@@ -55,7 +55,7 @@ export default function WhoIsThisForContent() {
         <li><strong>CI/CD gates</strong> - Results are probabilistic, shouldn't block deployments</li>
         <li><strong>Performance benchmarking</strong> - Not designed for precise performance metrics</li>
         <li><strong>API testing</strong> - Focused on frontend, not backend APIs</li>
-        <li><strong>Mobile app testing</strong> - Web apps only, not native mobile apps</li>
+        <li><strong>Mobile app testing</strong> - Desktop web apps only, not native mobile apps</li>
         <li><strong>Automated monitoring</strong> - Designed for on-demand checks, not continuous monitoring</li>
       </ul>
 

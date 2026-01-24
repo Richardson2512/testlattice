@@ -2,7 +2,7 @@ export default function TestNavigationContent() {
   return (
     <article>
       <h1>How to Test Navigation and Broken Links</h1>
-      
+
       <p style={{ fontSize: '1.125rem', color: 'var(--text-secondary)', marginBottom: '2rem', lineHeight: 1.7 }}>
         <strong>Rihario automatically checks navigation and detects broken links during exploration.</strong> As the AI navigates your app, it follows links, checks if they work, and flags 404 errors, broken redirects, or inaccessible pages. No need to manually check every link.
       </p>
@@ -45,7 +45,7 @@ export default function TestNavigationContent() {
       <h3>Navigation Structure</h3>
 
       <ul>
-        <li><strong>Menu functionality</strong> - Dropdowns, mobile menus, navigation drawers</li>
+        <li><strong>Menu functionality</strong> - Dropdowns, responsive menus, navigation drawers</li>
         <li><strong>Breadcrumbs</strong> - If present, verifies they're correct</li>
         <li><strong>Back/forward buttons</strong> - Browser navigation works</li>
         <li><strong>Deep linking</strong> - Direct URL access works</li>
@@ -175,7 +175,7 @@ export default function TestNavigationContent() {
         <li><strong>Test after restructuring</strong> - Run navigation checks after changing site structure</li>
         <li><strong>Check important pages</strong> - Focus on critical navigation paths</li>
         <li><strong>Verify manually</strong> - Always manually verify broken links are real issues</li>
-        <li><strong>Test across viewports</strong> - Navigation may differ on mobile vs desktop</li>
+        <li><strong>Test across viewports</strong> - Navigation may differ on different screen sizes</li>
         <li><strong>Check authenticated state</strong> - Some links only work when logged in</li>
       </ul>
 

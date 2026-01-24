@@ -4,7 +4,7 @@ export default function BrowserLimitationsContent() {
       <h1>Browser & Device Limitations</h1>
 
       <p style={{ fontSize: '1.125rem', color: 'var(--text-secondary)', marginBottom: '2rem', lineHeight: 1.7 }}>
-        <strong>Rihario supports modern browsers (Chrome, Firefox, Safari) on desktop and mobile viewports.</strong> Some features work better on desktop, mobile testing has limitations, and certain browser-specific features may not be fully supported. Here's what works and what doesn't.
+        <strong>Rihario supports modern browsers (Chrome, Firefox, Safari) on desktop.</strong> Some features work better on desktop, and certain browser-specific features may not be fully supported. Here's what works and what doesn't.
       </p>
 
       <h2>Supported Browsers</h2>
@@ -36,34 +36,7 @@ export default function BrowserLimitationsContent() {
         <li><strong>Responsive testing</strong> - Test at different desktop sizes</li>
       </ul>
 
-      <h3>Mobile Viewports</h3>
 
-      <ul>
-        <li><strong>Common devices</strong> - iPhone, Android sizes</li>
-        <li><strong>Emulated mobile</strong> - Browser emulation, not real devices</li>
-        <li><strong>Touch events</strong> - Simulated touch, not real touch</li>
-      </ul>
-
-      <h2>Mobile Device Limitations</h2>
-
-      <h3>What Works</h3>
-
-      <ul>
-        <li><strong>Viewport emulation</strong> - Browser emulates mobile viewport</li>
-        <li><strong>Responsive design testing</strong> - See how site looks on mobile</li>
-        <li><strong>Basic interactions</strong> - Clicks, scrolling, form filling</li>
-        <li><strong>Visual checks</strong> - See if layout breaks on mobile</li>
-      </ul>
-
-      <h3>What Doesn't Work</h3>
-
-      <ul>
-        <li><strong>Real device testing</strong> - Not testing on actual phones</li>
-        <li><strong>Real touch events</strong> - Simulated, not real touch input</li>
-        <li><strong>Device sensors</strong> - GPS, accelerometer, etc. not available</li>
-        <li><strong>Device-specific features</strong> - Camera, microphone, etc.</li>
-        <li><strong>Native app testing</strong> - Only web apps, not native mobile apps</li>
-      </ul>
 
       <h2>Browser-Specific Limitations</h2>
 
@@ -141,7 +114,6 @@ export default function BrowserLimitationsContent() {
       <ul>
         <li><strong>Free tier</strong> - Limited to certain browsers</li>
         <li><strong>Paid tiers</strong> - Access to all browsers</li>
-        <li><strong>Mobile testing</strong> - May require higher tier or add-on</li>
       </ul>
 
       <p>
