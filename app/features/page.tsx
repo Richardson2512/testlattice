@@ -135,7 +135,7 @@ export default function FeaturesPage() {
                         <TestingTypeCard
                             icon="🔒"
                             title="Is It Secure?"
-                            description="We test for XSS, SQL injection, and other attacks before hackers find them."
+                            description="We check for Security Best Practices, CSP headers, mixed content, and exposed secrets."
                         />
                         <TestingTypeCard
                             icon="♿"
