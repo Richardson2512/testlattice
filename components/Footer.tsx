@@ -20,6 +20,7 @@ export function Footer() {
                         <h4 style={{ fontSize: '0.9rem', marginBottom: '1rem', color: 'var(--text-inverse)' }}>Product</h4>
                         <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                             <li><Link href="/features" style={{ color: 'var(--beige-300)', textDecoration: 'none' }}>Features</Link></li>
+                            <li><Link href="/vibe-coding" style={{ color: 'var(--beige-300)', textDecoration: 'none' }}>Vibe Coding</Link></li>
                             <li><Link href="/pricing" style={{ color: 'var(--beige-300)', textDecoration: 'none' }}>Pricing</Link></li>
                         </ul>
                     </div>
@@ -38,6 +39,15 @@ export function Footer() {
                         <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                             <li><Link href="/privacy-policy" style={{ color: 'var(--beige-300)', textDecoration: 'none' }}>Privacy Policy</Link></li>
                             <li><Link href="/terms-of-service" style={{ color: 'var(--beige-300)', textDecoration: 'none' }}>Terms of Service</Link></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 style={{ fontSize: '0.9rem', marginBottom: '1rem', color: 'var(--text-inverse)' }}>Compare</h4>
+                        <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                            <li><Link href="/compare/playwright" style={{ color: 'var(--beige-300)', textDecoration: 'none' }}>Vs Playwright</Link></li>
+                            <li><Link href="/compare/cypress" style={{ color: 'var(--beige-300)', textDecoration: 'none' }}>Vs Cypress</Link></li>
+                            <li><Link href="/compare/selenium" style={{ color: 'var(--beige-300)', textDecoration: 'none' }}>Vs Selenium</Link></li>
+                            <li><Link href="/compare/manual-qa" style={{ color: 'var(--beige-300)', textDecoration: 'none' }}>Vs Manual QA</Link></li>
                         </ul>
                     </div>
                 </div>

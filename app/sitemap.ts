@@ -44,6 +44,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
             changeFrequency: 'monthly',
             priority: 0.8,
         },
+        {
+            url: `${BASE_URL}/vibe-coding`,
+            changeFrequency: 'weekly',
+            priority: 1.0,
+        },
         // Canonical Definitions
         {
             url: `${BASE_URL}/testing-types`,
@@ -76,6 +81,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
             priority: 0.8,
         },
     ]
+
+    // ... (docsPages, blogPages) ...
+
+
 
     // Docs pages - dynamically generated from navigation data
     const docsPages: MetadataRoute.Sitemap = [
@@ -144,10 +153,27 @@ export default function sitemap(): MetadataRoute.Sitemap {
         },
     ]
 
+
+
     // Comparison pages
     const comparisonPages: MetadataRoute.Sitemap = [
         {
             url: `${BASE_URL}/compare/playwright`,
+            changeFrequency: 'monthly',
+            priority: 0.8,
+        },
+        {
+            url: `${BASE_URL}/compare/cypress`,
+            changeFrequency: 'monthly',
+            priority: 0.8,
+        },
+        {
+            url: `${BASE_URL}/compare/selenium`,
+            changeFrequency: 'monthly',
+            priority: 0.8,
+        },
+        {
+            url: `${BASE_URL}/compare/manual-qa`,
             changeFrequency: 'monthly',
             priority: 0.8,
         },
