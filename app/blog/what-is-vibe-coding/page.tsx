@@ -8,6 +8,9 @@ export const metadata: Metadata = {
     title: 'What is Vibe Coding? The Rise of the AI-Native Developer | Rihario',
     description: 'Vibe Coding is the new flow state of building software with AI tools like Cursor and Replit. Learn what it is, why it matters, and how to stay in the vibe without breaking prod.',
     keywords: ['vibe coding', 'ai coding', 'cursor ai', 'replit agent', 'ai-native developer', 'flow state coding'],
+    alternates: {
+        canonical: 'https://rihario.com/docs/what-is-vibe-coding'
+    },
     openGraph: {
         title: 'What is Vibe Coding? The Rise of the AI-Native Developer',
         description: 'Vibe Coding is the new flow state of building software with AI tools like Cursor and Replit.',
@@ -80,8 +83,8 @@ export default function VibeCodingPost() {
 
                     <h2 style={{ fontSize: '2rem', marginTop: '3rem', marginBottom: '1rem', color: 'var(--text-primary)' }}>The Definition of Vibe Coding</h2>
                     <p>
-                        <strong>Vibe Coding</strong> is developing software primarily through natural language prompting, focusing on flow state over syntax.
-                        {' '}<Link href="/docs/what-is-vibe-coding" style={{ color: 'var(--primary)' }}>See full documentation →</Link>
+                        <strong>Vibe Coding</strong> is a new way of building software that focuses on flow state.
+                        {' '}<Link href="/docs/what-is-vibe-coding" style={{ color: 'var(--primary)', fontWeight: 'bold' }}>Read the official definition →</Link>
                     </p>
 
                     <div className="glass-panel" style={{ padding: '2rem', margin: '2rem 0', borderLeft: '4px solid var(--primary)' }}>

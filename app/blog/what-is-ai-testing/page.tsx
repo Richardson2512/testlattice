@@ -8,6 +8,9 @@ export const metadata: Metadata = {
     title: 'What is AI Testing? Complete Guide for Indie Hackers [2024]',
     description: 'Learn what AI testing is, how it works, and why it\'s replacing manual testing for indie hackers. Covers self-healing tests, no-code testing, and when to use AI vs traditional tools.',
     keywords: ['AI testing', 'what is AI testing', 'automated testing AI', 'AI testing tools', 'no-code testing'],
+    alternates: {
+        canonical: 'https://rihario.com/docs/what-is-ai-testing'
+    }
 }
 
 export default function WhatIsAiTestingPost() {
@@ -86,9 +89,8 @@ export default function WhatIsAiTestingPost() {
                                 What is AI Testing? (Simple Definition)
                             </h2>
                             <p>
-                                <strong style={{ color: 'var(--text-primary)' }}>AI testing</strong> is automated software testing powered by artificial intelligence.
-                                Instead of writing test scripts, you describe what you want to test in plain English.
-                                {' '}<Link href="/docs/what-is-ai-testing" style={{ color: 'var(--primary)' }}>See full documentation →</Link>
+                                <strong style={{ color: 'var(--text-primary)' }}>AI testing</strong> is changing how we verify software.
+                                {' '}<Link href="/docs/what-is-ai-testing" style={{ color: 'var(--primary)', fontWeight: 'bold' }}>Read the official definition →</Link>
                             </p>
                             <p>
                                 For example, instead of writing:

@@ -8,6 +8,9 @@ export const metadata: Metadata = {
     title: 'What is Vibe Testing? The New Way to Test Apps in 2024',
     description: 'Vibe Testing explained: describe tests in plain English, AI executes them. Learn how vibe testing differs from traditional testing and when to use it.',
     keywords: ['vibe testing', 'what is vibe testing', 'vibe testing tools', 'AI vibe testing', 'vibe code testing'],
+    alternates: {
+        canonical: 'https://rihario.com/docs/what-is-vibe-testing'
+    }
 }
 
 export default function WhatIsVibeTestingPage() {
@@ -75,8 +78,8 @@ export default function WhatIsVibeTestingPage() {
                                 What is Vibe Testing?
                             </h2>
                             <p>
-                                <strong style={{ color: 'var(--text-primary)' }}>Vibe Testing</strong> is a testing methodology where you describe what to test in natural language, and AI executes the test.
-                                {' '}<Link href="/docs/what-is-vibe-testing" style={{ color: 'var(--primary)' }}>See full definition →</Link>
+                                <strong style={{ color: 'var(--text-primary)' }}>Vibe Testing</strong> is a testing methodology popularized by the rise of AI coding tools.
+                                {' '}<Link href="/docs/what-is-vibe-testing" style={{ color: 'var(--primary)', fontWeight: 'bold' }}>Read the official definition →</Link>
                             </p>
                             <p>
                                 Instead of writing test scripts like this:

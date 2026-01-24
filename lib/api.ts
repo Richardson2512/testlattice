@@ -630,6 +630,19 @@ export const api = {
     })
   },
 
+  async updateProject(id: string, data: { name?: string; description?: string }): Promise<{ project: Project }> {
+    return request(`/api/projects/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    })
+  },
+
+  async deleteProject(id: string): Promise<{ success: boolean; message: string }> {
+    return request(`/api/projects/${id}`, {
+      method: 'DELETE',
+    })
+  },
+
   // Pause/Resume
   async pauseTestRun(runId: string): Promise<{ success: boolean; testRun: TestRun }> {
     return request(`/api/tests/${runId}/pause`, {

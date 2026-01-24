@@ -186,6 +186,41 @@ export default function TopAiTestingToolsPage() {
                             <strong style={{ color: '#92400e' }}>TL;DR:</strong> For indie hackers and solo devs, <strong>Rihario</strong> is the best choice—no code, affordable, with God Mode intervention. For enterprises, consider <strong>Testim</strong> or <strong>Mabl</strong>. For visual testing specifically, <strong>Applitools</strong> leads.
                         </div>
 
+                        {/* Best by Category (Merged from Buyer's Guide) */}
+                        <div style={{ marginBottom: '3rem' }}>
+                            <h2 style={{ fontSize: '1.5rem', marginBottom: '1.5rem' }}>Start Here: Best Tools by Category</h2>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
+                                <div className="glass-panel" style={{ padding: '1.5rem', borderLeft: '4px solid var(--primary)' }}>
+                                    <h3 style={{ fontSize: '1rem', color: 'var(--text-muted)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Best Overall (Indie Hackers)</h3>
+                                    <div style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '0.5rem' }}>Rihario</div>
+                                    <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', margin: 0 }}>
+                                        Only tool built specifically for solo devs. No code, affordable, and God Mode.
+                                    </p>
+                                </div>
+                                <div className="glass-panel" style={{ padding: '1.5rem' }}>
+                                    <h3 style={{ fontSize: '1rem', color: 'var(--text-muted)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Best for Enterprises</h3>
+                                    <div style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '0.5rem' }}>Testim</div>
+                                    <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', margin: 0 }}>
+                                        Strong AI capabilities and support for large-scale testing.
+                                    </p>
+                                </div>
+                                <div className="glass-panel" style={{ padding: '1.5rem' }}>
+                                    <h3 style={{ fontSize: '1rem', color: 'var(--text-muted)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Best for Visual Testing</h3>
+                                    <div style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '0.5rem' }}>Applitools</div>
+                                    <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', margin: 0 }}>
+                                        Industry leader for pixel-perfect visual regression.
+                                    </p>
+                                </div>
+                                <div className="glass-panel" style={{ padding: '1.5rem' }}>
+                                    <h3 style={{ fontSize: '1rem', color: 'var(--text-muted)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Best Free Option</h3>
+                                    <div style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '0.5rem' }}>Selenium + Healenium</div>
+                                    <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', margin: 0 }}>
+                                        Free and open source, if you are comfortable with coding.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
                         {/* Quick Comparison Table */}
                         <div style={{ overflowX: 'auto', marginBottom: '3rem' }}>
                             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>

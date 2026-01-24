@@ -25,7 +25,8 @@ export default function Navigation() {
   const supabase = createClient()
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
-  const [isCollapsed, setIsCollapsed] = useState(false)
+  const [isCollapsed, setIsCollapsed] = useState(true)
+  const [isHovered, setIsHovered] = useState(false)
   const [isAdmin, setIsAdmin] = useState(false)
   const [userTier, setUserTier] = useState<string>('free')
   const expandedWidth = 280
@@ -37,7 +38,7 @@ export default function Navigation() {
     const items: NavItem[] = [
       { id: 'dashboard', label: 'Dashboard', href: '/dashboard', icon: '📊' },
       { id: 'runs', label: 'Test Runs', href: '/runs', icon: '🔬' },
-      { id: 'projects', label: 'Projects', href: '#', icon: '📁', disabled: true },
+      { id: 'projects', label: 'Projects', href: '/dashboard/projects', icon: '📁' },
       { id: 'credentials', label: 'Credentials', href: '/dashboard/credentials', icon: '🔐' },
       { id: 'profile', label: 'Profile', href: '/profile', icon: '👤' },
     ]
@@ -94,8 +95,10 @@ export default function Navigation() {
 
   useEffect(() => {
     const handleResize = () => {
-      const mobile = window.innerWidth < 1024
-      setIsCollapsed(mobile)
+      // Only auto-collapse on mobile, never auto-expand
+      if (window.innerWidth < 1024) {
+        setIsCollapsed(true)
+      }
     }
     handleResize()
     window.addEventListener('resize', handleResize)
@@ -122,6 +125,8 @@ export default function Navigation() {
 
   return (
     <aside
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       style={{
         width: `${sidebarWidth}px`,
         background: 'var(--bg-card)',
@@ -194,6 +199,9 @@ export default function Navigation() {
               fontSize: '0.7rem',
               color: 'var(--text-muted)',
               boxShadow: 'var(--shadow-sm)',
+              opacity: isHovered ? 1 : 0,
+              transition: 'opacity 0.2s ease',
+              pointerEvents: isHovered ? 'auto' : 'none',
             }}
           >
             ›

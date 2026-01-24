@@ -77,7 +77,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
             changeFrequency: 'weekly',
             priority: 0.7,
         },
-        ...blogSlugs.map(path => ({
+        ...blogSlugs.filter(slug => slug !== '/blog/best-ai-testing-tools').map(path => ({
             url: `${BASE_URL}${path}`,
             changeFrequency: 'monthly' as const,
             priority: 0.8,
