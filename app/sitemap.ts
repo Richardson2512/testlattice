@@ -36,6 +36,16 @@ export default function sitemap(): MetadataRoute.Sitemap {
             changeFrequency: 'monthly',
             priority: 0.8,
         },
+        {
+            url: `${BASE_URL}/about`,
+            changeFrequency: 'monthly',
+            priority: 0.8,
+        },
+        {
+            url: `${BASE_URL}/faq`,
+            changeFrequency: 'weekly',
+            priority: 0.8,
+        },
     ]
 
     // Feature pages
