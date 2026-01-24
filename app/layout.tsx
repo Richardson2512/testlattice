@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     template: '%s | Rihario',
     default: 'Rihario - The Vibe Testing Platform',
   },
-  description: 'Rihario uses autonomous AI agents to perform 7 types of frontend testing including Visual, Functional, and Rage Bait testing. No code required. Self-healing E2E tests.',
+  description: 'Rihario is an AI-powered testing platform that uses autonomous agents to explore web applications in real-time. Detect visual bugs, accessibility issues, and security vulnerabilities without writing test scripts. Get comprehensive reports with video replays in 3 minutes.',
   keywords: ['vibe testing', 'ai testing', 'autonomous testing', 'playwright alternative', 'selenium alternative', 'test automation', 'self-healing tests'],
   authors: [{ name: 'Rihario Team' }],
   openGraph: {
