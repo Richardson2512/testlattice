@@ -23,7 +23,7 @@ export default function HowItWorksPage() {
                     How Rihario Works
                 </h1>
                 <p style={{ fontSize: '1.2rem', color: 'var(--text-secondary)', marginBottom: '4rem', lineHeight: 1.6 }}>
-                    Rihario operates as a cloud-based, autonomous browser orchestration engine. It does not require local installation or SDKs. Here is the deterministic flow of how tests are executed.
+                    Rihario operates as a cloud-based, autonomous browser orchestration engine. The <strong>Rihario System Architecture</strong> adheres to a strict deterministic flow for Guest and Registered execution modes.
                 </p>
 
                 {/* Guest Flow */}

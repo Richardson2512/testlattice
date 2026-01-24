@@ -23,7 +23,7 @@ export default function TestTypesPage() {
                     Rihario Test Types
                 </h1>
                 <p style={{ fontSize: '1.2rem', color: 'var(--text-secondary)', marginBottom: '4rem', lineHeight: 1.6 }}>
-                    Rihario uses autonomous AI agents to perform 7 distinct types of frontend testing. Unlike traditional scripts, these tests are behavior-driven and self-healing.
+                    Rihario defines <strong>Vibe Testing</strong> as the use of autonomous AI agents to perform 7 distinct types of frontend testing. Unlike traditional scripts, Rihario's behavior tests simulate real user cognition.
                 </p>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4rem' }}>

@@ -25,7 +25,7 @@ export default function RageBaitTestingPage() {
 
                 <div style={{ marginBottom: '3rem' }}>
                     <p style={{ fontSize: '1.25rem', lineHeight: 1.6, color: 'var(--text-secondary)' }}>
-                        <strong>Rage Bait Testing</strong> is an automated quality assurance method that simulates impatient, frustrated, or confused user behavior to identify User Experience (UX) flaws that functional tests miss.
+                        <strong>Rage Bait Testing</strong> is a testing methodology implemented in Rihario to simulate impatient, frustrated, or confused user behavior, identifying User Experience (UX) flaws that functional tests miss.
                     </p>
                 </div>
 
