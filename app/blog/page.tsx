@@ -52,7 +52,7 @@ const blogPosts = [
     },
     {
         slug: 'top-10-ai-testing-tools',
-        title: 'Top 10 Best AI Testing Tools in 2024',
+        title: 'Top 10 Best AI Testing Tools in 2026',
         description: 'A comprehensive comparison of AI-powered testing tools—from indie-friendly to enterprise-grade.',
         category: 'Comparison',
         date: 'December 2025',
@@ -60,7 +60,7 @@ const blogPosts = [
     },
     {
         slug: 'best-ai-testing-tools',
-        title: 'Best AI Testing Tools 2024: Complete Buyer\'s Guide',
+        title: 'Best AI Testing Tools 2026: Complete Buyer\'s Guide',
         description: 'We tested every major AI testing tool. Here\'s which one to choose based on your needs.',
         category: 'Buyer\'s Guide',
         date: 'June 2025',
@@ -68,7 +68,7 @@ const blogPosts = [
     },
     {
         slug: 'top-10-software-testing-tools',
-        title: 'Top 10 Best Software Testing Tools for Indie Hackers',
+        title: 'Top 10 Best Software Testing Tools for Indie Hackers (2026)',
         description: 'From AI-powered no-code tools to open-source frameworks—find the right testing stack.',
         category: 'Comparison',
         date: 'February 2025',

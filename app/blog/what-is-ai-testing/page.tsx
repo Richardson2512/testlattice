@@ -5,7 +5,7 @@ import { Footer } from '@/components/Footer'
 import Script from 'next/script'
 
 export const metadata: Metadata = {
-    title: 'What is AI Testing? Complete Guide for Indie Hackers [2024]',
+    title: 'What is AI Testing? Complete Guide for Indie Hackers [2026]',
     description: 'Learn what AI testing is, how it works, and why it\'s replacing manual testing for indie hackers. Covers self-healing tests, no-code testing, and when to use AI vs traditional tools.',
     keywords: ['AI testing', 'what is AI testing', 'automated testing AI', 'AI testing tools', 'no-code testing'],
     alternates: {
@@ -25,7 +25,7 @@ export default function WhatIsAiTestingPost() {
                     "description": "Comprehensive guide to AI testing for solo developers and indie hackers",
                     "author": { "@type": "Organization", "name": "Rihario" },
                     "publisher": { "@type": "Organization", "name": "Rihario" },
-                    "datePublished": "2024-08-22",
+                    "datePublished": "2026-08-22",
                     "dateModified": "2024-01-08"
                 })}
             </Script>
