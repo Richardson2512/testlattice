@@ -8,6 +8,7 @@ import { GuestTestModalWrapper } from '@/components/GuestTestModalWrapper'
 import { SocialProofSection } from '@/components/SocialProofSection'
 import { HowItWorksSection } from '@/components/HowItWorksSection'
 import { ComparisonSection } from '@/components/ComparisonSection'
+import { ProductFactSheet } from '@/components/ProductFactSheet'
 import { FaqSection } from '@/components/FaqSection'
 import { CtaSection } from '@/components/CtaSection'
 import { FeatureCarousel } from '@/components/FeatureCarousel'
@@ -237,6 +238,9 @@ export default async function Home() {
 
         {/* How it Works */}
         <HowItWorksSection />
+
+        {/* Product Fact Sheet (GEO Optimized) - AI Fact Extraction Layer */}
+        <ProductFactSheet />
 
         {/* Behavior Analysis Feature */}
         <BehaviorAnalysisSection />
