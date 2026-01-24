@@ -104,6 +104,8 @@ export const docsNavSections: DocsNavSection[] = [
         items: [
             { href: '/docs/rage-bait-test', label: 'Rage Bait Test: Stress-Test Your Forms' },
             { href: '/docs/behavior-analysis', label: 'Behavior Analysis Testing' },
+            { href: '/docs/parallel-cross-browser-testing', label: 'Parallel Cross-Browser Testing' },
+            { href: '/docs/system-architecture', label: 'System Architecture & Security' },
         ]
     },
     {

@@ -1,6 +1,7 @@
 import { MetadataRoute } from 'next'
 import { getAllDocsUrls } from '@/lib/docs-navigation'
 import { getAllBlogSlugs } from '@/lib/blog-discovery'
+import { glossaryTerms } from '@/lib/glossary-data'
 
 const BASE_URL = 'https://rihario.com'
 
@@ -80,6 +81,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
             changeFrequency: 'monthly',
             priority: 0.8,
         },
+        {
+            url: `${BASE_URL}/behavior-test`,
+            changeFrequency: 'monthly',
+            priority: 0.8,
+        },
     ]
 
     // ... (docsPages, blogPages) ...
@@ -129,28 +135,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
         },
     ]
 
-    // Glossary pages
+    // Glossary pages - dynamically generated from data
     const glossaryPages: MetadataRoute.Sitemap = [
         {
             url: `${BASE_URL}/glossary`,
             changeFrequency: 'monthly',
             priority: 0.7,
         },
-        {
-            url: `${BASE_URL}/glossary/god-mode`,
-            changeFrequency: 'monthly',
+        ...glossaryTerms.map(term => ({
+            url: `${BASE_URL}/glossary/${term.slug}`,
+            changeFrequency: 'monthly' as const,
             priority: 0.6,
-        },
-        {
-            url: `${BASE_URL}/glossary/vibe-testing`,
-            changeFrequency: 'monthly',
-            priority: 0.6,
-        },
-        {
-            url: `${BASE_URL}/glossary/self-healing-tests`,
-            changeFrequency: 'monthly',
-            priority: 0.6,
-        },
+        })),
     ]
 
 
