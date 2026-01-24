@@ -47,6 +47,7 @@ export const docsNavSections: DocsNavSection[] = [
             { href: '/docs/test-signup-forms', label: 'How to Test Sign-Up Forms Without Writing Tests' },
             { href: '/docs/test-navigation', label: 'How to Test Navigation and Broken Links' },
             { href: '/docs/test-forms', label: 'How to Test Forms and User Inputs' },
+            { href: '/docs/testing-localhost', label: 'Localhost Testing (Tunnels)' },
             { href: '/docs/accessibility-checks', label: 'AI Accessibility Checks (What It Finds and What It Doesn\'t)' },
         ]
     },

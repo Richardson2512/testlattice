@@ -14,7 +14,7 @@ export const glossaryTerms: GlossaryTerm[] = [
         definition: 'A real-time browser takeover feature that lets you manually intervene when AI gets stuck during testing.',
         category: 'Features',
         relatedTerms: ['Self-Healing Tests', 'AI Testing'],
-        canonicalUrl: '/docs/god-mode'
+        canonicalUrl: '/features/god-mode'
     },
     {
         term: 'Vibe Coding',
@@ -51,7 +51,7 @@ export const glossaryTerms: GlossaryTerm[] = [
         definition: 'Tests that automatically adapt when your UI changes.',
         category: 'Features',
         relatedTerms: ['God Mode', 'AI Testing'],
-        canonicalUrl: '/docs/self-healing'
+        canonicalUrl: '/docs/what-is-self-healing'
     },
     {
         term: 'AI Testing',

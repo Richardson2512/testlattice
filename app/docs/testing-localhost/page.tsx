@@ -27,7 +27,7 @@ export default function LocalhostTestingDocPage() {
                 })}
             </Script>
 
-            <article style={{ paddingTop: '140px', paddingBottom: '80px' }}>
+            <article style={{ paddingTop: '40px', paddingBottom: '80px' }}>
                 <div className="container" style={{ maxWidth: '800px' }}>
 
                     {/* Breadcrumbs */}
