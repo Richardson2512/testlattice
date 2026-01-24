@@ -44,13 +44,29 @@ export default function sitemap(): MetadataRoute.Sitemap {
             changeFrequency: 'monthly',
             priority: 0.8,
         },
+        // Canonical Definitions
         {
-            url: `${BASE_URL}/features/testing-types`,
+            url: `${BASE_URL}/testing-types`,
+            changeFrequency: 'weekly',
+            priority: 0.9,
+        },
+        {
+            url: `${BASE_URL}/rage-bait-testing`,
+            changeFrequency: 'weekly',
+            priority: 0.9,
+        },
+        {
+            url: `${BASE_URL}/how-rihario-works`,
             changeFrequency: 'monthly',
             priority: 0.8,
         },
         {
-            url: `${BASE_URL}/behavior-test`,
+            url: `${BASE_URL}/docs/system-architecture`,
+            changeFrequency: 'monthly',
+            priority: 0.8,
+        },
+        {
+            url: `${BASE_URL}/behavior-testing`,
             changeFrequency: 'monthly',
             priority: 0.8,
         },

@@ -14,8 +14,23 @@ export const metadata: Metadata = {
 }
 
 export default function RageBaitTestingPage() {
+    const jsonLd = {
+        '@context': 'https://schema.org',
+        '@type': 'DefinedTerm',
+        'name': 'Rage Bait Testing',
+        'description': 'A QA methodology that simulates frustrated user behavior (rage clicks, thrashing) to identify UX flaws.',
+        'inDefinedTermSet': {
+            '@type': 'DefinedTermSet',
+            'name': 'Rihario Testing Methodology'
+        }
+    }
+
     return (
         <main style={{ minHeight: '100vh', background: 'var(--bg-primary)' }}>
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+            />
             <LandingHeader />
 
             <div className="container" style={{ paddingTop: '120px', paddingBottom: '80px', maxWidth: '800px' }}>

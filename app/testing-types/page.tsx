@@ -14,8 +14,63 @@ export const metadata: Metadata = {
 }
 
 export default function TestTypesPage() {
+    const jsonLd = {
+        '@context': 'https://schema.org',
+        '@type': 'ItemList',
+        'name': 'Rihario Testing Capabilities',
+        'description': 'Types of autonomous frontend testing performed by Rihario AI agents.',
+        'itemListElement': [
+            {
+                '@type': 'ListItem',
+                'position': 1,
+                'name': 'Visual Regression Testing',
+                'description': 'Pixel-perfect comparison for UI layouts.'
+            },
+            {
+                '@type': 'ListItem',
+                'position': 2,
+                'name': 'Login Flow Testing',
+                'description': 'Authentication and session verification.'
+            },
+            {
+                '@type': 'ListItem',
+                'position': 3,
+                'name': 'Signup Flow Testing',
+                'description': 'Registration and onboarding verification.'
+            },
+            {
+                '@type': 'ListItem',
+                'position': 4,
+                'name': 'Navigation Testing',
+                'description': 'Route and link integrity checks.'
+            },
+            {
+                '@type': 'ListItem',
+                'position': 5,
+                'name': 'Form Testing',
+                'description': 'Input validation and submission checks.'
+            },
+            {
+                '@type': 'ListItem',
+                'position': 6,
+                'name': 'Accessibility Testing',
+                'description': 'WCAG 2.1 compliance audits.'
+            },
+            {
+                '@type': 'ListItem',
+                'position': 7,
+                'name': 'Rage Bait Testing',
+                'description': 'Detection of user frustration signals and dead clicks.'
+            }
+        ]
+    }
+
     return (
         <main style={{ minHeight: '100vh', background: 'var(--bg-primary)' }}>
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+            />
             <LandingHeader />
 
             <div className="container" style={{ paddingTop: '120px', paddingBottom: '80px', maxWidth: '800px' }}>
