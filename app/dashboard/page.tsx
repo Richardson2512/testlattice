@@ -854,6 +854,25 @@ export default function DashboardPage() {
               >×</button>
             </div>
 
+            {/* Free Tier Limit Banner */}
+            {currentTier === 'free' && (
+              <div style={{
+                padding: '0.75rem',
+                background: 'rgba(217, 119, 6, 0.08)',
+                border: '1px solid rgba(217, 119, 6, 0.2)',
+                borderRadius: 'var(--radius-md)',
+                marginBottom: '1.25rem',
+                fontSize: '0.85rem',
+                color: 'var(--warning)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
+              }}>
+                <span>⚠️</span>
+                <span><strong>Free Plan:</strong> Limited to 3 runs/month • Chrome Only • Single Page. <Link href="/pricing" style={{ color: 'var(--warning)', textDecoration: 'underline' }}>Upgrade for more</Link></span>
+              </div>
+            )}
+
             <form onSubmit={handleCreateTest} style={{ display: 'grid', gap: '1.5rem' }}>
               {/* Project & Mode */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
@@ -879,52 +898,79 @@ export default function DashboardPage() {
                     {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
                   </select>
                 </div>
-                <div>
-                  <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', fontWeight: 500, color: 'var(--text-secondary)' }}>
-                    Test Mode
-                  </label>
-                  <div style={{ display: 'flex', gap: '0.75rem' }}>
-                    <button
-                      type="button"
-                      onClick={() => changeMode('single')}
-                      style={{
-                        flex: 1,
-                        padding: '0.75rem',
-                        background: testMode === 'single' ? 'rgba(92, 15, 15, 0.08)' : 'var(--bg-primary)',
-                        border: `1px solid ${testMode === 'single' ? 'var(--primary)' : 'var(--border-medium)'}`,
-                        borderRadius: 'var(--radius-md)',
-                        cursor: 'pointer',
-                        fontWeight: 600,
-                        fontSize: '0.85rem',
-                        color: testMode === 'single' ? 'var(--primary)' : 'var(--text-secondary)',
-                      }}
-                    >
-                      Single Page
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => changeMode('multi')}
-                      style={{
-                        flex: 1,
-                        padding: '0.75rem',
-                        background: testMode === 'multi' ? 'rgba(92, 15, 15, 0.08)' : 'var(--bg-primary)',
-                        border: `1px solid ${testMode === 'multi' ? 'var(--primary)' : 'var(--border-medium)'}`,
-                        borderRadius: 'var(--radius-md)',
-                        cursor: 'pointer',
-                        fontWeight: 600,
-                        fontSize: '0.85rem',
-                        color: testMode === 'multi' ? 'var(--primary)' : 'var(--text-secondary)',
-                      }}
-                    >
-                      Multi Page
-                    </button>
-                  </div>
-                  {testMode === 'multi' && (
-                    <div style={{ marginTop: '0.5rem', padding: '0.5rem 0.75rem', background: 'rgba(217, 119, 6, 0.08)', border: '1px solid rgba(217, 119, 6, 0.2)', borderRadius: 'var(--radius-sm)', fontSize: '0.75rem', color: 'var(--warning)' }}>
-                      ⓘ Each page counts as a separate test against your monthly quota.
+
+                {/* Test Mode Selector - Hidden for Free Tier */}
+                {currentTier !== 'free' && (
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', fontWeight: 500, color: 'var(--text-secondary)' }}>
+                      Test Mode
+                    </label>
+                    <div style={{ display: 'flex', gap: '0.75rem' }}>
+                      <button
+                        type="button"
+                        onClick={() => changeMode('single')}
+                        style={{
+                          flex: 1,
+                          padding: '0.75rem',
+                          background: testMode === 'single' ? 'rgba(92, 15, 15, 0.08)' : 'var(--bg-primary)',
+                          border: `1px solid ${testMode === 'single' ? 'var(--primary)' : 'var(--border-medium)'}`,
+                          borderRadius: 'var(--radius-md)',
+                          cursor: 'pointer',
+                          fontWeight: 600,
+                          fontSize: '0.85rem',
+                          color: testMode === 'single' ? 'var(--primary)' : 'var(--text-secondary)',
+                        }}
+                      >
+                        Single Page
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => changeMode('multi')}
+                        style={{
+                          flex: 1,
+                          padding: '0.75rem',
+                          background: testMode === 'multi' ? 'rgba(92, 15, 15, 0.08)' : 'var(--bg-primary)',
+                          border: `1px solid ${testMode === 'multi' ? 'var(--primary)' : 'var(--border-medium)'}`,
+                          borderRadius: 'var(--radius-md)',
+                          cursor: 'pointer',
+                          fontWeight: 600,
+                          fontSize: '0.85rem',
+                          color: testMode === 'multi' ? 'var(--primary)' : 'var(--text-secondary)',
+                        }}
+                      >
+                        Multi Page
+                      </button>
                     </div>
-                  )}
-                </div>
+                    {testMode === 'multi' && (
+                      <div style={{ marginTop: '0.5rem', padding: '0.5rem 0.75rem', background: 'rgba(217, 119, 6, 0.08)', border: '1px solid rgba(217, 119, 6, 0.2)', borderRadius: 'var(--radius-sm)', fontSize: '0.75rem', color: 'var(--warning)' }}>
+                        ⓘ Each page counts as a separate test against your monthly quota.
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Free Tier: Show Read-Only Mode Badge instead of selector */}
+                {currentTier === 'free' && (
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', fontWeight: 500, color: 'var(--text-secondary)' }}>
+                      Test Mode
+                    </label>
+                    <div style={{
+                      padding: '0.75rem',
+                      background: 'var(--bg-primary)',
+                      border: '1px solid var(--border-medium)',
+                      borderRadius: 'var(--radius-md)',
+                      color: 'var(--text-muted)',
+                      fontSize: '0.9rem',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center'
+                    }}>
+                      <span>Single Page</span>
+                      <Link href="/pricing" style={{ fontSize: '0.75rem', color: 'var(--primary)', textDecoration: 'none', fontWeight: 600 }}>Upgrade to Multi →</Link>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* URL Input */}
@@ -1147,50 +1193,52 @@ export default function DashboardPage() {
               )}
 
               {/* Configuration */}
-              <div style={{ borderTop: '1px solid var(--border-light)', paddingTop: '1.5rem' }}>
-                <h3 style={{ fontSize: '0.9rem', fontWeight: 600, marginBottom: '1rem', color: 'var(--text-primary)' }}>
-                  Configuration
-                </h3>
-                {/* Mobile Device Upgrade Banner */}
-                {device && !isFeatureAvailable(currentTier, 'mobile') && [
-                  DeviceProfile.MOBILE_CHROME,
-                  DeviceProfile.MOBILE_SAFARI,
-                  DeviceProfile.MOBILE_CHROME_ANDROID,
-                  DeviceProfile.ANDROID_EMULATOR,
-                  DeviceProfile.IOS_SIMULATOR,
-                ].includes(device as DeviceProfile) && (
-                    <UpgradeBanner
-                      feature="mobile"
-                      currentTier={currentTier}
-                      onDismiss={() => setDevice('chrome-latest')}
-                    />
-                  )}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', marginBottom: '1rem' }}>
-                  <DeviceProfileSelector value={device as DeviceProfile} onChange={setDevice} />
-                  <div>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', fontWeight: 500, color: 'var(--text-secondary)' }}>
-                      AI Instructions
-                    </label>
-                    <textarea
-                      value={extraInstructions}
-                      onChange={e => setExtraInstructions(e.target.value)}
-                      placeholder="e.g. 'Click the signup button'"
-                      style={{
-                        width: '100%',
-                        height: '80px',
-                        padding: '0.75rem',
-                        background: 'var(--bg-primary)',
-                        border: '1px solid var(--border-medium)',
-                        borderRadius: 'var(--radius-md)',
-                        color: 'var(--text-primary)',
-                        fontSize: '0.9rem',
-                        resize: 'vertical',
-                      }}
-                    />
+              {currentTier !== 'free' && (
+                <div style={{ borderTop: '1px solid var(--border-light)', paddingTop: '1.5rem' }}>
+                  <h3 style={{ fontSize: '0.9rem', fontWeight: 600, marginBottom: '1rem', color: 'var(--text-primary)' }}>
+                    Configuration
+                  </h3>
+                  {/* Mobile Device Upgrade Banner */}
+                  {device && !isFeatureAvailable(currentTier, 'mobile') && [
+                    DeviceProfile.MOBILE_CHROME,
+                    DeviceProfile.MOBILE_SAFARI,
+                    DeviceProfile.MOBILE_CHROME_ANDROID,
+                    DeviceProfile.ANDROID_EMULATOR,
+                    DeviceProfile.IOS_SIMULATOR,
+                  ].includes(device as DeviceProfile) && (
+                      <UpgradeBanner
+                        feature="mobile"
+                        currentTier={currentTier}
+                        onDismiss={() => setDevice('chrome-latest')}
+                      />
+                    )}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', marginBottom: '1rem' }}>
+                    <DeviceProfileSelector value={device as DeviceProfile} onChange={setDevice} />
+                    <div>
+                      <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', fontWeight: 500, color: 'var(--text-secondary)' }}>
+                        AI Instructions
+                      </label>
+                      <textarea
+                        value={extraInstructions}
+                        onChange={e => setExtraInstructions(e.target.value)}
+                        placeholder="e.g. 'Click the signup button'"
+                        style={{
+                          width: '100%',
+                          height: '80px',
+                          padding: '0.75rem',
+                          background: 'var(--bg-primary)',
+                          border: '1px solid var(--border-medium)',
+                          borderRadius: 'var(--radius-md)',
+                          color: 'var(--text-primary)',
+                          fontSize: '0.9rem',
+                          resize: 'vertical',
+                        }}
+                      />
+                    </div>
                   </div>
+                  <BrowserMatrixSelector value={browserMatrix} onChange={setBrowserMatrix} />
                 </div>
-                <BrowserMatrixSelector value={browserMatrix} onChange={setBrowserMatrix} />
-              </div>
+              )}
 
               {/* Actions */}
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
