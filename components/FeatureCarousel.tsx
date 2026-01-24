@@ -89,7 +89,7 @@ const features: FeatureSlide[] = [
                 </div>
 
                 {/* Mock DevTools / Console */}
-                <div style={{ marginTop: '1rem', height: '120px', background: '#1e293b', borderRadius: '6px', color: '#94a3b8', fontSize: '0.75rem', padding: '0.75rem', overflow: 'hidden' }}>
+                <div style={{ marginTop: '1rem', height: '100px', background: '#1e293b', borderRadius: '6px', color: '#94a3b8', fontSize: '0.75rem', padding: '0.75rem', overflow: 'hidden' }}>
                     <div style={{ display: 'flex', gap: '1rem', borderBottom: '1px solid #334155', paddingBottom: '0.25rem', marginBottom: '0.5rem', color: '#cbd5e1' }}>
                         <span>Console</span>
                         <span>Network</span>
@@ -195,7 +195,8 @@ export function FeatureCarousel() {
                 display: 'flex',
                 flexDirection: 'column',
                 transition: 'all 0.3s ease-in-out',
-                position: 'relative' // Ensure positioning context
+                position: 'relative', // Ensure positioning context
+                overflow: 'hidden' // Prevent content overflow
             }}>
                 {/* Browser Toolbar / Header */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem', paddingBottom: '1rem', borderBottom: `1px solid ${theme.border.subtle}` }}>
