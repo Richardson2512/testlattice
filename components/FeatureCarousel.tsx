@@ -65,14 +65,14 @@ const features: FeatureSlide[] = [
                 </div>
 
                 {/* Mock Page Content */}
-                <div style={{ background: theme.bg.tertiary, borderRadius: '6px', padding: '1.5rem', border: `1px solid ${theme.border.subtle}`, flex: 1, position: 'relative' }}>
+                <div style={{ background: theme.bg.tertiary, borderRadius: '6px', padding: '1rem', border: `1px solid ${theme.border.subtle}`, flex: 1, position: 'relative' }}>
                     <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
                         <div style={{ height: '32px', width: '32px', background: '#e2e8f0', borderRadius: '50%' }} />
                         <div style={{ height: '12px', width: '40%', background: '#e2e8f0', borderRadius: '4px', marginTop: '10px' }} />
                     </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
-                        <div style={{ height: '80px', background: '#fff', borderRadius: '4px', border: '1px solid #e2e8f0' }} />
-                        <div style={{ height: '80px', background: '#fff', borderRadius: '4px', border: '1px solid #e2e8f0' }} />
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+                        <div style={{ height: '60px', background: '#fff', borderRadius: '4px', border: '1px solid #e2e8f0' }} />
+                        <div style={{ height: '60px', background: '#fff', borderRadius: '4px', border: '1px solid #e2e8f0' }} />
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'center' }}>
                         <div style={{ padding: '0.5rem 2rem', background: '#3b82f6', color: '#fff', borderRadius: '6px', fontSize: '0.8rem', boxShadow: '0 4px 6px -1px rgba(59, 130, 246, 0.4)' }}>
@@ -199,7 +199,7 @@ export function FeatureCarousel() {
                 overflow: 'hidden' // Prevent content overflow
             }}>
                 {/* Browser Toolbar / Header */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem', paddingBottom: '1rem', borderBottom: `1px solid ${theme.border.subtle}` }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem', paddingBottom: '1rem', borderBottom: `1px solid ${theme.border.subtle}` }}>
                     <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#ef4444' }} />
                     <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#f59e0b' }} />
                     <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#10b981' }} />
