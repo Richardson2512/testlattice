@@ -59,7 +59,7 @@ export default function ArchitectureDocPage() {
                 The system monitors for "Frustration Signals":
             </p>
             <ul>
-                <li><strong>Rapid Clicking:</strong> >3 clicks on the same coordinate in 500ms.</li>
+                <li><strong>Rapid Clicking:</strong> &gt;3 clicks on the same coordinate in 500ms.</li>
                 <li><strong>Dead Clicks:</strong> Clicks on elements with `cursor: pointer` that trigger no network or DOM change.</li>
                 <li><strong>Cursor Thrashing:</strong> Rapid, erratic mouse movement indicating confusion.</li>
             </ul>
