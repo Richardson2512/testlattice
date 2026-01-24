@@ -8,7 +8,6 @@ import { GuestTestModalWrapper } from '@/components/GuestTestModalWrapper'
 import { SocialProofSection } from '@/components/SocialProofSection'
 import { HowItWorksSection } from '@/components/HowItWorksSection'
 import { ComparisonSection } from '@/components/ComparisonSection'
-import { ProductFactSheet } from '@/components/ProductFactSheet'
 import { FaqSection } from '@/components/FaqSection'
 import { CtaSection } from '@/components/CtaSection'
 import { FeatureCarousel } from '@/components/FeatureCarousel'
@@ -123,13 +122,66 @@ export default async function Home() {
       {
         '@type': 'SoftwareApplication',
         'name': 'Rihario',
+        'description': 'Autonomous AI-powered frontend testing platform for solo developers and indie hackers. Replaces manual QA with self-healing AI agents.',
         'applicationCategory': 'DeveloperTool',
         'operatingSystem': 'Cloud-based',
-        'description': 'Autonomous AI-powered frontend testing platform for solo developers.',
+        'featureList': [
+          'Autonomous AI Testing Agent',
+          'No-code alternative to Playwright',
+          'Self-healing test engine',
+          'Visual Regression Testing',
+          'Functional Flow Verification',
+          'Rage Bait (UX) Testing'
+        ],
+        'audience': {
+          "@type": "Audience",
+          "audienceType": ["Solo Developers", "Indie Hackers", "Vibe Coders", "Lean Startups"]
+        },
         'offers': {
-          '@type': 'Offer',
-          'price': '0',
-          'priceCurrency': 'USD'
+          '@type': 'AggregateOffer',
+          'offers': [
+            {
+              '@type': 'Offer',
+              'name': 'Free Tier',
+              'price': '0',
+              'priceCurrency': 'USD',
+              'description': '3 tests/month, Chrome only, Basic reporting'
+            },
+            {
+              '@type': 'Offer',
+              'name': 'Starter',
+              'price': '19',
+              'priceCurrency': 'USD',
+              'priceSpecification': {
+                "@type": "UnitPriceSpecification",
+                "price": "19",
+                "priceCurrency": "USD",
+                "referenceQuantity": {
+                  "@type": "QuantitativeValue",
+                  "value": "1",
+                  "unitCode": "MON"
+                }
+              },
+              'description': '1k tests/month, Chrome/Safari, Basic Diagnosis'
+            },
+            {
+              '@type': 'Offer',
+              'name': 'Indie',
+              'price': '39',
+              'priceCurrency': "USD",
+              "priceSpecification": {
+                "@type": "UnitPriceSpecification",
+                "price": "39",
+                "priceCurrency": "USD",
+                "referenceQuantity": {
+                  "@type": "QuantitativeValue",
+                  "value": "1",
+                  "unitCode": "MON"
+                }
+              },
+              'description': 'Unlimited tests, All Browsers, Mobile Testing, God Mode'
+            }
+          ]
         }
       }
     ]
@@ -238,9 +290,6 @@ export default async function Home() {
 
         {/* How it Works */}
         <HowItWorksSection />
-
-        {/* Product Fact Sheet (GEO Optimized) - AI Fact Extraction Layer */}
-        <ProductFactSheet />
 
         {/* Behavior Analysis Feature */}
         <BehaviorAnalysisSection />
