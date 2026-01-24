@@ -89,7 +89,7 @@ const features: FeatureSlide[] = [
                 </div>
 
                 {/* Mock DevTools / Console */}
-                <div style={{ marginTop: '1rem', height: '100px', background: '#1e293b', borderRadius: '6px', color: '#94a3b8', fontSize: '0.75rem', padding: '0.75rem', overflow: 'hidden' }}>
+                <div style={{ marginTop: '0.75rem', height: '90px', background: '#1e293b', borderRadius: '6px', color: '#94a3b8', fontSize: '0.75rem', padding: '0.75rem', overflow: 'hidden' }}>
                     <div style={{ display: 'flex', gap: '1rem', borderBottom: '1px solid #334155', paddingBottom: '0.25rem', marginBottom: '0.5rem', color: '#cbd5e1' }}>
                         <span>Console</span>
                         <span>Network</span>
@@ -226,7 +226,7 @@ export function FeatureCarousel() {
                 </div>
 
                 {/* Navigation Dots (Manual Control) */}
-                <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', marginTop: '1.5rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', marginTop: '1rem' }}>
                     {features.map((_, idx) => (
                         <button
                             key={idx}
