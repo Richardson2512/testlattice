@@ -133,7 +133,34 @@ export default function WhyRihario() {
                     <p style={{ fontSize: '1.25rem', color: theme.text.secondary, margin: '0 auto 2.5rem', lineHeight: 1.6 }}>
                         <strong style={{ color: theme.text.primary }}>Simple answer:</strong> Rihario is the only AI testing platform built specifically for indie hackers, solo developers, and bootstrapped founders. No code. No setup nightmares. Just paste your URL and get comprehensive test results in minutes.
                     </p>
-                    <div style={{ fontSize: '1.1rem', color: theme.text.secondary }}>
+
+                    {/* Comparison Quick Links */}
+                    <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap', marginTop: '3rem' }}>
+                        {[
+                            { label: 'Vs Playwright', href: '/compare/playwright' },
+                            { label: 'Vs Cypress', href: '/compare/cypress' },
+                            { label: 'Vs Selenium', href: '/compare/selenium' },
+                            { label: 'Vs Manual QA', href: '/compare/manual-qa' },
+                        ].map(link => (
+                            <Link
+                                key={link.href}
+                                href={link.href}
+                                className="glass-card"
+                                style={{
+                                    padding: '0.75rem 1.25rem',
+                                    textDecoration: 'none',
+                                    color: theme.text.secondary,
+                                    fontSize: '0.9rem',
+                                    fontWeight: 500,
+                                    background: 'var(--bg-tertiary)'
+                                }}
+                            >
+                                {link.label} →
+                            </Link>
+                        ))}
+                    </div>
+
+                    <div style={{ fontSize: '1.1rem', color: theme.text.secondary, marginTop: '2rem' }}>
                         <strong>The real answer?</strong> Keep reading.
                     </div>
                 </div>

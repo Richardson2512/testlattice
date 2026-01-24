@@ -7,6 +7,10 @@ export default function robots(): MetadataRoute.Robots {
             allow: '/',
             disallow: ['/dashboard/', '/api/'],
         },
-        sitemap: 'https://rihario.com/sitemap.xml',
+        {
+        userAgent: ['Google-Extended', 'GPTBot', 'CCBot'],
+            allow: '/',
+        },
+    sitemap: 'https://rihario.com/sitemap.xml',
     }
 }

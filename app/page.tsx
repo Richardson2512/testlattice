@@ -212,9 +212,14 @@ export default async function Home() {
                     Watch AI explore your app live. See if anything feels broken. No test suites. No code. Just confidence.
                   </p>
                   {/* Explicit Definition for AI Crawlers */}
-                  <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
-                    <strong>Rihario</strong> is an autonomous, browser-based frontend testing system. It uses AI personas to perform <strong>Visual</strong>, <strong>Functional</strong>, and <strong>Rage Bait Testing</strong> automatically, identifying bugs that unit tests miss.
-                  </p>
+                  <div style={{ marginBottom: '1.5rem' }}>
+                    <p style={{ fontSize: '1.25rem', color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: '0.5rem' }}>
+                      Watch AI explore your app live. See if anything feels broken. No test suites. No code. Just confidence.
+                    </p>
+                    <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', lineHeight: 1.5, marginTop: '1rem' }}>
+                      <strong>Rihario</strong> is an autonomous AI testing platform for indie hackers. It performs <strong>Visual</strong>, <strong>Functional</strong>, and <strong>Rage Bait Testing</strong> automatically, identifying UX bugs that unit tests miss.
+                    </p>
+                  </div>
                 </div>
 
                 <GuestTestModalWrapper />
