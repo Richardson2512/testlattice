@@ -162,15 +162,15 @@ export default async function Home() {
                 <span className="text-gradient">Ship With Confidence</span>
               </h1>
 
-              <p style={{
-                fontSize: '1.25rem',
-                color: 'var(--text-secondary)',
-                marginBottom: '2.5rem',
-                maxWidth: '540px',
-                lineHeight: 1.6
-              }}>
-                Watch AI explore your app live. See if anything feels broken. No test suites. No code. Just confidence.
-              </p>
+              <div style={{ marginBottom: '1.5rem' }}>
+                <p style={{ fontSize: '1.25rem', color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: '0.5rem' }}>
+                  Watch AI explore your app live. See if anything feels broken. No test suites. No code. Just confidence.
+                </p>
+                {/* Explicit Definition for AI Crawlers */}
+                <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
+                  <strong>Rihario</strong> is an autonomous, browser-based frontend testing system. It uses AI personas to perform <strong>Visual</strong>, <strong>Functional</strong>, and <strong>Rage Bait Testing</strong> automatically, identifying bugs that unit tests miss.
+                </p>
+              </div>
 
               <GuestTestModalWrapper />
 
