@@ -308,26 +308,28 @@ export default function TestRunPage() {
             </button>
           )}
 
-          {['queued', 'pending', 'diagnosing'].includes(testRun?.status || '') && (
-            <button
-              onClick={handleCancel}
-              style={{
-                background: 'var(--warning)',
-                border: 'none',
-                padding: '6px 14px',
-                borderRadius: 'var(--radius-md)',
-                color: 'white',
-                cursor: 'pointer',
-                fontSize: '0.8rem',
-                fontWeight: 600,
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-              }}
-            >
-              <Icons.Stop /> Cancel Test
-            </button>
-          )}
+          {/* Only show Cancel for queued/pending/diagnosing states, explicitly excluding completed/failed */}
+          {['queued', 'pending', 'diagnosing'].includes(testRun?.status || '') &&
+            !['completed', 'failed', 'cancelled', 'timed_out'].includes(testRun?.status || '') && (
+              <button
+                onClick={handleCancel}
+                style={{
+                  background: 'var(--warning)',
+                  border: 'none',
+                  padding: '6px 14px',
+                  borderRadius: 'var(--radius-md)',
+                  color: 'white',
+                  cursor: 'pointer',
+                  fontSize: '0.8rem',
+                  fontWeight: 600,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                }}
+              >
+                <Icons.Stop /> Cancel Test
+              </button>
+            )}
         </div>
       </header>
 

@@ -194,7 +194,8 @@ export default function RunsPage() {
                                             </td>
                                             <td style={{ padding: '1rem 1.5rem', textAlign: 'right', verticalAlign: 'middle' }}>
                                                 <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
-                                                    {['running', 'queued', 'pending', 'diagnosing'].includes(run.status) ? (
+                                                    {['running', 'queued', 'pending', 'diagnosing'].includes(run.status) &&
+                                                        !['completed', 'failed', 'cancelled', 'timed_out'].includes(run.status) ? (
                                                         <button
                                                             onClick={() => handleCancelRun(run.id)}
                                                             className="btn"
