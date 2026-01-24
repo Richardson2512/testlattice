@@ -341,14 +341,14 @@ export default function TestingTypesPage() {
                 description="You test on Chrome. Your users are on Safari, Firefox, Edge, and mobile. We run your tests across 50+ browser/device combinations."
                 checks={[
                     "Chrome, Firefox, Safari, Edge",
-                    "iOS Safari and Android Chrome",
-                    "Desktop and mobile viewports",
+                    "Headless and GUI modes",
+                    "Desktop viewports",
                     "Different screen resolutions",
-                    "Tablet breakpoints"
+                    "OS compatibility"
                 ]}
                 example={{
                     question: "Does my site work on Safari?",
-                    answer: "We test on Safari 17 (macOS) and Safari on iOS 17. Your flexbox gap property isn't supported—we suggest a fallback."
+                    answer: "We test on Safari (macOS). Your flexbox gap property is fully supported."
                 }}
             />
 

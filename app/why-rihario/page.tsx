@@ -92,7 +92,7 @@ export default function WhyRihario() {
                                 "name": "Can Rihario test mobile apps?",
                                 "acceptedAnswer": {
                                     "@type": "Answer",
-                                    "text": "Rihario tests mobile web apps (responsive websites) across iOS Safari and Android Chrome emulations. For native iOS or Android apps (.ipa/.apk files), you would need a dedicated mobile testing tool."
+                                    "text": "Rihario tests responsive web apps on desktop browsers (checking various viewports). We do not support native mobile apps or mobile device emulation at this time."
                                 }
                             },
                             {
@@ -108,7 +108,7 @@ export default function WhyRihario() {
                                 "name": "What browsers does Rihario support?",
                                 "acceptedAnswer": {
                                     "@type": "Answer",
-                                    "text": "Rihario tests on Chrome, Firefox, Safari, and Edge across Windows, macOS, and Linux. Mobile testing covers iOS Safari (iPhone) and Android Chrome (Pixel, Samsung). Over 50 browser/device combinations in total."
+                                    "text": "Rihario tests on Chrome, Firefox, Safari, and Edge. We support major desktop browsers in headless and headed modes to ensure your app works for the vast majority of web users."
                                 }
                             },
                             {
@@ -155,7 +155,7 @@ export default function WhyRihario() {
                         </p>
                         <ul style={{ marginBottom: '2rem', paddingLeft: '1.5rem', color: theme.text.secondary, lineHeight: 1.8 }}>
                             <li>Does it work on Safari? (You only tested on Chrome)</li>
-                            <li>Does it work on mobile? (You built it on a 27" monitor)</li>
+                            <li>Does it work on different screen sizes? (You built it on a 27" monitor)</li>
                             <li>What happens when someone types <code>&lt;script&gt;alert('xss')&lt;/script&gt;</code>?</li>
                             <li>Are there console errors you never noticed?</li>
                         </ul>

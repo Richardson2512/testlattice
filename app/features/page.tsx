@@ -113,7 +113,7 @@ export default function FeaturesPage() {
                         <dt>API Monitoring</dt>
                         <dd>Identifies slow or failing API calls that degrade user experience.</dd>
                         <dt>Cross-Browser Testing</dt>
-                        <dd>Tests across Chrome, Safari, Firefox, Edge and mobile browsers on 50+ device combinations.</dd>
+                        <dd>Tests across Chrome, Safari, Firefox, and Edge on desktop.</dd>
                     </dl>
 
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem', marginBottom: '2rem' }}>
@@ -160,7 +160,7 @@ export default function FeaturesPage() {
                         <TestingTypeCard
                             icon="🌐"
                             title="Works Everywhere?"
-                            description="Chrome, Safari, Firefox, mobile—we test across 50+ browser/device combos."
+                            description="Chrome, Safari, Firefox, Edge—we test across all major desktop browsers."
                         />
                     </div>
 
@@ -386,105 +386,11 @@ export default function FeaturesPage() {
                         </p>
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2rem' }}>
                         {/* Desktop Browsers */}
                         <div className="glass-panel" style={{ padding: '3rem' }}>
-                            <h3 style={{ marginBottom: '2rem', fontSize: '1.5rem' }}>Desktop Browsers</h3>
+                            <h3 style={{ marginBottom: '2rem', fontSize: '1.5rem', textAlign: 'center' }}>Desktop Browsers</h3>
                             <InteractiveBrowserStack />
-                        </div>
-
-                        {/* Mobile Devices */}
-                        <div className="glass-panel" style={{ padding: '3rem' }}>
-                            <h3 style={{ marginBottom: '2rem', fontSize: '1.5rem', textAlign: 'center' }}>Mobile Devices</h3>
-                            <div style={{ display: 'flex', justifyContent: 'center', gap: '2rem', alignItems: 'center' }}>
-                                {/* iPhone */}
-                                <div style={{ width: '140px', height: '280px', background: '#000', borderRadius: '24px', border: '6px solid #1c1c1e', overflow: 'hidden', position: 'relative' }}>
-                                    <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: '30%', height: '15px', background: '#1c1c1e', borderRadius: '0 0 8px 8px', zIndex: 10 }} />
-                                    <div style={{ background: '#fff', width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
-                                        <div style={{ flex: 1, background: '#f2f2f7', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#8e8e93', fontSize: '12px' }}>Safari</div>
-                                        <div style={{ height: '44px', background: '#f9f9f9', borderTop: '1px solid #d1d1d6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                            <div style={{ background: '#e3e3e8', padding: '4px 12px', borderRadius: '8px', fontSize: '10px' }}>your-app.com</div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Samsung S25 Ultra */}
-                                <div style={{
-                                    width: '150px',
-                                    height: '315px',
-                                    position: 'relative',
-                                    // No overflow hidden on container if we want buttons to stick out, 
-                                    // but we need space. The parent flex container has gap 2rem so it should be fine.
-                                }}>
-                                    <div style={{
-                                        width: '976.55px',
-                                        height: '2048px',
-                                        position: 'absolute',
-                                        top: 0,
-                                        left: 0,
-                                        transform: 'scale(0.153)',
-                                        transformOrigin: 'top left',
-                                    }}>
-                                        {/* Body */}
-                                        <div style={{
-                                            position: 'absolute', left: 0, right: 0, top: 0, bottom: 0,
-                                            border: '4px solid #212121', borderRadius: '63.06px',
-                                            background: '#212121'
-                                        }} />
-
-                                        {/* Pen */}
-                                        <div style={{
-                                            position: 'absolute', width: '76.36px', height: '6.18px', left: '48.92px', bottom: '-6.14px',
-                                            border: '4px solid #212121', borderRadius: '0px 0px 14.84px 14.84px', background: '#212121'
-                                        }} />
-
-                                        {/* Volume Buttons */}
-                                        <div style={{
-                                            position: 'absolute', width: '7.73px', height: '264.31px', right: '-8.49px', top: '390.43px',
-                                            border: '4px solid #212121', borderRadius: '1.09px 0px 0px 1.09px', background: '#212121',
-                                            transform: 'matrix(-1, 0, 0, 1, 0, 0)'
-                                        }} />
-                                        <div style={{
-                                            position: 'absolute', width: '7.73px', height: '145.29px', right: '-8.49px', top: '773.45px',
-                                            border: '4px solid #212121', borderRadius: '1.09px 0px 0px 1.09px', background: '#212121',
-                                            transform: 'matrix(-1, 0, 0, 1, 0, 0)'
-                                        }} />
-
-                                        {/* Screen Frame */}
-                                        <div style={{
-                                            position: 'absolute', left: '14.15px', right: '14.6px', top: '11.44px', bottom: '12.06px',
-                                            border: '4px solid #3E3E3E', borderRadius: '50.7px',
-                                            background: '#000'
-                                        }} />
-
-                                        {/* Display Area */}
-                                        <div style={{
-                                            position: 'absolute', left: '13.36px', right: '13.22px', top: '13.29px', bottom: '13.29px',
-                                            borderRadius: '40.8px',
-                                            background: '#fff',
-                                            overflow: 'hidden',
-                                            display: 'flex',
-                                            flexDirection: 'column'
-                                        }}>
-                                            {/* Camera Punch-hole */}
-                                            <div style={{
-                                                position: 'absolute', width: '42.75px', height: '42.16px',
-                                                left: 'calc(50% - 42.75px/2 - 0.15px)', top: '20.87px',
-                                                background: '#3E3E3E', borderRadius: '53.3px', zIndex: 50
-                                            }} />
-
-                                            {/* Browser UI */}
-                                            <div style={{ height: '180px', background: '#f1f3f4', borderBottom: '1px solid #dadce0', display: 'flex', alignItems: 'center', justifyContent: 'center', paddingTop: '60px' }}>
-                                                <div style={{ background: '#fff', padding: '15px 40px', borderRadius: '40px', fontSize: '32px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)', color: '#3c4043' }}>your-app.com</div>
-                                            </div>
-                                            <div style={{ flex: 1, background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#5f6368', fontSize: '40px', flexDirection: 'column', gap: '20px' }}>
-                                                <div style={{ fontSize: '100px' }}>🌏</div>
-                                                <div>Chrome</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>

@@ -44,23 +44,7 @@ const FirefoxIcon = () => (
   </svg>
 )
 
-const MobileIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-    <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
-    <line x1="12" y1="18" x2="12" y2="18" />
-  </svg>
-)
 
-const AndroidIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 48 48" fill="none">
-    <rect x="8" y="20" width="32" height="20" rx="2" fill="#3DDC84" />
-    <rect x="12" y="24" width="6" height="12" rx="1" fill="white" />
-    <rect x="30" y="24" width="6" height="12" rx="1" fill="white" />
-    <circle cx="17" cy="12" r="2" fill="#3DDC84" />
-    <circle cx="31" cy="12" r="2" fill="#3DDC84" />
-    <path d="M14 18h20" stroke="#3DDC84" strokeWidth="2" />
-  </svg>
-)
 
 interface DeviceOption {
   value: DeviceProfile
@@ -98,31 +82,6 @@ const DEVICE_OPTIONS: DeviceOption[] = [
     priority: 3
   },
 
-  // Mobile Browsers
-  {
-    value: DeviceProfile.MOBILE_CHROME,
-    label: 'Mobile Chrome',
-    description: 'iPhone 12',
-    viewport: '390×844',
-    icon: <MobileIcon />,
-    priority: 2
-  },
-  {
-    value: DeviceProfile.MOBILE_SAFARI,
-    label: 'Mobile Safari',
-    description: 'iOS quirks',
-    viewport: '390×844',
-    icon: <MobileIcon />,
-    priority: 2
-  },
-  {
-    value: DeviceProfile.MOBILE_CHROME_ANDROID,
-    label: 'Android Chrome',
-    description: 'Android',
-    viewport: '360×640',
-    icon: <AndroidIcon />,
-    priority: 3
-  },
 ]
 
 interface DeviceProfileSelectorProps {
@@ -131,11 +90,9 @@ interface DeviceProfileSelectorProps {
 }
 
 export function DeviceProfileSelector({ value, onChange }: DeviceProfileSelectorProps) {
+
   const desktopDevices = DEVICE_OPTIONS.filter(opt =>
     !opt.value.includes('mobile') && !opt.value.includes('android') && !opt.value.includes('ios')
-  )
-  const mobileDevices = DEVICE_OPTIONS.filter(opt =>
-    opt.value.includes('mobile') || opt.value.includes('android') || opt.value.includes('ios')
   )
 
   const containerStyle: React.CSSProperties = {
@@ -207,30 +164,6 @@ export function DeviceProfileSelector({ value, onChange }: DeviceProfileSelector
         <p style={groupTitleStyle}>Desktop Browsers</p>
         <div style={gridStyle}>
           {desktopDevices
-            .sort((a, b) => a.priority - b.priority)
-            .map((option) => {
-              const isSelected = value === option.value
-              return (
-                <button
-                  key={option.value}
-                  type="button"
-                  style={getOptionStyle(isSelected)}
-                  onClick={() => onChange(option.value)}
-                >
-                  <span style={iconStyle}>{option.icon}</span>
-                  <span style={optionLabelStyle(isSelected)}>{option.label}</span>
-                  <span style={viewportStyle}>{option.viewport}</span>
-                </button>
-              )
-            })}
-        </div>
-      </div>
-
-      {/* Mobile Browsers */}
-      <div>
-        <p style={groupTitleStyle}>Mobile Browsers</p>
-        <div style={gridStyle}>
-          {mobileDevices
             .sort((a, b) => a.priority - b.priority)
             .map((option) => {
               const isSelected = value === option.value

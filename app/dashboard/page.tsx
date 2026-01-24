@@ -1200,19 +1200,7 @@ export default function DashboardPage() {
                     Configuration
                   </h3>
                   {/* Mobile Device Upgrade Banner */}
-                  {device && !isFeatureAvailable(currentTier, 'mobile') && [
-                    DeviceProfile.MOBILE_CHROME,
-                    DeviceProfile.MOBILE_SAFARI,
-                    DeviceProfile.MOBILE_CHROME_ANDROID,
-                    DeviceProfile.ANDROID_EMULATOR,
-                    DeviceProfile.IOS_SIMULATOR,
-                  ].includes(device as DeviceProfile) && (
-                      <UpgradeBanner
-                        feature="mobile"
-                        currentTier={currentTier}
-                        onDismiss={() => setDevice('chrome-latest')}
-                      />
-                    )}
+
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', marginBottom: '1rem' }}>
                     <DeviceProfileSelector value={device as DeviceProfile} onChange={setDevice} />
                     <div>
