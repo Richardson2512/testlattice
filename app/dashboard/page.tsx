@@ -574,36 +574,35 @@ export default function DashboardPage() {
                         {new Date(run.createdAt).toLocaleDateString()}
                       </td>
                       <td style={{ padding: '0.75rem 1.25rem', textAlign: 'right' }}>
-                        <td style={{ padding: '0.75rem 1.25rem', textAlign: 'right' }}>
-                          {['running', 'queued', 'pending', 'diagnosing'].includes(run.status) &&
-                            !['completed', 'failed', 'cancelled', 'timed_out'].includes(run.status) && (
-                              <button
-                                onClick={(e) => handleCancelRun(e, run.id)}
-                                style={{
-                                  padding: '4px 8px',
-                                  background: 'rgba(239, 68, 68, 0.1)',
-                                  color: 'var(--error)',
-                                  border: '1px solid rgba(239, 68, 68, 0.2)',
-                                  borderRadius: '4px',
-                                  fontSize: '0.7rem',
-                                  fontWeight: 600,
-                                  cursor: 'pointer',
-                                  whiteSpace: 'nowrap',
-                                  transition: 'all 0.2s',
-                                }}
-                                onMouseEnter={(e) => {
-                                  e.currentTarget.style.background = 'var(--error)';
-                                  e.currentTarget.style.color = 'white';
-                                }}
-                                onMouseLeave={(e) => {
-                                  e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)';
-                                  e.currentTarget.style.color = 'var(--error)';
-                                }}
-                              >
-                                Cancel
-                              </button>
-                            )}
-                        </td>
+                        {['running', 'queued', 'pending', 'diagnosing'].includes(run.status) &&
+                          !['completed', 'failed', 'cancelled', 'timed_out'].includes(run.status) && (
+                            <button
+                              onClick={(e) => handleCancelRun(e, run.id)}
+                              style={{
+                                padding: '4px 8px',
+                                background: 'rgba(239, 68, 68, 0.1)',
+                                color: 'var(--error)',
+                                border: '1px solid rgba(239, 68, 68, 0.2)',
+                                borderRadius: '4px',
+                                fontSize: '0.7rem',
+                                fontWeight: 600,
+                                cursor: 'pointer',
+                                whiteSpace: 'nowrap',
+                                transition: 'all 0.2s',
+                              }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.background = 'var(--error)';
+                                e.currentTarget.style.color = 'white';
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)';
+                                e.currentTarget.style.color = 'var(--error)';
+                              }}
+                            >
+                              Cancel
+                            </button>
+                          )}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
