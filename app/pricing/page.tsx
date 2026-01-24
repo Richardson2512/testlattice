@@ -11,6 +11,43 @@ export const metadata: Metadata = {
 }
 
 export default function PricingPage() {
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    'name': 'Rihario',
+    'applicationCategory': 'DeveloperTool',
+    'offers': [
+      {
+        '@type': 'Offer',
+        'name': 'Guest / Free',
+        'price': '0',
+        'priceCurrency': 'USD',
+        'description': '300 monthly tests, single browser.'
+      },
+      {
+        '@type': 'Offer',
+        'name': 'Starter',
+        'price': '19',
+        'priceCurrency': 'USD',
+        'description': '1000 tests, God Mode, 5 concurrent runs.'
+      },
+      {
+        '@type': 'Offer',
+        'name': 'Indie',
+        'price': '39',
+        'priceCurrency': 'USD',
+        'description': 'Unlimited tests, Priority Support, 20 concurrent runs.'
+      },
+      {
+        '@type': 'Offer',
+        'name': 'Pro',
+        'price': '99',
+        'priceCurrency': 'USD',
+        'description': 'Dedicated infrastructure, SSO, audit logs.'
+      }
+    ]
+  }
+
   return (
     <main style={{
       minHeight: '100vh',
@@ -18,6 +55,10 @@ export default function PricingPage() {
       color: 'var(--text-primary)',
       fontFamily: 'var(--font-sans)'
     }}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <LandingHeader />
 
       {/* Header Section - Static SSR content */}

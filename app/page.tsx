@@ -205,7 +205,7 @@ export default async function Home() {
 
                 <h1 style={{ marginBottom: '1.5rem', lineHeight: 1.1 }}>
                   AI Testing for Indie Hackers<br />
-                  <span className="text-gradient">Ship With Confidence</span>
+                  <span className="text-gradient">Autonomous AI</span> Vibe Testing Platform
                 </h1>
 
                 <div style={{ marginBottom: '1.5rem' }}>
