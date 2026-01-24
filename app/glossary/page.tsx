@@ -87,9 +87,7 @@ export default function GlossaryPage() {
                                     </dt>
                                     <dd style={{ color: 'var(--text-secondary)', lineHeight: 1.7, marginBottom: '1rem' }}>
                                         <strong style={{ color: 'var(--text-primary)' }}>{item.term}</strong> is {item.definition.charAt(0).toLowerCase() + item.definition.slice(1)}
-                                        {(item as any).canonicalUrl && (
-                                            <>{' '}<Link href={(item as any).canonicalUrl} style={{ color: 'var(--primary)' }}>Full definition →</Link></>
-                                        )}
+                                        {' '}<Link href={`/glossary/${item.slug}`} style={{ color: 'var(--primary)' }}>Full definition →</Link>
                                     </dd>
                                     <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                                         <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Related:</span>

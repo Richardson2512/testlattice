@@ -28,6 +28,8 @@ export function Footer() {
                         <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                             <li><Link href="/why-rihario" style={{ color: 'var(--beige-300)', textDecoration: 'none' }}>Why Rihario?</Link></li>
                             <li><Link href="/blog" style={{ color: 'var(--beige-300)', textDecoration: 'none' }}>Blog</Link></li>
+                            <li><Link href="/docs/testing-localhost" style={{ color: 'var(--beige-300)', textDecoration: 'none' }}>Localhost Testing</Link></li>
+                            <li><Link href="/rage-bait-testing" style={{ color: 'var(--beige-300)', textDecoration: 'none' }}>Rage Bait Testing</Link></li>
                             <li><Link href="/contact" style={{ color: 'var(--beige-300)', textDecoration: 'none' }}>Contact Us</Link></li>
                         </ul>
                     </div>
