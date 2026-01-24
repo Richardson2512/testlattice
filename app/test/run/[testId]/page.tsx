@@ -8,6 +8,7 @@ import { generateReportPDF } from '../../../../lib/pdfGenerator'
 import LiveStreamPlayer from '../../../../components/LiveStreamPlayer'
 import { DiagnosisReport } from '@/components/DiagnosisReport'
 import { filterStepsByBrowser, getBrowserDisplayName, aggregateBrowserRuns, type BrowserType } from '../../../../lib/browserResults'
+import { LiveTestControl } from '../../../../components/LiveTestControl'
 
 // --- ICONS ---
 const Icons = {
@@ -75,6 +76,7 @@ export default function TestRunPage() {
   const [activeTab, setActiveTab] = useState<'inspector' | 'console' | 'network'>('inspector')
   const [selectedBrowser, setSelectedBrowser] = useState<BrowserType | 'all'>('all')
   const [showShareModal, setShowShareModal] = useState(false)
+  const [showGodMode, setShowGodMode] = useState(false)
   const wsRef = useRef<WebSocket | null>(null)
 
   const handleVisibilityChange = async (visibility: 'public' | 'private') => {
@@ -225,6 +227,28 @@ export default function TestRunPage() {
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          {testRun?.status === 'running' && (
+            <button
+              onClick={() => setShowGodMode(true)}
+              style={{
+                background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                border: 'none',
+                padding: '6px 14px',
+                borderRadius: 'var(--radius-md)',
+                color: 'white',
+                cursor: 'pointer',
+                fontSize: '0.8rem',
+                fontWeight: 600,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                boxShadow: '0 2px 4px rgba(245, 158, 11, 0.2)'
+              }}
+            >
+              <span>🎮</span> God Mode
+            </button>
+          )}
+
           <button
             id="download-pdf-btn"
             onClick={handleDownloadPDF}
@@ -678,6 +702,14 @@ export default function TestRunPage() {
           <span>WS: {wsRef.current ? '● Connected' : '○ Disconnected'}</span>
         </div>
       </footer>
+
+      {/* God Mode Overlay */}
+      {showGodMode && (
+        <LiveTestControl
+          testRunId={testId}
+          onClose={() => setShowGodMode(false)}
+        />
+      )}
 
     </div>
   )
