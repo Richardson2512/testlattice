@@ -57,6 +57,11 @@ export default function Navigation() {
       items.push({ id: 'admin', label: 'Admin', href: '/admin', icon: '🛡️' })
     }
 
+    // Filter out Projects for Free tier (default project is managed automatically)
+    if (userTier === 'free' || userTier === 'guest') {
+      return items.filter(i => i.id !== 'projects')
+    }
+
     return items
   }, [isAdmin, userTier])
 

@@ -405,7 +405,7 @@ export interface Project {
 }
 
 export interface CreateTestRunRequest {
-  projectId: string
+  projectId?: string
   build: {
     type: 'web'
     url?: string

@@ -63,7 +63,7 @@ export default function PricingPage() {
 
       {/* Header Section - Static SSR content */}
       <section style={{
-        paddingTop: '120px',
+        paddingTop: '60px',
         paddingBottom: '4rem',
         textAlign: 'center',
         background: 'linear-gradient(180deg, var(--bg-primary) 0%, var(--beige-100) 100%)'

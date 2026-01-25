@@ -223,7 +223,8 @@ export default function DashboardPage() {
     e.preventDefault()
     setIsSubmitting(true)
     try {
-      if (!selectedProject || selectedProject === 'none') {
+      // For Free tier, we don't require selecting a project (backend uses default)
+      if (currentTier !== 'free' && (!selectedProject || selectedProject === 'none')) {
         alert('Please select or create a project')
         setIsSubmitting(false)
         return
@@ -277,7 +278,7 @@ export default function DashboardPage() {
       }
 
       const response = await api.createTestRun({
-        projectId: selectedProject,
+        projectId: currentTier === 'free' ? undefined : selectedProject,
         build: { type: 'web', url: mainUrl },
         profile: { device: device as any, maxMinutes: 10 },
         options: {
@@ -398,37 +399,41 @@ export default function DashboardPage() {
             </div>
           </div>
           <div style={{ display: 'flex', gap: '0.75rem' }}>
-            <select
-              value={selectedProject}
-              onChange={(e) => setSelectedProject(e.target.value)}
-              style={{
-                padding: '0.6rem 1rem',
-                background: 'var(--bg-card)',
-                border: '1px solid var(--border-medium)',
-                borderRadius: 'var(--radius-md)',
-                color: 'var(--text-primary)',
-                fontSize: '0.85rem',
-                cursor: 'pointer',
-              }}
-            >
-              <option value="none">All Projects</option>
-              {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-            </select>
-            <button
-              onClick={() => setShowCreateProjectModal(true)}
-              style={{
-                padding: '0.6rem 1rem',
-                background: 'var(--bg-card)',
-                border: '1px solid var(--border-medium)',
-                borderRadius: 'var(--radius-md)',
-                color: 'var(--text-primary)',
-                fontSize: '0.85rem',
-                cursor: 'pointer',
-                fontWeight: 500,
-              }}
-            >
-              + Project
-            </button>
+            {currentTier !== 'free' && (
+              <>
+                <select
+                  value={selectedProject}
+                  onChange={(e) => setSelectedProject(e.target.value)}
+                  style={{
+                    padding: '0.6rem 1rem',
+                    background: 'var(--bg-card)',
+                    border: '1px solid var(--border-medium)',
+                    borderRadius: 'var(--radius-md)',
+                    color: 'var(--text-primary)',
+                    fontSize: '0.85rem',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <option value="none">All Projects</option>
+                  {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                </select>
+                <button
+                  onClick={() => setShowCreateProjectModal(true)}
+                  style={{
+                    padding: '0.6rem 1rem',
+                    background: 'var(--bg-card)',
+                    border: '1px solid var(--border-medium)',
+                    borderRadius: 'var(--radius-md)',
+                    color: 'var(--text-primary)',
+                    fontSize: '0.85rem',
+                    cursor: 'pointer',
+                    fontWeight: 500,
+                  }}
+                >
+                  + Project
+                </button>
+              </>
+            )}
             <button
               onClick={() => setShowCreateTestModal(true)}
               style={{
