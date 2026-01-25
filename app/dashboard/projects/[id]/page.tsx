@@ -1,11 +1,13 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useParams } from 'next/navigation'
 import { api, Project, TestRun } from '@/lib/api'
 import { useDashboardData, invalidateProjects } from '@/lib/hooks'
 
-export default function ProjectDetailsPage({ params }: { params: { id: string } }) {
+export default function ProjectDetailsPage() {
+    const params = useParams()
+    const projectId = params.id as string
     const router = useRouter()
     // const { projects } = useDashboardData() // Could use this but simpler to fetch directly for freshness
     const [project, setProject] = useState<Project | null>(null)
@@ -21,15 +23,17 @@ export default function ProjectDetailsPage({ params }: { params: { id: string } 
 
     useEffect(() => {
         async function fetchProject() {
+            if (!projectId) return
+
             try {
                 setLoading(true)
-                const { project } = await api.getProject(params.id)
+                const { project } = await api.getProject(projectId)
                 setProject(project)
                 setEditName(project.name)
                 setEditDescription(project.description || '')
 
                 // Fetch test runs
-                const { testRuns } = await api.listTestRuns(params.id)
+                const { testRuns } = await api.listTestRuns(projectId)
                 setTestRuns(testRuns)
             } catch (err: any) {
                 setError(err.message || 'Failed to load project')
@@ -38,7 +42,7 @@ export default function ProjectDetailsPage({ params }: { params: { id: string } 
             }
         }
         fetchProject()
-    }, [params.id])
+    }, [projectId])
 
     async function handleSave() {
         if (!project) return
