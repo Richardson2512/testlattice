@@ -100,7 +100,7 @@ export function DeviceAuthFrame({ children, title, subtitle, showMobile = false 
 
                         <div style={{ marginTop: '3rem', padding: '1rem', background: 'rgba(51, 65, 85, 0.05)', borderRadius: '8px', borderLeft: `4px solid ${theme.accent.primary}` }}>
                             <div style={{ color: theme.text.tertiary, fontSize: '0.85rem', marginBottom: '0.5rem', fontWeight: 600 }}>LIVE STATUS</div>
-                            <div style={{ color: theme.text.secondary, fontFamily: 'monospace', fontSize: '0.9rem' }}>
+                            <div style={{ color: theme.text.secondary, fontFamily: "'Courier New', monospace", fontSize: '0.9rem' }}>
                                 &gt; {typedText}<span className="animate-pulse">_</span>
                             </div>
                         </div>
@@ -128,7 +128,7 @@ export function DeviceAuthFrame({ children, title, subtitle, showMobile = false 
                             <div style={{
                                 flex: 1, background: theme.bg.secondary, borderRadius: '4px', height: '28px',
                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                fontSize: '0.8rem', color: theme.text.tertiary, fontFamily: 'monospace'
+                                fontSize: '0.8rem', color: theme.text.tertiary, fontFamily: "'Courier New', monospace"
                             }}>
                                 🔒 secure-auth.rihario.dev
                             </div>
