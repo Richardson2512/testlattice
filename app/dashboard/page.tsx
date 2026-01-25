@@ -192,7 +192,7 @@ export default function DashboardPage() {
         sessionStorage.removeItem('pending_guest_test')
 
         // Redirect to the test report page
-        window.location.href = `/test/run/${pendingTestId}`
+        window.location.href = `/test/report/${pendingTestId}`
       } catch (err: any) {
         console.warn('Failed to associate guest test:', err.message)
         sessionStorage.removeItem('pending_guest_test')

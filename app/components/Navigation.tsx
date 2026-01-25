@@ -29,6 +29,10 @@ export default function Navigation() {
   const [isHovered, setIsHovered] = useState(false)
   const [isAdmin, setIsAdmin] = useState(false)
   const [userTier, setUserTier] = useState<string>('free')
+
+  // Tooltip state
+  const [hoveredItem, setHoveredItem] = useState<{ label: string, top: number } | null>(null)
+
   const expandedWidth = 280
   const collapsedWidth = 72
   const sidebarWidth = isCollapsed ? collapsedWidth : expandedWidth
@@ -255,7 +259,14 @@ export default function Navigation() {
             <Link
               key={item.id}
               href={item.href}
-              title={isCollapsed ? item.label : undefined}
+              // title={isCollapsed ? item.label : undefined}
+              onMouseEnter={(e) => {
+                if (isCollapsed) {
+                  const rect = e.currentTarget.getBoundingClientRect()
+                  setHoveredItem({ label: item.label, top: rect.top + (rect.height / 2) })
+                }
+              }}
+              onMouseLeave={() => setHoveredItem(null)}
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -293,7 +304,14 @@ export default function Navigation() {
             <Link
               key={item.id}
               href={item.href}
-              title={isCollapsed ? item.label : undefined}
+              // title={isCollapsed ? item.label : undefined}
+              onMouseEnter={(e) => {
+                if (isCollapsed) {
+                  const rect = e.currentTarget.getBoundingClientRect()
+                  setHoveredItem({ label: item.label, top: rect.top + (rect.height / 2) })
+                }
+              }}
+              onMouseLeave={() => setHoveredItem(null)}
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -416,6 +434,41 @@ export default function Navigation() {
           </div>
         )}
       </div>
+      {/* Custom Tooltip Portal */}
+      {isCollapsed && hoveredItem && (
+        <div style={{
+          position: 'fixed',
+          top: hoveredItem.top,
+          left: collapsedWidth + 10, // 10px spacing from sidebar
+          background: 'var(--text-primary)',
+          color: 'var(--text-inverse)',
+          padding: '0.4rem 0.8rem',
+          borderRadius: 'var(--radius-md)',
+          fontSize: '0.85rem',
+          fontWeight: 500,
+          zIndex: 1000,
+          boxShadow: 'var(--shadow-md)',
+          pointerEvents: 'none',
+          whiteSpace: 'nowrap',
+          opacity: 1,
+          animation: 'fadeIn 0.15s ease-out forwards',
+          transform: 'translateY(-50%)', // Center vertically relative to the icon
+        }}>
+          {hoveredItem.label}
+          {/* Arrow */}
+          <div style={{
+            position: 'absolute',
+            left: '-4px',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            width: 0,
+            height: 0,
+            borderTop: '5px solid transparent',
+            borderBottom: '5px solid transparent',
+            borderRight: '5px solid var(--text-primary)',
+          }} />
+        </div>
+      )}
     </aside>
   )
 }
