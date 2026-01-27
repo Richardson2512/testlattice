@@ -255,7 +255,7 @@ export default function ProjectDetailsPage() {
                                         <td style={{ padding: '1rem' }}>{new Date(run.createdAt).toLocaleString()}</td>
                                         <td style={{ padding: '1rem', textAlign: 'right' }}>
                                             <button
-                                                onClick={() => router.push(`/dashboard/tests/${run.id}`)}
+                                                onClick={() => router.push(`/test/run/${run.id}`)}
                                                 style={{
                                                     padding: '0.25rem 0.75rem',
                                                     background: 'white',

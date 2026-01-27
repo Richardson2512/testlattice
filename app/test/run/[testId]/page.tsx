@@ -17,7 +17,8 @@ const Icons = {
   Stop: () => <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" /></svg>,
   Terminal: () => <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>,
   Eye: () => <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>,
-  Code: () => <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg>
+  Code: () => <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg>,
+  Globe: () => <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" /></svg>,
 }
 
 // --- COMPONENTS ---
@@ -130,7 +131,22 @@ export default function TestRunPage() {
 
   // WebSocket
   useEffect(() => {
-    if (!testRun || testRun.status !== 'running') return
+    // Connect WebSocket for any active test status
+    const activeStatuses = ['running', 'queued', 'pending', 'diagnosing']
+    const isActive = testRun && activeStatuses.includes(testRun.status)
+
+    if (!isActive) {
+      if (wsRef.current) {
+        wsRef.current.close()
+        wsRef.current = null
+      }
+      return
+    }
+
+    // Check if we already have an active connection
+    if (wsRef.current?.readyState === WebSocket.OPEN) return
+    if (wsRef.current?.readyState === WebSocket.CONNECTING) return
+
     const wsUrl = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:3001'
     const ws = new WebSocket(`${wsUrl}/ws/test-control?runId=${testId}`)
     ws.onopen = () => console.log('Test Run Connected')
@@ -373,68 +389,75 @@ export default function TestRunPage() {
         {/* Center Panel: Live Stream */}
         <main style={{
           flex: 1,
-          background: 'var(--beige-900)',
-          position: 'relative',
           display: 'flex',
           flexDirection: 'column',
+          borderRadius: 'var(--radius-lg)',
+          overflow: 'hidden',
+          boxShadow: 'var(--shadow-lg)',
+          border: '1px solid var(--border-light)',
+          background: 'var(--bg-card)',
+          margin: '0.5rem 1rem 1rem 1rem'
         }}>
-          {/* Virtual Browser Frame */}
+          {/* Browser Chrome - Title Bar */}
           <div style={{
-            background: 'linear-gradient(180deg, var(--beige-800) 0%, var(--beige-900) 100%)',
-            padding: '0.5rem 1rem',
+            height: '40px',
+            background: 'linear-gradient(to bottom, var(--maroon-800), var(--maroon-900))',
             display: 'flex',
             alignItems: 'center',
-            gap: '0.75rem',
-            borderBottom: '1px solid rgba(255,255,255,0.1)',
+            padding: '0 12px',
+            gap: '8px'
           }}>
             {/* Traffic Lights */}
             <div style={{ display: 'flex', gap: '6px' }}>
               <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#ff5f57' }} />
-              <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#ffbd2e' }} />
-              <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#28ca42' }} />
+              <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#febc2e' }} />
+              <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#28c840' }} />
             </div>
-            {/* URL Bar */}
+
+            {/* Address Bar */}
             <div style={{
               flex: 1,
-              background: 'rgba(255,255,255,0.1)',
+              marginLeft: '12px',
+              background: 'rgba(255,255,255,0.15)',
               borderRadius: 'var(--radius-sm)',
-              padding: '0.35rem 0.75rem',
-              fontSize: '0.75rem',
-              color: 'rgba(255,255,255,0.7)',
-              fontFamily: 'var(--font-mono)',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
+              padding: '6px 12px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
             }}>
-              {testRun?.build?.url || 'about:blank'}
-            </div>
-            {/* LIVE Badge */}
-            {testRun?.status === 'running' && (
-              <div style={{
-                background: 'var(--error)',
-                color: 'white',
-                padding: '2px 8px',
-                borderRadius: 'var(--radius-sm)',
-                fontSize: '0.65rem',
-                fontWeight: 700,
-                letterSpacing: '0.05em',
+              <Icons.Globe />
+              <span style={{
+                fontSize: '12px',
+                color: 'rgba(255,255,255,0.9)',
+                fontFamily: 'var(--font-sans)',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap'
               }}>
-                LIVE
-              </div>
-            )}
+                {testRun?.build?.url || 'about:blank'}
+              </span>
+            </div>
           </div>
 
-          {/* Stream Content */}
-          <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            {testRun?.status === 'running' ? (
+          {/* Browser Content */}
+          <div style={{
+            flex: 1,
+            background: '#000',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            position: 'relative'
+          }}>
+            {['running', 'queued', 'pending', 'diagnosing'].includes(testRun?.status || '') ? (
               <LiveStreamPlayer
                 runId={testId}
                 streamUrl={`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/tests/${testId}/stream`}
                 onPause={() => api.pauseTestRun(testId)}
                 onResume={() => api.resumeTestRun(testId)}
-                isPaused={testRun.paused}
-                currentStep={testRun.steps?.length || 0}
+                isPaused={testRun?.paused}
+                currentStep={testRun?.steps?.length || 0}
                 style={{ width: '100%', height: '100%' }}
+                minimal={true}
               />
             ) : (
               <div style={{ textAlign: 'center', color: 'rgba(255,255,255,0.6)' }}>
@@ -451,6 +474,42 @@ export default function TestRunPage() {
                     style={{ maxWidth: '50%', marginTop: '1.5rem', borderRadius: 'var(--radius-md)', border: '1px solid rgba(255,255,255,0.2)' }}
                   />
                 )}
+              </div>
+            )}
+
+            {/* Status Overlay for non-running active states */}
+            {['queued', 'pending', 'diagnosing'].includes(testRun?.status || '') && testRun?.status !== 'running' && (
+              <div style={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                background: 'rgba(0,0,0,0.7)',
+                padding: '1rem 2rem',
+                borderRadius: '8px',
+                color: 'white',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '1rem',
+                pointerEvents: 'none'
+              }}>
+                <div style={{
+                  width: '32px',
+                  height: '32px',
+                  border: '3px solid rgba(255,255,255,0.3)',
+                  borderTopColor: 'white',
+                  borderRadius: '50%',
+                  animation: 'spin 1s linear infinite'
+                }} />
+                <span style={{ fontWeight: 500 }}>
+                  {testRun?.status === 'queued' ? 'Waiting in queue...' :
+                    testRun?.status === 'diagnosing' ? 'Analyzing failure...' :
+                      'Initializing environment...'}
+                </span>
+                <style jsx>{`
+                        @keyframes spin { to { transform: rotate(360deg); } }
+                    `}</style>
               </div>
             )}
           </div>
