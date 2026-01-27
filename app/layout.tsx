@@ -2,12 +2,12 @@ import type { Metadata } from 'next'
 import { League_Spartan } from 'next/font/google'
 import Script from 'next/script'
 import './globals.css'
-import Navigation from './components/Navigation'
 import { ErrorBoundary } from '../components/ErrorBoundary'
 import { ScrollToTop } from '../components/ScrollToTop'
 import { createClient } from '@/lib/supabase/server'
 import { Analytics } from '@vercel/analytics/next'
 import { SpeedInsights } from '@vercel/speed-insights/next'
+import LayoutShell from './components/LayoutShell'
 
 const leagueSpartan = League_Spartan({
   subsets: ['latin'],
@@ -174,19 +174,9 @@ export default async function RootLayout({
           }}
         />
         <ErrorBoundary>
-          {isAuthenticated && <Navigation />}
-          <main
-            style={{
-              minHeight: '100vh',
-              background: 'var(--bg-primary)',
-              padding: 0,
-              marginLeft: isAuthenticated ? 'var(--sidebar-width)' : '0',
-              width: isAuthenticated ? 'calc(100% - var(--sidebar-width))' : '100%',
-              transition: 'margin-left var(--transition-base), width var(--transition-base)',
-            }}
-          >
+          <LayoutShell userAuthenticated={isAuthenticated}>
             {children}
-          </main>
+          </LayoutShell>
           <ScrollToTop />
         </ErrorBoundary>
         <Analytics />
@@ -195,4 +185,3 @@ export default async function RootLayout({
     </html>
   )
 }
-
