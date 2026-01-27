@@ -78,6 +78,7 @@ export default function TestRunPage() {
   const [selectedBrowser, setSelectedBrowser] = useState<BrowserType | 'all'>('all')
   const [showShareModal, setShowShareModal] = useState(false)
   const [showGodMode, setShowGodMode] = useState(false)
+  const [isConnected, setIsConnected] = useState(false)
   const wsRef = useRef<WebSocket | null>(null)
 
   const handleVisibilityChange = async (visibility: 'public' | 'private') => {
@@ -149,9 +150,13 @@ export default function TestRunPage() {
 
     const wsUrl = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:3001'
     const ws = new WebSocket(`${wsUrl}/ws/test-control?runId=${testId}`)
-    ws.onopen = () => console.log('Test Run Connected')
+    ws.onopen = () => {
+      console.log('Test Run Connected')
+      setIsConnected(true)
+    }
+    ws.onclose = () => setIsConnected(false)
     wsRef.current = ws
-    return () => { ws.close(); wsRef.current = null; }
+    return () => { ws.close(); wsRef.current = null; setIsConnected(false); }
   }, [testId, testRun?.status])
 
   // Handlers
@@ -504,7 +509,7 @@ export default function TestRunPage() {
                 }} />
                 <span style={{ fontWeight: 500 }}>
                   {testRun?.status === 'queued' ? 'Waiting in queue...' :
-                    testRun?.status === 'diagnosing' ? 'Analyzing failure...' :
+                    (testRun?.status as string) === 'diagnosing' ? 'Analyzing failure...' :
                       'Initializing environment...'}
                 </span>
                 <style jsx>{`
@@ -760,7 +765,7 @@ export default function TestRunPage() {
           <span>Run ID: {testId.slice(0, 12)}</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <span>WS: {wsRef.current ? '● Connected' : '○ Disconnected'}</span>
+          <span>WS: {isConnected ? '● Connected' : '○ Disconnected'}</span>
         </div>
       </footer>
 
