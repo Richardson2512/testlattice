@@ -18,6 +18,8 @@ interface LiveStreamPlayerProps {
   frameData?: string // Base64 frame data from parent (WS)
   style?: React.CSSProperties
   minimal?: boolean // If true, hides all controls (viewer only)
+  className?: string
+  selectedBrowser?: string // 'all' | 'chromium' | 'firefox' | 'webkit'
 }
 
 export default function LiveStreamPlayer({
@@ -35,6 +37,8 @@ export default function LiveStreamPlayer({
   frameData,
   style,
   minimal = false,
+  className,
+  selectedBrowser = 'all',
 }: LiveStreamPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -78,17 +82,31 @@ export default function LiveStreamPlayer({
 
   // Frame Data Update (WebSocket Push)
   useEffect(() => {
-    if (frameData && canvasRef.current) {
-      const ctx = canvasRef.current.getContext('2d')
-      if (ctx) {
-        const img = new Image()
-        img.onload = () => {
-          canvasRef.current!.width = img.width
-          canvasRef.current!.height = img.height
-          ctx.drawImage(img, 0, 0)
-          if (!isConnected) setIsConnected(true) // infer connection from data
+    if (frameData) {
+      // Parse frame data if it contains metadata (JSON)
+      // The parent component might pass a raw base64 string or a JSON object with browser tag
+      // For now, we assume the parent handles the filtering or passes a complex object we parse here
+      // BUT, looking at the previous plan, we decided to filter in the PARENT (TestRunPage)
+      // and pass the correct frame.
+
+      // ... WAIT. The parent currently extracts `payload.state.screenshot` and passes THAT as frameData.
+      // We need to update the PARENT to pass the whole state or update the PARENT to filter.
+      // Let's stick to the plan: Update PARENT to filter, so this component just receives the correct image.
+
+      if (canvasRef.current) {
+        const ctx = canvasRef.current.getContext('2d')
+        if (ctx) {
+          const img = new Image()
+          img.onload = () => {
+            canvasRef.current!.width = img.width
+            canvasRef.current!.height = img.height
+            ctx.drawImage(img, 0, 0)
+            if (!isConnected) setIsConnected(true) // infer connection from data
+          }
+          // Handle if frameData is an object (future proofing) or string
+          const imageSrc = typeof frameData === 'string' ? frameData : (frameData as any).screenshot
+          img.src = imageSrc?.startsWith('data:') ? imageSrc : `data:image/jpeg;base64,${imageSrc}`
         }
-        img.src = frameData.startsWith('data:') ? frameData : `data:image/jpeg;base64,${frameData}`
       }
     }
   }, [frameData])
@@ -207,7 +225,7 @@ export default function LiveStreamPlayer({
   }, [customInstructions, onInstructionUpdate])
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', ...style }}>
+    <div className={className} style={{ display: 'flex', flexDirection: 'column', gap: '16px', ...style }}>
       {/* Video Display */}
       <div
         style={{

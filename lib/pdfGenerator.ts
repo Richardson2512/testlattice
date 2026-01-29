@@ -137,8 +137,8 @@ export async function generateReportPDF(elementId: string, testRun: TestRun) {
         // 5. Save
         pdf.save(`Rihario_Report_${testRun.id.slice(0, 8)}.pdf`)
 
-    } catch (error) {
+    } catch (error: any) {
         console.error('PDF Generation failed', error)
-        alert('Failed to generate PDF')
+        alert(`Failed to generate PDF: ${error.message || 'Unknown error'}`)
     }
 }

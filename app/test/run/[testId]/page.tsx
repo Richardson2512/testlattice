@@ -42,6 +42,7 @@ const TestStepLog = ({ steps, showBrowserBadges = false }: { steps: any[], showB
             <div style={{ flex: 1 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
                 <div style={{ color: step.success === false ? 'var(--error)' : 'var(--text-primary)', fontWeight: 500 }}>{step.action}</div>
+                {step.description && <div style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', marginLeft: '0.5rem', fontStyle: 'italic' }}>- {step.description}</div>}
                 {browserLabel && (
                   <span style={{
                     padding: '2px 6px',
@@ -56,6 +57,12 @@ const TestStepLog = ({ steps, showBrowserBadges = false }: { steps: any[], showB
                 )}
               </div>
               {step.selector && <div style={{ color: 'var(--text-muted)', fontSize: '0.7rem', marginTop: '2px' }}>{step.selector}</div>}
+              {step.screenshotUrl && (
+                <a href={step.screenshotUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.7rem', color: 'var(--primary)', marginTop: '4px', textDecoration: 'none' }}>
+                  <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                  Screenshot
+                </a>
+              )}
               {step.value && <div style={{ color: 'var(--info)', fontSize: '0.7rem' }}>"{step.value}"</div>}
             </div>
             <div style={{ color: step.success ? 'var(--success)' : (step.success === false ? 'var(--error)' : 'var(--text-muted)') }}>
@@ -79,7 +86,12 @@ export default function TestRunPage() {
   const [showShareModal, setShowShareModal] = useState(false)
   const [showGodMode, setShowGodMode] = useState(false)
   const [isConnected, setIsConnected] = useState(false)
+  const [frameData, setFrameData] = useState<string | null>(null)
   const wsRef = useRef<WebSocket | null>(null)
+
+  // Ref for selectedBrowser to access in WS callback without reconnecting
+  const selectedBrowserRef = useRef(selectedBrowser)
+  useEffect(() => { selectedBrowserRef.current = selectedBrowser }, [selectedBrowser])
 
   const handleVisibilityChange = async (visibility: 'public' | 'private') => {
     if (!testRun) return
@@ -155,6 +167,26 @@ export default function TestRunPage() {
       setIsConnected(true)
     }
     ws.onclose = () => setIsConnected(false)
+    ws.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data)
+
+        // Handle page state (video frames)
+        if (data.payload?.type === 'page_state' && data.payload.state?.screenshot) {
+          const stateBrowser = data.payload.state.browser
+          const currentSelection = selectedBrowserRef.current
+
+          // Filter frames based on selected browser
+          if (currentSelection === 'all' || !stateBrowser || stateBrowser === currentSelection) {
+            setFrameData(data.payload.state.screenshot)
+          }
+        }
+
+        // Handle logs (if backend broadcasts them here - usually separate, but good to have)
+      } catch (e) {
+        console.error('WS Error:', e);
+      }
+    }
     wsRef.current = ws
     return () => { ws.close(); wsRef.current = null; setIsConnected(false); }
   }, [testId, testRun?.status])
@@ -403,6 +435,36 @@ export default function TestRunPage() {
           background: 'var(--bg-card)',
           margin: '0.5rem 1rem 1rem 1rem'
         }}>
+          {/* Browser Selection Tabs (Only for Multi-Browser Runs) */}
+          {isMultiBrowser && (
+            <div style={{
+              display: 'flex',
+              background: 'var(--bg-tertiary)',
+              borderBottom: '1px solid var(--border-light)',
+            }}>
+              {['all', ...aggregated!.selectedBrowsers].map((b) => (
+                <button
+                  key={b}
+                  onClick={() => setSelectedBrowser(b as any)}
+                  style={{
+                    flex: 1,
+                    padding: '8px',
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                    border: 'none',
+                    background: selectedBrowser === b ? 'var(--bg-card)' : 'transparent',
+                    color: selectedBrowser === b ? 'var(--primary)' : 'var(--text-muted)',
+                    borderTop: selectedBrowser === b ? '2px solid var(--primary)' : '2px solid transparent',
+                    cursor: 'pointer',
+                    textTransform: 'uppercase'
+                  }}
+                >
+                  {b === 'all' ? 'All Browsers' : getBrowserDisplayName(b as any)}
+                </button>
+              ))}
+            </div>
+          )}
+
           {/* Browser Chrome - Title Bar */}
           <div style={{
             height: '40px',
@@ -463,6 +525,9 @@ export default function TestRunPage() {
                 currentStep={testRun?.steps?.length || 0}
                 style={{ width: '100%', height: '100%' }}
                 minimal={true}
+                className="no-print"
+                selectedBrowser={selectedBrowser} // Pass selected browser for filtering
+                frameData={frameData || undefined} // Pass filtered frame data
               />
             ) : (
               <div style={{ textAlign: 'center', color: 'rgba(255,255,255,0.6)' }}>
@@ -476,6 +541,7 @@ export default function TestRunPage() {
                   <img
                     src={testRun.steps[testRun.steps.length - 1].screenshotUrl!}
                     alt="Last state"
+                    crossOrigin="anonymous"
                     style={{ maxWidth: '50%', marginTop: '1.5rem', borderRadius: 'var(--radius-md)', border: '1px solid rgba(255,255,255,0.2)' }}
                   />
                 )}
