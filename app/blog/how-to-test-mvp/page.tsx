@@ -68,15 +68,21 @@ export default function HowToTestMvpPage() {
                             </div>
                         </header>
 
-                        {/* TL;DR */}
+                        {/* Key Takeaways Box */}
                         <div style={{
-                            padding: '1.5rem',
-                            background: 'linear-gradient(135deg, #fef3c7 0%, #fff 100%)',
-                            border: '1px solid #fcd34d',
-                            borderRadius: '8px',
-                            marginBottom: '2rem'
+                            background: 'linear-gradient(135deg, rgba(92, 15, 15, 0.08) 0%, rgba(153, 27, 27, 0.04) 100%)',
+                            border: '1px solid var(--border-light)',
+                            borderRadius: 'var(--radius-lg)',
+                            padding: '2rem',
+                            marginBottom: '2.5rem',
                         }}>
-                            <strong style={{ color: '#92400e' }}>TL;DR:</strong> Before launching your MVP, test these 6 things: core functionality, cross-browser compatibility, performance, security, accessibility, and real user feedback. You can automate most of this with AI testing tools like Rihario in under an hour.
+                            <h3 style={{ margin: 0, marginBottom: '1rem', color: 'var(--primary)', fontSize: '1.25rem' }}>🎯 Key Takeaways</h3>
+                            <ul style={{ margin: 0, paddingLeft: '1.5rem' }}>
+                                <li><strong>6-step MVP testing:</strong> Monitoring, core flows, browsers, performance, security, user feedback.</li>
+                                <li>With AI tools like Rihario, you can test in under an hour.</li>
+                                <li>Watch for: broken forms, mobile layout issues, slow loading, payment bugs.</li>
+                                <li>Automated testing catches 90% of issues—real user feedback catches the rest.</li>
+                            </ul>
                         </div>
 
                         <div style={{ lineHeight: 1.8, color: 'var(--text-secondary)' }}>

@@ -20,6 +20,23 @@ export default function BehaviorAnalysisEnginePage() {
                     Scripted tests only check what you tell them to check. The Behavior Analysis Engine (BAE) checks what you <em>didn't</em> think of.
                 </p>
 
+                {/* Key Takeaways Box */}
+                <div style={{
+                    background: 'linear-gradient(135deg, rgba(92, 15, 15, 0.08) 0%, rgba(153, 27, 27, 0.04) 100%)',
+                    border: '1px solid var(--border-light)',
+                    borderRadius: 'var(--radius-lg)',
+                    padding: '2rem',
+                    marginBottom: '2.5rem',
+                }}>
+                    <h3 style={{ margin: 0, marginBottom: '1rem', color: 'var(--primary)', fontSize: '1.25rem' }}>🎯 Key Takeaways</h3>
+                    <ul style={{ margin: 0, paddingLeft: '1.5rem' }}>
+                        <li><strong>BAE</strong> detects security vulnerabilities and logic flaws without test scripts.</li>
+                        <li>Goes beyond "happy paths"—checks what hackers and confused users find.</li>
+                        <li>Looks for SQL injection, exposed PII, rage-click potential, and more.</li>
+                        <li>Zero configuration—point Rihario at your URL and it acts like a white-hat hacker.</li>
+                    </ul>
+                </div>
+
                 <h2 style={{ marginTop: '3rem', marginBottom: '1rem' }}>Beyond Functional Testing</h2>
                 <p style={{ lineHeight: 1.7, marginBottom: '1.5rem', color: 'var(--text-secondary)' }}>
                     Traditional automated tests verify "Happy Paths" (e.g., "User can login"). But they miss the "Unhappy Paths" that hackers and confused users find.

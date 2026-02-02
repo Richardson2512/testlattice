@@ -70,6 +70,23 @@ export default function TestingForVibeCodersPost() {
                 {/* Content */}
                 <div className="prose" style={{ fontSize: '1.1rem', lineHeight: 1.8, color: 'var(--text-secondary)' }}>
 
+                    {/* Key Takeaways Box */}
+                    <div style={{
+                        background: 'linear-gradient(135deg, rgba(92, 15, 15, 0.08) 0%, rgba(153, 27, 27, 0.04) 100%)',
+                        border: '1px solid var(--border-light)',
+                        borderRadius: 'var(--radius-lg)',
+                        padding: '2rem',
+                        marginBottom: '2.5rem',
+                    }}>
+                        <h3 style={{ margin: 0, marginBottom: '1rem', color: 'var(--primary)', fontSize: '1.25rem' }}>🎯 Key Takeaways</h3>
+                        <ul style={{ margin: 0, paddingLeft: '1.5rem' }}>
+                            <li><strong>Don't let manual QA break your flow.</strong> Testing should match your iteration speed.</li>
+                            <li>Use AI-powered testing tools that understand intent, not selectors.</li>
+                            <li>Run tests after every major AI-generated change to catch silent regressions.</li>
+                            <li><strong>The vibe coder's loop:</strong> Prompt → Generate → Test → Repeat.</li>
+                        </ul>
+                    </div>
+
                     <p>
                         So you’re <em>vibe coding</em>. You’re prompting Cursor to build a new dashboard. You’re asking Replit to refactor your auth flow. You’re moving 10x faster than you used to.
                     </p>

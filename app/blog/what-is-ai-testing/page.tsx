@@ -70,16 +70,21 @@ export default function WhatIsAiTestingPost() {
                             </div>
                         </header>
 
-                        {/* TL;DR */}
+                        {/* Key Takeaways Box */}
                         <div style={{
-                            padding: '1.5rem',
-                            background: 'linear-gradient(135deg, #fef3c7 0%, #fff 100%)',
-                            border: '1px solid #fcd34d',
-                            borderRadius: '8px',
-                            marginBottom: '2rem'
+                            background: 'linear-gradient(135deg, rgba(92, 15, 15, 0.08) 0%, rgba(153, 27, 27, 0.04) 100%)',
+                            border: '1px solid var(--border-light)',
+                            borderRadius: 'var(--radius-lg)',
+                            padding: '2rem',
+                            marginBottom: '2.5rem',
                         }}>
-                            <strong style={{ color: '#92400e' }}>TL;DR:</strong> AI testing uses artificial intelligence to generate, run, and maintain tests automatically.
-                            {' '}<Link href="/docs/what-is-ai-testing" style={{ color: '#92400e', textDecoration: 'underline' }}>See the complete guide →</Link>
+                            <h3 style={{ margin: 0, marginBottom: '1rem', color: 'var(--primary)', fontSize: '1.25rem' }}>🎯 Key Takeaways</h3>
+                            <ul style={{ margin: 0, paddingLeft: '1.5rem' }}>
+                                <li><strong>AI testing</strong> uses artificial intelligence to generate, run, and maintain tests.</li>
+                                <li>No selector maintenance—AI adapts to UI changes automatically.</li>
+                                <li>Describe tests in plain English instead of writing code.</li>
+                                <li>Perfect for indie hackers who want testing without the overhead.</li>
+                            </ul>
                         </div>
 
                         {/* Content */}

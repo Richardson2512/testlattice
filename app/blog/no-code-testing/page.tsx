@@ -69,14 +69,21 @@ export default function NoCodeTestingPost() {
                         </header>
 
                         {/* TL;DR */}
+                        {/* Key Takeaways Box */}
                         <div style={{
-                            padding: '1.5rem',
-                            background: 'linear-gradient(135deg, #fef3c7 0%, #fff 100%)',
-                            border: '1px solid #fcd34d',
-                            borderRadius: '8px',
-                            marginBottom: '2rem'
+                            background: 'linear-gradient(135deg, rgba(92, 15, 15, 0.08) 0%, rgba(153, 27, 27, 0.04) 100%)',
+                            border: '1px solid var(--border-light)',
+                            borderRadius: 'var(--radius-lg)',
+                            padding: '2rem',
+                            marginBottom: '2.5rem',
                         }}>
-                            <strong style={{ color: '#92400e' }}>TL;DR:</strong> No-code testing lets you verify your app works correctly without writing test scripts. Tools like Rihario use AI to understand what you want to test from plain English descriptions, then execute tests automatically across all browsers.
+                            <h3 style={{ margin: 0, marginBottom: '1rem', color: 'var(--primary)', fontSize: '1.25rem' }}>🎯 Key Takeaways</h3>
+                            <ul style={{ margin: 0, paddingLeft: '1.5rem' }}>
+                                <li><strong>No-code testing</strong> lets you verify apps without writing test scripts.</li>
+                                <li>Describe what to test in plain English—AI handles the execution.</li>
+                                <li>Perfect for indie hackers, founders, and non-technical users.</li>
+                                <li>Tools like Rihario run tests across all browsers automatically.</li>
+                            </ul>
                         </div>
 
                         <div style={{ lineHeight: 1.8, color: 'var(--text-secondary)' }}>

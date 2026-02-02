@@ -70,6 +70,23 @@ export default function SmokeTestChecklistPost() {
                 {/* Content */}
                 <div className="prose" style={{ fontSize: '1.1rem', lineHeight: 1.8, color: 'var(--text-secondary)' }}>
 
+                    {/* Key Takeaways Box */}
+                    <div style={{
+                        background: 'linear-gradient(135deg, rgba(92, 15, 15, 0.08) 0%, rgba(153, 27, 27, 0.04) 100%)',
+                        border: '1px solid var(--border-light)',
+                        borderRadius: 'var(--radius-lg)',
+                        padding: '2rem',
+                        marginBottom: '2.5rem',
+                    }}>
+                        <h3 style={{ margin: 0, marginBottom: '1rem', color: 'var(--primary)', fontSize: '1.25rem' }}>🎯 Key Takeaways</h3>
+                        <ul style={{ margin: 0, paddingLeft: '1.5rem' }}>
+                            <li><strong>5-point smoke test:</strong> Login, core action, 404 check, mobile viewport, third-party integrations.</li>
+                            <li>Run after every major AI prompt to catch regressions immediately.</li>
+                            <li>Manual smoke testing kills your flow—<strong>automate it</strong>.</li>
+                            <li>Rihario self-heals tests when your UI changes—no maintenance required.</li>
+                        </ul>
+                    </div>
+
                     <p>
                         Vibe coding with tools like Cursor and Replit is fast, but it's also chaotic. Small prompts can break big features. A "smoke test" is your first line of defense—a quick set of checks to ensure the app isn't on fire.
                     </p>

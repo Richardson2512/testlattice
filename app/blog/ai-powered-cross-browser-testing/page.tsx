@@ -21,6 +21,23 @@ export default function CrossBrowserTestingPage() {
                     Most developers test on Chrome and cross their fingers for Safari. Rihario changes that by running your tests on all major engines simultaneously.
                 </p>
 
+                {/* Key Takeaways Box */}
+                <div style={{
+                    background: 'linear-gradient(135deg, rgba(92, 15, 15, 0.08) 0%, rgba(153, 27, 27, 0.04) 100%)',
+                    border: '1px solid var(--border-light)',
+                    borderRadius: 'var(--radius-lg)',
+                    padding: '2rem',
+                    marginBottom: '2.5rem',
+                }}>
+                    <h3 style={{ margin: 0, marginBottom: '1rem', color: 'var(--primary)', fontSize: '1.25rem' }}>🎯 Key Takeaways</h3>
+                    <ul style={{ margin: 0, paddingLeft: '1.5rem' }}>
+                        <li><strong>The "One Engine" trap:</strong> Chrome works ≠ Safari works. CSS and JS behave differently.</li>
+                        <li>Rihario runs Chromium, WebKit, and Firefox tests in parallel.</li>
+                        <li>AI detects browser-specific regressions automatically.</li>
+                        <li>100% coverage in the time it takes to run one test.</li>
+                    </ul>
+                </div>
+
                 <div style={{ marginBottom: '3rem' }}>
                     <InteractiveBrowserStack />
                 </div>
