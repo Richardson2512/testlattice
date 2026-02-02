@@ -14,6 +14,7 @@ interface TestStep {
     observed_state?: Record<string, any>
     error?: string
     duration?: number
+    screenshotUrl?: string
 }
 
 interface GuestTestReportProps {
@@ -351,6 +352,24 @@ function StepCard({ step }: { step: TestStep }) {
                             marginBottom: '0.5rem'
                         }}>
                             Error: {step.error}
+                        </div>
+                    )}
+
+                    {/* Screenshot */}
+                    {step.screenshotUrl && (
+                        <div style={{ marginTop: '1rem' }}>
+                            <img
+                                src={step.screenshotUrl}
+                                alt={`Screenshot for ${label.name}`}
+                                style={{
+                                    maxWidth: '100%',
+                                    borderRadius: '4px',
+                                    border: '1px solid var(--border-medium)',
+                                    maxHeight: '300px',
+                                    objectFit: 'contain',
+                                    display: 'block'
+                                }}
+                            />
                         </div>
                     )}
 

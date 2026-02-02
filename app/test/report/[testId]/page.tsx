@@ -452,120 +452,126 @@ export default function DeepInsightsPage() {
         )}
 
 
-        {/* Video & Timeline Section */}
-        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem', marginBottom: '2rem', height: '600px' }}>
-          {/* Video Player Box */}
-          <div style={{ background: '#000', borderRadius: 'var(--radius-lg)', overflow: 'hidden', border: '1px solid var(--border-medium)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            {videoUrl ? (
-              <VideoPlayer videoUrl={videoUrl} title={`Test Replay`} />
-            ) : (
-              <div style={{ color: 'var(--text-muted)' }}>No video recording available</div>
-            )}
-          </div>
 
-          {/* Steps Timeline (The Story) */}
-          <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', padding: 0 }}>
-            <div style={{ padding: '1rem', borderBottom: '1px solid var(--border-light)', fontWeight: 600, fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-              LIVE PLAY-BY-PLAY
-            </div>
-            <div style={{ flex: 1, overflowY: 'auto', padding: '1rem' }}>
-              {(!filteredSteps || filteredSteps.length === 0) ? (
-                <div style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '2rem' }}>
-                  No steps recorded yet.
-                </div>
+        {/* Video & Timeline Section - Hidden for Guest Tests */}
+        {!isGuestTest && (
+          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem', marginBottom: '2rem', height: '600px' }}>
+            {/* Video Player Box */}
+            <div style={{ background: '#000', borderRadius: 'var(--radius-lg)', overflow: 'hidden', border: '1px solid var(--border-medium)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              {videoUrl ? (
+                <VideoPlayer videoUrl={videoUrl} title={`Test Replay`} />
               ) : (
-                filteredSteps.map((step, i) => {
-                  const hasWarning = (step as any).warnings && (step as any).warnings.length > 0
+                <div style={{ color: 'var(--text-muted)' }}>No video recording available</div>
+              )}
+            </div>
 
-                  return (
-                    <div key={step.id || i} style={{ display: 'flex', gap: '1rem', marginBottom: '1rem', opacity: step.success === false ? 1 : 0.9 }}>
-                      <div style={{ flexDirection: 'column', alignItems: 'center', display: 'flex' }}>
-                        <div style={{
-                          width: '12px', height: '12px', borderRadius: '50%',
-                          background: step.success === false ? 'var(--error)' : hasWarning ? 'var(--warning)' : 'var(--success)',
-                          marginTop: '6px'
-                        }} />
-                        {i < filteredSteps.length - 1 && <div style={{ width: '2px', flex: 1, background: 'var(--border-light)', marginTop: '4px' }} />}
-                      </div>
-                      <div style={{ flex: 1 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
-                          <div style={{ fontSize: '0.95rem', fontWeight: 500 }}>
-                            {step.action === 'navigate' ? 'Navigated to URL' :
-                              step.action === 'click' ? 'Clicked Element' :
-                                step.action === 'type' ? 'Typed Text' : step.action}
-                          </div>
+            {/* Steps Timeline (The Story) */}
+            <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', padding: 0 }}>
+              <div style={{ padding: '1rem', borderBottom: '1px solid var(--border-light)', fontWeight: 600, fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                LIVE PLAY-BY-PLAY
+              </div>
+              <div style={{ flex: 1, overflowY: 'auto', padding: '1rem' }}>
+                {(!filteredSteps || filteredSteps.length === 0) ? (
+                  <div style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '2rem' }}>
+                    No steps recorded yet.
+                  </div>
+                ) : (
+                  filteredSteps.map((step, i) => {
+                    const hasWarning = (step as any).warnings && (step as any).warnings.length > 0
+
+                    return (
+                      <div key={step.id || i} style={{ display: 'flex', gap: '1rem', marginBottom: '1rem', opacity: step.success === false ? 1 : 0.9 }}>
+                        <div style={{ flexDirection: 'column', alignItems: 'center', display: 'flex' }}>
+                          <div style={{
+                            width: '12px', height: '12px', borderRadius: '50%',
+                            background: step.success === false ? 'var(--error)' : hasWarning ? 'var(--warning)' : 'var(--success)',
+                            marginTop: '6px'
+                          }} />
+                          {i < filteredSteps.length - 1 && <div style={{ width: '2px', flex: 1, background: 'var(--border-light)', marginTop: '4px' }} />}
                         </div>
-
-                        {/* Natural Language Selector Description */}
-                        {step.selector && (
-                          <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginTop: '2px' }}>
-                            Target: <code style={{ background: 'var(--bg-secondary)', padding: '2px 4px', borderRadius: '4px' }}>{step.target || step.selector}</code>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
+                            <div style={{ fontSize: '0.95rem', fontWeight: 500 }}>
+                              {step.action === 'navigate' ? 'Navigated to URL' :
+                                step.action === 'click' ? 'Clicked Element' :
+                                  step.action === 'type' ? 'Typed Text' : step.action}
+                            </div>
                           </div>
-                        )}
 
-                        {/* Error Message */}
-                        {step.error && <div style={{ color: 'var(--error)', fontSize: '0.85rem', marginTop: '4px', background: 'rgba(239, 68, 68, 0.1)', padding: '8px', borderRadius: '6px' }}>{step.error}</div>}
+                          {/* Natural Language Selector Description */}
+                          {step.selector && (
+                            <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginTop: '2px' }}>
+                              Target: <code style={{ background: 'var(--bg-secondary)', padding: '2px 4px', borderRadius: '4px' }}>{step.target || step.selector}</code>
+                            </div>
+                          )}
 
-                        {/* Warnings (Natural Language) */}
-                        {(step as any).warnings?.map((w: any, idx: number) => (
-                          <div key={idx} style={{ color: 'var(--warning)', fontSize: '0.8rem', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                            <span>⚠️</span> {w.message}
-                          </div>
-                        ))}
+                          {/* Error Message */}
+                          {step.error && <div style={{ color: 'var(--error)', fontSize: '0.85rem', marginTop: '4px', background: 'rgba(239, 68, 68, 0.1)', padding: '8px', borderRadius: '6px' }}>{step.error}</div>}
 
-                        {/* Healing Badge */}
-                        {step.selfHealing && (
-                          <div style={{ marginTop: '0.5rem', fontSize: '0.8rem', background: 'rgba(16, 185, 129, 0.1)', color: 'var(--success)', padding: '4px 8px', borderRadius: '6px', display: 'inline-block' }}>
-                            ✨ AI Auto-corrected this step
-                          </div>
-                        )}
+                          {/* Warnings (Natural Language) */}
+                          {(step as any).warnings?.map((w: any, idx: number) => (
+                            <div key={idx} style={{ color: 'var(--warning)', fontSize: '0.8rem', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                              <span>⚠️</span> {w.message}
+                            </div>
+                          ))}
+
+                          {/* Healing Badge */}
+                          {step.selfHealing && (
+                            <div style={{ marginTop: '0.5rem', fontSize: '0.8rem', background: 'rgba(16, 185, 129, 0.1)', color: 'var(--success)', padding: '4px 8px', borderRadius: '6px', display: 'inline-block' }}>
+                              ✨ AI Auto-corrected this step
+                            </div>
+                          )}
+                        </div>
                       </div>
+                    )
+                  })
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+
+        {/* Bottom Details Tabs - Hidden for Guest Tests */}
+        {!isGuestTest && (
+          <div className="glass-card" style={{ overflow: 'hidden' }}>
+            <div style={{ display: 'flex', borderBottom: '1px solid var(--border-light)', background: 'var(--bg-secondary)' }}>
+              <TabButton active={activeTab === 'timeline'} onClick={() => setActiveTab('timeline')}>Play-by-play</TabButton>
+              <TabButton active={activeTab === 'console'} onClick={() => setActiveTab('console')}>System Logs</TabButton>
+              <TabButton active={activeTab === 'network'} onClick={() => setActiveTab('network')}>Network Activity</TabButton>
+              <TabButton active={activeTab === 'diffs'} onClick={() => setActiveTab('diffs')}>Visual Changes</TabButton>
+            </div>
+
+            <div style={{ padding: '2rem', minHeight: '300px' }}>
+              {activeTab === 'timeline' && (
+                <div style={{ height: '400px' }}>
+                  {traceUrl ? (
+                    <TraceViewer traceUrl={traceUrl} />
+                  ) : (
+                    <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--text-muted)' }}>
+                      No detailed history available.
                     </div>
-                  )
-                })
+                  )}
+                </div>
+              )}
+
+              {activeTab === 'console' && (
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.9rem' }}>
+                  {/* Logic to map console logs would go here - for now placeholder */}
+                  <div style={{ color: 'var(--text-muted)' }}>No system logs captured for this session.</div>
+                </div>
+              )}
+
+              {activeTab === 'network' && (
+                <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--text-muted)' }}>Network activity visualization.</div>
+              )}
+
+              {activeTab === 'diffs' && (
+                <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--text-muted)' }}>No visual changes detected.</div>
               )}
             </div>
           </div>
-        </div>
-
-        {/* Bottom Details Tabs */}
-        <div className="glass-card" style={{ overflow: 'hidden' }}>
-          <div style={{ display: 'flex', borderBottom: '1px solid var(--border-light)', background: 'var(--bg-secondary)' }}>
-            <TabButton active={activeTab === 'timeline'} onClick={() => setActiveTab('timeline')}>Play-by-play</TabButton>
-            <TabButton active={activeTab === 'console'} onClick={() => setActiveTab('console')}>System Logs</TabButton>
-            <TabButton active={activeTab === 'network'} onClick={() => setActiveTab('network')}>Network Activity</TabButton>
-            <TabButton active={activeTab === 'diffs'} onClick={() => setActiveTab('diffs')}>Visual Changes</TabButton>
-          </div>
-
-          <div style={{ padding: '2rem', minHeight: '300px' }}>
-            {activeTab === 'timeline' && (
-              <div style={{ height: '400px' }}>
-                {traceUrl ? (
-                  <TraceViewer traceUrl={traceUrl} />
-                ) : (
-                  <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--text-muted)' }}>
-                    No detailed history available.
-                  </div>
-                )}
-              </div>
-            )}
-
-            {activeTab === 'console' && (
-              <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.9rem' }}>
-                {/* Logic to map console logs would go here - for now placeholder */}
-                <div style={{ color: 'var(--text-muted)' }}>No system logs captured for this session.</div>
-              </div>
-            )}
-
-            {activeTab === 'network' && (
-              <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--text-muted)' }}>Network activity visualization.</div>
-            )}
-
-            {activeTab === 'diffs' && (
-              <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--text-muted)' }}>No visual changes detected.</div>
-            )}
-          </div>
-        </div>
+        )}
 
         {/* Fix Prompt Section */}
         {fixPrompt && (
