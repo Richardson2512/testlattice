@@ -36,11 +36,24 @@ const getRiskIcon = (risk: string) => {
     }
 }
 
-export function DiagnosisReport({ diagnosis, testId, onApprove, isApproving }: {
+// DiagnosisProgress type
+interface DiagnosisProgress {
+    step: number
+    totalSteps: number
+    stepLabel: string
+    subStepLabel?: string
+    percent: number
+}
+
+export function DiagnosisReport({ diagnosis, testId, onApprove, isApproving, isDiagnosisComplete = false, diagnosisProgress, perTypeDiagnosis, hideApproveButton = false }: {
     diagnosis: any,
     testId: string,
     onApprove: () => void,
-    isApproving: boolean
+    isApproving: boolean,
+    isDiagnosisComplete?: boolean // Only show Approve button when diagnosis is complete
+    diagnosisProgress?: DiagnosisProgress | null // Real-time progress updates
+    perTypeDiagnosis?: any // Per-test-type diagnosis data
+    hideApproveButton?: boolean // Hide the approve button (if another component handles it)
 }) {
     const [filteredData, setFilteredData] = useState<DiagnosisIssue[]>([])
     const [searchTerm, setSearchTerm] = useState('')
@@ -56,12 +69,11 @@ export function DiagnosisReport({ diagnosis, testId, onApprove, isApproving }: {
     }, [])
 
     const convertDiagnosisToIssues = useMemo((): DiagnosisIssue[] => {
-        if (!diagnosis) return []
         const issues: DiagnosisIssue[] = []
         let idCounter = 1
 
-        // Convert high risk areas
-        if (diagnosis.highRiskAreas) {
+        // Handle null/undefined diagnosis
+        if (diagnosis?.highRiskAreas) {
             diagnosis.highRiskAreas.forEach((area: any) => {
                 const riskMap: Record<string, 'Critical' | 'Major' | 'Minor' | 'Info'> = {
                     'critical': 'Critical', 'high': 'Major', 'medium': 'Minor', 'low': 'Info'
@@ -84,7 +96,7 @@ export function DiagnosisReport({ diagnosis, testId, onApprove, isApproving }: {
         }
 
         // Convert comprehensive test results - Security issues
-        if (diagnosis.comprehensiveTests?.security) {
+        if (diagnosis?.comprehensiveTests?.security) {
             diagnosis.comprehensiveTests.security.forEach((security: any) => {
                 const riskMap: Record<string, 'Critical' | 'Major' | 'Minor' | 'Info'> = {
                     'high': 'Critical', 'medium': 'Major', 'low': 'Minor'
@@ -107,7 +119,7 @@ export function DiagnosisReport({ diagnosis, testId, onApprove, isApproving }: {
             })
         }
 
-        if (diagnosis.comprehensiveTests?.consoleErrors) {
+        if (diagnosis?.comprehensiveTests?.consoleErrors) {
             diagnosis.comprehensiveTests.consoleErrors
                 .filter((err: any) => err.type === 'error' || err.type === 'warning')
                 .forEach((err: any) => {
@@ -199,30 +211,303 @@ export function DiagnosisReport({ diagnosis, testId, onApprove, isApproving }: {
                     <h1 style={{ fontSize: '1.875rem', fontWeight: 700, margin: 0 }}>Automated UI Diagnosis Report</h1>
                     <p style={{ color: theme.text.secondary, marginTop: '0.5rem' }}>Summary of high-risk and actionable findings.</p>
                 </div>
-                <button onClick={onApprove} disabled={isApproving} style={{ padding: '0.75rem 1.5rem', backgroundColor: theme.accent.blue, color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600 }}>
-                    {isApproving ? 'Starting...' : 'Approve & Start Test'}
-                </button>
+                {!hideApproveButton && (
+                    <button onClick={onApprove} disabled={isApproving || !isDiagnosisComplete} style={{
+                        padding: '0.75rem 1.5rem',
+                        backgroundColor: isDiagnosisComplete ? theme.accent.blue : theme.bg.tertiary,
+                        color: isDiagnosisComplete ? '#fff' : theme.text.secondary,
+                        border: 'none',
+                        borderRadius: '8px',
+                        cursor: isDiagnosisComplete ? 'pointer' : 'not-allowed',
+                        fontWeight: 600,
+                        opacity: isDiagnosisComplete ? 1 : 0.6
+                    }}>
+                        {!isDiagnosisComplete ? 'Diagnosis in progress...' : isApproving ? 'Starting...' : 'Approve & Start Test'}
+                    </button>
+                )}
             </header>
 
-            {/* Summary Cards */}
+            {/* Progress Bar - Embedded below title when diagnosis is in progress */}
+            {
+                !isDiagnosisComplete && diagnosisProgress && (
+                    <div style={{
+                        padding: theme.spacing.lg,
+                        background: theme.bg.secondary,
+                        borderRadius: '12px',
+                        marginBottom: theme.spacing.xl,
+                        border: `1px solid ${theme.border.default}`,
+                    }}>
+                        {/* Header with step info */}
+                        <div style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            marginBottom: theme.spacing.md,
+                        }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                <div style={{
+                                    width: '20px',
+                                    height: '20px',
+                                    border: `3px solid ${theme.accent.blue}30`,
+                                    borderTopColor: theme.accent.blue,
+                                    borderRadius: '50%',
+                                    animation: 'diagSpin 1s linear infinite',
+                                }} />
+                                <span style={{
+                                    color: theme.text.secondary,
+                                    fontSize: '0.875rem',
+                                    fontWeight: 500,
+                                }}>
+                                    Step {diagnosisProgress.step} of {diagnosisProgress.totalSteps}
+                                </span>
+                            </div>
+                            <span style={{
+                                color: theme.accent.blue,
+                                fontWeight: 600,
+                                fontSize: '0.875rem',
+                            }}>
+                                {diagnosisProgress.percent}%
+                            </span>
+                        </div>
+
+                        {/* Progress bar */}
+                        <div style={{
+                            height: '8px',
+                            background: theme.bg.tertiary,
+                            borderRadius: '4px',
+                            overflow: 'hidden',
+                            marginBottom: theme.spacing.md,
+                        }}>
+                            <div style={{
+                                height: '100%',
+                                width: `${diagnosisProgress.percent}%`,
+                                background: `linear-gradient(90deg, ${theme.accent.blue}, ${theme.accent.purple || '#8B5CF6'})`,
+                                borderRadius: '4px',
+                                transition: 'width 0.3s ease-out',
+                            }} />
+                        </div>
+
+                        {/* Current step description */}
+                        <p style={{
+                            color: theme.text.primary,
+                            fontWeight: 500,
+                            fontSize: '1rem',
+                            margin: 0,
+                        }}>
+                            {diagnosisProgress.stepLabel}
+                        </p>
+                        {diagnosisProgress.subStepLabel && (
+                            <p style={{
+                                color: theme.text.secondary,
+                                fontSize: '0.875rem',
+                                margin: '4px 0 0',
+                            }}>
+                                {diagnosisProgress.subStepLabel}
+                            </p>
+                        )}
+                        <style>{`
+                        @keyframes diagSpin { to { transform: rotate(360deg); } }
+                    `}</style>
+                    </div>
+                )
+            }
+
+            {/* Summary Cards - Show loading placeholders when diagnosis in progress */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: theme.spacing.md, marginBottom: theme.spacing.xl }}>
                 <div style={{ background: theme.bg.secondary, padding: '1.5rem', borderRadius: '12px' }}>
                     <div style={{ color: theme.text.secondary, fontSize: '0.9rem' }}>Health Score</div>
-                    <div style={{ fontSize: '2rem', fontWeight: 700, color: summaryData.healthScore > 80 ? theme.accent.green : theme.accent.red }}>{summaryData.healthScore}%</div>
+                    <div style={{ fontSize: '2rem', fontWeight: 700, color: !isDiagnosisComplete ? theme.text.secondary : (summaryData.healthScore > 80 ? theme.accent.green : theme.accent.red) }}>
+                        {!isDiagnosisComplete ? '--' : `${summaryData.healthScore}%`}
+                    </div>
                 </div>
                 <div style={{ background: theme.bg.secondary, padding: '1.5rem', borderRadius: '12px' }}>
                     <div style={{ color: theme.text.secondary, fontSize: '0.9rem' }}>Critical Issues</div>
-                    <div style={{ fontSize: '2rem', fontWeight: 700, color: theme.accent.red }}>{summaryData.critical}</div>
+                    <div style={{ fontSize: '2rem', fontWeight: 700, color: !isDiagnosisComplete ? theme.text.secondary : theme.accent.red }}>
+                        {!isDiagnosisComplete ? '--' : summaryData.critical}
+                    </div>
                 </div>
                 <div style={{ background: theme.bg.secondary, padding: '1.5rem', borderRadius: '12px' }}>
                     <div style={{ color: theme.text.secondary, fontSize: '0.9rem' }}>Major Issues</div>
-                    <div style={{ fontSize: '2rem', fontWeight: 700, color: theme.accent.orange }}>{summaryData.major}</div>
+                    <div style={{ fontSize: '2rem', fontWeight: 700, color: !isDiagnosisComplete ? theme.text.secondary : theme.accent.orange }}>
+                        {!isDiagnosisComplete ? '--' : summaryData.major}
+                    </div>
                 </div>
                 <div style={{ background: theme.bg.secondary, padding: '1.5rem', borderRadius: '12px' }}>
                     <div style={{ color: theme.text.secondary, fontSize: '0.9rem' }}>Total Findings</div>
-                    <div style={{ fontSize: '2rem', fontWeight: 700, color: theme.accent.blue }}>{summaryData.total}</div>
+                    <div style={{ fontSize: '2rem', fontWeight: 700, color: !isDiagnosisComplete ? theme.text.secondary : theme.accent.blue }}>
+                        {!isDiagnosisComplete ? '--' : summaryData.total}
+                    </div>
                 </div>
             </div>
+
+            {/* Per-Test-Type Diagnosis Narratives */}
+            {
+                diagnosis?.perTypeDiagnosis?.perType && diagnosis.perTypeDiagnosis.perType.length > 0 && (
+                    <div style={{ marginBottom: theme.spacing.xl }}>
+                        <h2 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: theme.spacing.md }}>
+                            Diagnosis by Test Type
+                        </h2>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.md }}>
+                            {(perTypeDiagnosis?.perType || diagnosis?.perTypeDiagnosis?.perType || []).map((typeDiag: any, idx: number) => {
+                                const narrative = typeDiag.narrative
+                                const testTypeLabel = typeDiag.testType?.replace(/_/g, ' ').toUpperCase() || 'UNKNOWN'
+                                const passed = narrative?.passed ?? (typeDiag.canTest?.length > typeDiag.cannotTest?.length)
+                                const testTypeIcons: Record<string, string> = {
+                                    visual: '🎨', navigation: '🧭', login: '🔐', signup: '📝',
+                                    form: '📋', accessibility: '♿', rage_bait: '💢'
+                                }
+                                const icon = testTypeIcons[typeDiag.testType] || '🔍'
+
+                                return (
+                                    <div key={idx} style={{
+                                        background: theme.bg.secondary,
+                                        borderRadius: '12px',
+                                        padding: theme.spacing.lg,
+                                        borderLeft: `4px solid ${passed ? theme.accent.green : theme.accent.red}`
+                                    }}>
+                                        {/* Header */}
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: theme.spacing.md }}>
+                                            <h3 style={{ fontSize: '1.1rem', fontWeight: 600, margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                <span>{icon}</span> {testTypeLabel} TEST DIAGNOSIS
+                                            </h3>
+                                            <span style={{
+                                                padding: '0.25rem 0.75rem',
+                                                borderRadius: '20px',
+                                                fontSize: '0.75rem',
+                                                fontWeight: 600,
+                                                backgroundColor: passed ? `${theme.accent.green}20` : `${theme.accent.red}20`,
+                                                color: passed ? theme.accent.green : theme.accent.red
+                                            }}>
+                                                {passed ? 'PASSED' : 'FAILED'}
+                                            </span>
+                                        </div>
+
+                                        {/* Narrative Sections */}
+                                        {narrative ? (
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.sm }}>
+                                                <div>
+                                                    <div style={{ color: theme.accent.blue, fontWeight: 600, fontSize: '0.85rem', marginBottom: '0.25rem' }}>
+                                                        What is being diagnosed?
+                                                    </div>
+                                                    <p style={{ margin: 0, color: theme.text.primary, fontSize: '0.95rem', lineHeight: 1.5 }}>
+                                                        {narrative.what}
+                                                    </p>
+                                                </div>
+                                                <div>
+                                                    <div style={{ color: theme.accent.blue, fontWeight: 600, fontSize: '0.85rem', marginBottom: '0.25rem' }}>
+                                                        How is it being diagnosed?
+                                                    </div>
+                                                    <p style={{ margin: 0, color: theme.text.primary, fontSize: '0.95rem', lineHeight: 1.5 }}>
+                                                        {narrative.how}
+                                                    </p>
+                                                </div>
+                                                <div>
+                                                    <div style={{ color: theme.accent.blue, fontWeight: 600, fontSize: '0.85rem', marginBottom: '0.25rem' }}>
+                                                        Why is it being diagnosed?
+                                                    </div>
+                                                    <p style={{ margin: 0, color: theme.text.primary, fontSize: '0.95rem', lineHeight: 1.5 }}>
+                                                        {narrative.why}
+                                                    </p>
+                                                </div>
+                                                <div>
+                                                    <div style={{ color: passed ? theme.accent.green : theme.accent.red, fontWeight: 600, fontSize: '0.85rem', marginBottom: '0.25rem' }}>
+                                                        Result
+                                                    </div>
+                                                    <p style={{ margin: 0, color: theme.text.primary, fontSize: '0.95rem', lineHeight: 1.5, fontWeight: 500 }}>
+                                                        {narrative.result}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            /* Fallback: show canTest/cannotTest if no narrative */
+                                            <div style={{ color: theme.text.secondary, fontSize: '0.9rem' }}>
+                                                <p style={{ margin: '0 0 0.5rem 0' }}>
+                                                    <strong>Can test:</strong> {typeDiag.canTest?.length || 0} elements
+                                                </p>
+                                                <p style={{ margin: 0 }}>
+                                                    <strong>Cannot test:</strong> {typeDiag.cannotTest?.map((c: any) => c.name).join(', ') || 'None'}
+                                                </p>
+                                            </div>
+                                        )}
+
+                                        {/* Detailed Technical Breakdown (Always Visible on Expand) */}
+                                        <div style={{ marginTop: theme.spacing.lg, paddingTop: theme.spacing.lg, borderTop: `1px solid ${theme.border.subtle}` }}>
+                                            <h4 style={{ fontSize: '0.85rem', textTransform: 'uppercase', color: theme.text.tertiary, marginBottom: theme.spacing.md, letterSpacing: '0.05em' }}>
+                                                Technical Analysis
+                                            </h4>
+
+                                            {/* Can Test Elements */}
+                                            {typeDiag.canTest?.length > 0 && (
+                                                <div style={{ marginBottom: theme.spacing.md }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                                                        <span style={{ color: theme.accent.green }}>✅</span>
+                                                        <span style={{ fontSize: '0.9rem', fontWeight: 600, color: theme.text.primary }}>
+                                                            Testable Elements ({typeDiag.canTest.length})
+                                                        </span>
+                                                    </div>
+                                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', paddingLeft: '24px' }}>
+                                                        {typeDiag.canTest.slice(0, 50).map((el: any, i: number) => (
+                                                            <span key={i} title={el.selector} style={{
+                                                                padding: '4px 10px',
+                                                                borderRadius: '6px',
+                                                                background: `${theme.accent.green}15`,
+                                                                color: theme.accent.green,
+                                                                fontSize: '0.8rem',
+                                                                fontFamily: 'monospace',
+                                                                border: `1px solid ${theme.accent.green}30`,
+                                                                cursor: 'help'
+                                                            }}>
+                                                                {el.name || el.selector || 'Element'}
+                                                            </span>
+                                                        ))}
+                                                        {typeDiag.canTest.length > 50 && (
+                                                            <span style={{ fontSize: '0.8rem', color: theme.text.tertiary, display: 'flex', alignItems: 'center' }}>
+                                                                +{typeDiag.canTest.length - 50} more
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {/* Cannot Test Elements */}
+                                            {typeDiag.cannotTest?.length > 0 && (
+                                                <div>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                                                        <span style={{ color: theme.accent.red }}>❌</span>
+                                                        <span style={{ fontSize: '0.9rem', fontWeight: 600, color: theme.text.primary }}>
+                                                            Not Testable ({typeDiag.cannotTest.length})
+                                                        </span>
+                                                    </div>
+                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', paddingLeft: '24px' }}>
+                                                        {typeDiag.cannotTest.map((el: any, i: number) => (
+                                                            <div key={i} style={{
+                                                                padding: '8px 12px',
+                                                                borderRadius: '8px',
+                                                                background: `${theme.accent.red}10`,
+                                                                border: `1px solid ${theme.accent.red}20`,
+                                                                fontSize: '0.85rem'
+                                                            }}>
+                                                                <div style={{ fontWeight: 600, color: theme.text.primary, marginBottom: '2px' }}>
+                                                                    {el.name || el.selector || 'Unknown Element'}
+                                                                </div>
+                                                                {el.reason && (
+                                                                    <div style={{ color: theme.accent.red }}>
+                                                                        {el.reason}
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                )
+                            })}
+                        </div>
+                    </div>
+                )
+            }
 
             {/* Filters */}
             <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
@@ -293,6 +578,6 @@ export function DiagnosisReport({ diagnosis, testId, onApprove, isApproving }: {
                 </table>
             </div>
 
-        </div>
+        </div >
     )
 }

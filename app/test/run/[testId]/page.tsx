@@ -3,12 +3,13 @@
 import React, { useEffect, useState, useRef, useMemo } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { api, TestRun, TestArtifact } from '../../../../lib/api'
+import { api, TestRun, TestArtifact, FrontendTestType } from '../../../../lib/api'
 import { generateReportPDF } from '../../../../lib/pdfGenerator'
 import LiveStreamPlayer from '../../../../components/LiveStreamPlayer'
-import { DiagnosisReport } from '@/components/DiagnosisReport'
+import { DiagnosisProgressBar } from '@/components/DiagnosisProgressBar'
 import { filterStepsByBrowser, getBrowserDisplayName, aggregateBrowserRuns, type BrowserType } from '../../../../lib/browserResults'
 import { LiveTestControl } from '../../../../components/LiveTestControl'
+import { CancelTestModal } from '@/components/CancelTestModal'
 
 // --- ICONS ---
 const Icons = {
@@ -88,6 +89,13 @@ export default function TestRunPage() {
   const [isConnected, setIsConnected] = useState(false)
   const [frameData, setFrameData] = useState<string | null>(null)
   const wsRef = useRef<WebSocket | null>(null)
+
+  // Cancel modal state
+  const [cancelModal, setCancelModal] = useState<{
+    isOpen: boolean
+    testUrl?: string
+    testStatus?: string
+  }>({ isOpen: false })
 
   // Ref for selectedBrowser to access in WS callback without reconnecting
   const selectedBrowserRef = useRef(selectedBrowser)
@@ -193,7 +201,24 @@ export default function TestRunPage() {
 
   // Handlers
   const handleStop = async () => { if (confirm('Stop this test run?')) { await api.stopTestRun(testId); loadData(); } }
-  const handleCancel = async () => { if (confirm('Cancel this test run?')) { await api.cancelTestRun(testId); loadData(); } }
+
+  const handleCancelClick = () => {
+    setCancelModal({
+      isOpen: true,
+      testUrl: testRun?.build?.url,
+      testStatus: testRun?.status,
+    })
+  }
+
+  const handleConfirmCancel = async () => {
+    try {
+      await api.cancelTestRun(testId)
+      loadData()
+    } catch (error: any) {
+      alert(`Failed to cancel: ${error.message}`)
+      throw error
+    }
+  }
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -225,15 +250,30 @@ export default function TestRunPage() {
     </div>
   )
 
-  // Show Diagnosis Report if in diagnosing state
+  // Show Testability Contract Report during diagnosis/waiting approval
   if (testRun?.status === 'diagnosing' || testRun?.status === 'waiting_approval') {
+    const { TestabilityContractReport } = require('@/components/TestabilityContractReport')
+
+    // If contract not ready yet, show loading with progress
+    if (!testRun.testabilityContract) {
+      return (
+        <div style={{ background: 'var(--bg-primary)', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px 20px' }}>
+          {/* Enhanced Progress Bar with Live Commentary */}
+          <DiagnosisProgressBar
+            progress={testRun.diagnosisProgress}
+          />
+        </div>
+      )
+    }
+
     return (
       <div style={{ background: 'var(--bg-primary)', minHeight: '100vh' }}>
-        <DiagnosisReport
-          diagnosis={testRun.diagnosis}
+        <TestabilityContractReport
+          contract={testRun.testabilityContract}
           testId={testId}
           onApprove={async () => { await api.approveTestRun(testId); loadData(); }}
           isApproving={false}
+          perTypeDiagnosis={testRun.perTypeDiagnosis}
         />
       </div>
     )
@@ -365,7 +405,7 @@ export default function TestRunPage() {
           {['queued', 'pending', 'diagnosing'].includes(testRun?.status || '') &&
             !['completed', 'failed', 'cancelled', 'timed_out'].includes(testRun?.status || '') && (
               <button
-                onClick={handleCancel}
+                onClick={handleCancelClick}
                 style={{
                   background: 'var(--warning)',
                   border: 'none',
@@ -575,7 +615,7 @@ export default function TestRunPage() {
                 }} />
                 <span style={{ fontWeight: 500 }}>
                   {testRun?.status === 'queued' ? 'Waiting in queue...' :
-                    (testRun?.status as string) === 'diagnosing' ? 'Analyzing failure...' :
+                    (testRun?.status as string) === 'diagnosing' ? 'Analyzing your application...' :
                       'Initializing environment...'}
                 </span>
                 <style jsx>{`
@@ -842,6 +882,15 @@ export default function TestRunPage() {
           onClose={() => setShowGodMode(false)}
         />
       )}
+
+      {/* Cancel Test Modal */}
+      <CancelTestModal
+        isOpen={cancelModal.isOpen}
+        onClose={() => setCancelModal({ ...cancelModal, isOpen: false })}
+        onConfirm={handleConfirmCancel}
+        testUrl={cancelModal.testUrl}
+        testStatus={cancelModal.testStatus}
+      />
 
     </div>
   )

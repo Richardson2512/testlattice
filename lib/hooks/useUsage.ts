@@ -26,12 +26,8 @@ export function useUsage() {
     async function fetchUsage() {
       try {
         setLoading(true)
-        // TODO: Replace with actual API endpoint when backend is ready
-        // Fetch real usage from API
-        const [tierInfoRes, usageRes] = await Promise.all([
-          api.getTierInfo(),
-          api.checkUsage()
-        ])
+        // Only call checkUsage - it already returns tier info
+        const usageRes = await api.checkUsage()
 
         // Map backend tier to pricing tier
         const tierMap: Record<string, PricingTier> = {
@@ -43,7 +39,8 @@ export function useUsage() {
           'agency': 'pro',
         }
 
-        const currentTier = (tierMap[usageRes.tier] || tierMap[tierInfoRes.tier] || 'free') as PricingTier
+        // checkUsage returns tier directly, no need for separate getTierInfo call
+        const currentTier = (tierMap[usageRes.tier] || 'free') as PricingTier
 
         // Set limits based on tier (import from pricing.ts)
         const { PRICING_TIERS } = await import('../pricing')

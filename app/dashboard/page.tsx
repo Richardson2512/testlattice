@@ -11,6 +11,7 @@ import { useDashboardData, invalidateTestRuns, invalidateProjects, useTierInfo }
 import { DashboardSkeleton, FetchingIndicator } from '@/components/Skeleton'
 import { UpgradeModal } from '@/components/UpgradeModal'
 import { UpgradeBanner } from '@/components/UpgradeBanner'
+import { CancelTestModal } from '@/components/CancelTestModal'
 import { canCreateTest, isFeatureAvailable } from '@/lib/usageCheck'
 import { useUsage } from '@/lib/hooks/useUsage'
 import type { PricingTier } from '@/lib/pricing'
@@ -118,6 +119,16 @@ export default function DashboardPage() {
   const [loginUsername, setLoginUsername] = useState('')
   const [loginPassword, setLoginPassword] = useState('')
 
+  // Saved credentials for Login/Signup tests
+  const [savedCredentials, setSavedCredentials] = useState<Array<{
+    id: string
+    name: string
+    username?: string
+    email?: string
+  }>>([])
+  const [selectedCredentialId, setSelectedCredentialId] = useState<string>('')
+  const [credentialsLoading, setCredentialsLoading] = useState(false)
+
   // Use optimized data fetching hook with caching and auto-refresh
   const {
     testRuns,
@@ -128,8 +139,8 @@ export default function DashboardPage() {
     invalidate
   } = useDashboardData({ selectedProject, enabled: !!teamId })
 
-  // Get tier info and usage
-  const { data: tierInfo } = useTierInfo()
+  // Get tier info and usage (wait for auth before fetching to get correct tier)
+  const { data: tierInfo } = useTierInfo(!!userId)
   const { usage } = useUsage()
 
   // Map backend tier to pricing tier
@@ -149,6 +160,13 @@ export default function DashboardPage() {
     feature?: string
   }>({ isOpen: false, type: 'test-limit' })
 
+  // Cancel test modal state
+  const [cancelModal, setCancelModal] = useState<{
+    isOpen: boolean
+    runId: string | null
+    testUrl?: string
+    testStatus?: string
+  }>({ isOpen: false, runId: null })
 
   // -- LOGIC --
 
@@ -160,6 +178,25 @@ export default function DashboardPage() {
       setSinglePageUrl('')
     }
   }
+
+  // Fetch saved credentials when login/signup test type is selected (paid users only)
+  useEffect(() => {
+    const needsCredentials = selectedTestTypes.has('login') || selectedTestTypes.has('signup')
+    if (needsCredentials && currentTier !== 'free') {
+      setCredentialsLoading(true)
+      api.getCredentials()
+        .then((res) => {
+          setSavedCredentials(res.credentials || [])
+        })
+        .catch((err) => {
+          console.error('Failed to fetch credentials:', err)
+          setSavedCredentials([])
+        })
+        .finally(() => {
+          setCredentialsLoading(false)
+        })
+    }
+  }, [selectedTestTypes, currentTier])
 
   useEffect(() => {
     const getUserInfo = async () => {
@@ -288,8 +325,13 @@ export default function DashboardPage() {
           approvalPolicy: { mode: 'manual' },
           // Selected test types for registered users (multi-select)
           selectedTestTypes: selectedTestTypes.size > 0 ? Array.from(selectedTestTypes) : undefined,
-          // Credentials for login/signup tests
-          guestCredentials: (selectedTestTypes.has('login') || selectedTestTypes.has('signup')) && loginUsername
+          // Credential handling for login/signup tests
+          // Paid users: Pass credential ID for secure lookup
+          // Free users: Pass inline demo credentials
+          credentialId: currentTier !== 'free' && selectedCredentialId
+            ? selectedCredentialId
+            : undefined,
+          guestCredentials: currentTier === 'free' && (selectedTestTypes.has('login') || selectedTestTypes.has('signup')) && loginUsername
             ? { email: loginUsername, password: loginPassword }
             : undefined,
         },
@@ -355,16 +397,25 @@ export default function DashboardPage() {
     ? Math.round(testRuns.filter(r => r.duration).reduce((acc, r) => acc + (r.duration || 0), 0) / testRuns.filter(r => r.duration).length / 1000)
     : 0
 
-  async function handleCancelRun(e: React.MouseEvent, runId: string) {
+  function handleCancelClick(e: React.MouseEvent, run: TestRun) {
     e.stopPropagation()
-    if (!confirm('Are you sure you want to cancel this test run?')) return
+    setCancelModal({
+      isOpen: true,
+      runId: run.id,
+      testUrl: run.build?.url,
+      testStatus: run.status,
+    })
+  }
+
+  async function handleConfirmCancel() {
+    if (!cancelModal.runId) return
 
     try {
-      // Optimistic update could go here, but refetch is safer for consistency
-      await api.cancelTestRun(runId)
+      await api.cancelTestRun(cancelModal.runId)
       loadData() // Trigger refetch to update UI
     } catch (error: any) {
       alert(`Failed to cancel run: ${error.message}`)
+      throw error // Re-throw so modal knows it failed
     }
   }
 
@@ -582,7 +633,7 @@ export default function DashboardPage() {
                         {['running', 'queued', 'pending', 'diagnosing'].includes(run.status) &&
                           !['completed', 'failed', 'cancelled', 'timed_out'].includes(run.status) && (
                             <button
-                              onClick={(e) => handleCancelRun(e, run.id)}
+                              onClick={(e) => handleCancelClick(e, run)}
                               style={{
                                 padding: '4px 8px',
                                 background: 'rgba(239, 68, 68, 0.1)',
@@ -1148,53 +1199,147 @@ export default function DashboardPage() {
               {(selectedTestTypes.has('login') || selectedTestTypes.has('signup')) && (
                 <div style={{
                   padding: '1rem',
-                  background: 'rgba(217, 119, 6, 0.05)',
-                  border: '1px solid rgba(217, 119, 6, 0.2)',
+                  background: currentTier !== 'free' ? 'rgba(5, 150, 105, 0.05)' : 'rgba(217, 119, 6, 0.05)',
+                  border: `1px solid ${currentTier !== 'free' ? 'rgba(5, 150, 105, 0.2)' : 'rgba(217, 119, 6, 0.2)'}`,
                   borderRadius: 'var(--radius-md)'
                 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem', color: 'var(--warning)', fontSize: '0.8rem' }}>
-                    <span>⚠️</span> <strong>Demo credentials only!</strong> Do not enter real passwords.
-                  </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-                    <div>
-                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 500, marginBottom: '0.375rem', color: 'var(--text-secondary)' }}>
-                        Email / Username
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="demo@example.com"
-                        value={loginUsername}
-                        onChange={e => setLoginUsername(e.target.value)}
-                        style={{
-                          width: '100%',
-                          padding: '0.6rem',
-                          fontSize: '0.85rem',
-                          borderRadius: 'var(--radius-sm)',
-                          border: '1px solid var(--border-medium)',
+                  {/* Paid users: Select from saved credentials */}
+                  {currentTier !== 'free' ? (
+                    <>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem', color: 'var(--text-secondary)', fontSize: '0.8rem' }}>
+                        <span>🔐</span> <strong>Select saved credentials for {selectedTestTypes.has('login') ? 'login' : 'signup'} test</strong>
+                      </div>
+
+                      {credentialsLoading ? (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+                          <div style={{
+                            width: '16px',
+                            height: '16px',
+                            border: '2px solid var(--border-medium)',
+                            borderTopColor: 'var(--primary)',
+                            borderRadius: '50%',
+                            animation: 'spin 1s linear infinite'
+                          }} />
+                          Loading credentials...
+                        </div>
+                      ) : savedCredentials.length === 0 ? (
+                        <div style={{
+                          padding: '1rem',
                           background: 'var(--bg-primary)',
-                        }}
-                      />
-                    </div>
-                    <div>
-                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 500, marginBottom: '0.375rem', color: 'var(--text-secondary)' }}>
-                        Password
-                      </label>
-                      <input
-                        type="password"
-                        placeholder="••••••••"
-                        value={loginPassword}
-                        onChange={e => setLoginPassword(e.target.value)}
-                        style={{
-                          width: '100%',
-                          padding: '0.6rem',
-                          fontSize: '0.85rem',
                           borderRadius: 'var(--radius-sm)',
-                          border: '1px solid var(--border-medium)',
-                          background: 'var(--bg-primary)',
-                        }}
-                      />
-                    </div>
-                  </div>
+                          border: '1px dashed var(--border-medium)',
+                          textAlign: 'center'
+                        }}>
+                          <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>🔑</div>
+                          <div style={{ fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.25rem' }}>No saved credentials</div>
+                          <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.75rem' }}>
+                            Create credentials to use with login/signup tests
+                          </div>
+                          <Link
+                            href="/dashboard/credentials"
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '0.25rem',
+                              padding: '0.5rem 1rem',
+                              background: 'var(--primary)',
+                              color: 'white',
+                              borderRadius: 'var(--radius-sm)',
+                              fontSize: '0.8rem',
+                              fontWeight: 600,
+                              textDecoration: 'none'
+                            }}
+                          >
+                            + Create Credentials
+                          </Link>
+                        </div>
+                      ) : (
+                        <select
+                          value={selectedCredentialId}
+                          onChange={e => {
+                            setSelectedCredentialId(e.target.value)
+                            // Populate username/password from selected credential
+                            const cred = savedCredentials.find(c => c.id === e.target.value)
+                            if (cred) {
+                              setLoginUsername(cred.email || cred.username || '')
+                            }
+                          }}
+                          required
+                          style={{
+                            width: '100%',
+                            padding: '0.75rem',
+                            background: 'var(--bg-primary)',
+                            border: '1px solid var(--border-medium)',
+                            borderRadius: 'var(--radius-md)',
+                            color: 'var(--text-primary)',
+                            fontSize: '0.9rem',
+                          }}
+                        >
+                          <option value="">Select a credential...</option>
+                          {savedCredentials.map(cred => (
+                            <option key={cred.id} value={cred.id}>
+                              {cred.name} {cred.email ? `(${cred.email})` : cred.username ? `(@${cred.username})` : ''}
+                            </option>
+                          ))}
+                        </select>
+                      )}
+
+                      {savedCredentials.length > 0 && (
+                        <div style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: 'var(--text-muted)', display: 'flex', justifyContent: 'flex-end' }}>
+                          <Link href="/dashboard/credentials" style={{ color: 'var(--primary)', textDecoration: 'none' }}>
+                            Manage Credentials →
+                          </Link>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    /* Free users: Manual input with warning */
+                    <>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem', color: 'var(--warning)', fontSize: '0.8rem' }}>
+                        <span>⚠️</span> <strong>Demo credentials only!</strong> Do not enter real passwords.
+                      </div>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                        <div>
+                          <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 500, marginBottom: '0.375rem', color: 'var(--text-secondary)' }}>
+                            Email / Username
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="demo@example.com"
+                            value={loginUsername}
+                            onChange={e => setLoginUsername(e.target.value)}
+                            style={{
+                              width: '100%',
+                              padding: '0.6rem',
+                              fontSize: '0.85rem',
+                              borderRadius: 'var(--radius-sm)',
+                              border: '1px solid var(--border-medium)',
+                              background: 'var(--bg-primary)',
+                            }}
+                          />
+                        </div>
+                        <div>
+                          <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 500, marginBottom: '0.375rem', color: 'var(--text-secondary)' }}>
+                            Password
+                          </label>
+                          <input
+                            type="password"
+                            placeholder="••••••••"
+                            value={loginPassword}
+                            onChange={e => setLoginPassword(e.target.value)}
+                            style={{
+                              width: '100%',
+                              padding: '0.6rem',
+                              fontSize: '0.85rem',
+                              borderRadius: 'var(--radius-sm)',
+                              border: '1px solid var(--border-medium)',
+                              background: 'var(--bg-primary)',
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
               )}
 
@@ -1281,6 +1426,15 @@ export default function DashboardPage() {
         type={upgradeModal.type}
         feature={upgradeModal.feature}
         currentTier={currentTier}
+      />
+
+      {/* Cancel Test Modal */}
+      <CancelTestModal
+        isOpen={cancelModal.isOpen}
+        onClose={() => setCancelModal({ ...cancelModal, isOpen: false })}
+        onConfirm={handleConfirmCancel}
+        testUrl={cancelModal.testUrl}
+        testStatus={cancelModal.testStatus}
       />
     </div>
   )

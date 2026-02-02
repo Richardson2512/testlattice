@@ -212,6 +212,126 @@ export interface DiagnosisProgress {
   percent: number           // Overall progress 0-100
 }
 
+// ============================================================================
+// Per-Test-Type Diagnosis Types (NEW - steps add up based on selected types)
+// ============================================================================
+
+export type FrontendTestType = 'visual' | 'login' | 'signup' | 'form' | 'navigation' | 'accessibility' | 'rage_bait'
+
+export interface TestTypeDiagnosisItem {
+  name: string
+  description?: string
+  selector?: string
+  reason?: string
+}
+
+export interface TestTypeDiagnosis {
+  testType: FrontendTestType
+  steps: string[]
+  canTest: TestTypeDiagnosisItem[]
+  cannotTest: TestTypeDiagnosisItem[]
+  duration: number
+  // Plain English narrative for UI display
+  narrative?: {
+    what: string    // What is being diagnosed
+    how: string     // How it is being diagnosed
+    why: string     // Why it is being diagnosed
+    result: string  // Passed/Failed with explanation
+    passed: boolean
+  }
+}
+
+export interface PerTypeDiagnosis {
+  totalSteps: number
+  totalDuration: number
+  perType: TestTypeDiagnosis[]
+  combined: {
+    allCanTest: TestTypeDiagnosisItem[]
+    allCannotTest: TestTypeDiagnosisItem[]
+  }
+}
+
+// ============================================================================
+// Testability Contract Types (NEW - capability-focused diagnosis)
+// ============================================================================
+
+export type TestType =
+  | 'login'
+  | 'signup'
+  | 'checkout'
+  | 'form_submission'
+  | 'navigation'
+  | 'search'
+  | 'data_entry'
+  | 'file_upload'
+  | 'custom'
+  | 'visual'
+  | 'accessibility'
+  | 'performance'
+  | 'payment'
+  | 'settings'
+  | 'logout'
+
+export interface TestabilityContract {
+  testTypeAnalysis: TestTypeCapability[]
+  globalBlockers: GlobalBlocker[]
+  systemActions: SystemAction[]
+  overallConfidence: 'high' | 'medium' | 'low'
+  confidenceReason: string
+  riskAcceptance: RiskAcceptanceItem[]
+  canProceed: boolean
+  proceedBlockedReason?: string
+  analyzedAt: string
+  duration: number
+  url: string
+  pageTitle: string
+}
+
+export interface TestTypeCapability {
+  testType: TestType
+  testable: {
+    elements: CapabilityItem[]
+    confidence: 'high' | 'medium'
+  }
+  conditionallyTestable: {
+    elements: CapabilityItem[]
+    conditions: string[]
+    confidence: 'medium' | 'low'
+  }
+  notTestable: {
+    elements: CapabilityItem[]
+    reasons: string[]
+  }
+}
+
+export interface CapabilityItem {
+  name: string
+  selector?: string
+  reason: string
+  elementType?: 'button' | 'input' | 'link' | 'select' | 'textarea' | 'form' | 'other'
+}
+
+export interface GlobalBlocker {
+  type: 'captcha' | 'mfa' | 'cross_origin_iframe' | 'native_dialog' | 'email_verification' | 'payment_gateway'
+  detected: boolean
+  location?: string
+  selector?: string
+  impact: string
+  severity: 'blocking' | 'warning'
+}
+
+export interface SystemAction {
+  action: 'skip_selector' | 'avoid_page' | 'downgrade_check' | 'use_fallback' | 'wait_extra'
+  target: string
+  reason: string
+}
+
+export interface RiskAcceptanceItem {
+  risk: string
+  impact: string
+  userMustAccept: boolean
+}
+
 // ScoutQA-style report summary types
 export type IssueSeverity = 'Critical' | 'High' | 'Medium' | 'Low' | 'Info'
 export type IssueCategory = 'Security' | 'Usability' | 'Performance' | 'Accessibility' | 'Functionality'
@@ -273,6 +393,8 @@ export interface TestOptions {
   approvalPolicy?: ApprovalPolicy
   // Registered user test options (multi-select test types)
   selectedTestTypes?: string[]  // Array of selected test types: visual, login, signup, navigation, form, accessibility, rage_bait
+  // Saved credential ID for login/signup tests (paid users)
+  credentialId?: string
   // Guest test options (single test type - SEPARATE FLOW)
   isGuestRun?: boolean
   guestSessionId?: string
@@ -321,6 +443,8 @@ export interface TestRun {
   currentStep?: number
   diagnosis?: DiagnosisResult
   diagnosisProgress?: DiagnosisProgress
+  perTypeDiagnosis?: PerTypeDiagnosis  // NEW: Per-test-type can/cannot test results
+  testabilityContract?: TestabilityContract // NEW: Capability-focused diagnosis
   browserResults?: BrowserMatrixResult[]  // Cross-browser test results
   summary?: {  // Browser matrix summary
     totalBrowsers: number
@@ -441,7 +565,7 @@ async function getAuthToken(): Promise<string | null> {
   return null
 }
 
-async function request<T>(endpoint: string, options?: RequestInit): Promise<T> {
+async function request<T>(endpoint: string, options?: RequestInit & { timeout?: number }): Promise<T> {
   const token = await getAuthToken()
 
   // Use the Headers API so we can add/remove headers safely
@@ -456,9 +580,10 @@ async function request<T>(endpoint: string, options?: RequestInit): Promise<T> {
     headers.set('Authorization', `Bearer ${token}`)
   }
 
-  // Add timeout to prevent hanging requests
+  // Add timeout to prevent hanging requests (default 30s, configurable)
+  const timeoutMs = options?.timeout || 30000
   const controller = new AbortController()
-  const timeoutId = setTimeout(() => controller.abort(), 30000) // 30 second timeout
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs) // configurable timeout
 
   try {
     const response = await fetch(`${API_URL}${endpoint}`, {
@@ -480,7 +605,8 @@ async function request<T>(endpoint: string, options?: RequestInit): Promise<T> {
 
     // Handle timeout errors
     if (error.name === 'AbortError' || error.message?.includes('aborted')) {
-      throw new Error(`Request timeout: API server at ${API_URL} did not respond within 30 seconds. The server may be overloaded or unresponsive.`)
+      const seconds = Math.round(timeoutMs / 1000)
+      throw new Error(`Request timeout: API server at ${API_URL} did not respond within ${seconds} seconds. The server may be overloaded or unresponsive.`)
     }
 
     // Handle network errors (API server not running, CORS, etc.)
@@ -497,6 +623,7 @@ export const api = {
     return request('/api/tests/run', {
       method: 'POST',
       body: JSON.stringify(data),
+      timeout: 60000, // 60s for Redis queue enqueue
     })
   },
 
@@ -512,6 +639,7 @@ export const api = {
     return request('/api/tests/run/guest', {
       method: 'POST',
       body: JSON.stringify(data),
+      timeout: 60000, // 60s for Redis queue enqueue
     })
   },
 

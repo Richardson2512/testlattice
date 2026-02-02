@@ -5,6 +5,8 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 
 // Simple in-memory cache
 const cache = new Map<string, { data: any; timestamp: number }>()
+// In-flight request deduplication - prevents duplicate concurrent calls
+const inFlightRequests = new Map<string, Promise<any>>()
 const DEFAULT_CACHE_TIME = 30 * 1000 // 30 seconds
 const DEFAULT_STALE_TIME = 5 * 1000 // 5 seconds
 
@@ -80,12 +82,31 @@ export function useApi<T>(
     }, [key, staleTime])
 
     const refetch = useCallback(async () => {
+        // If there's already an in-flight request for this key, wait for it
+        const existingRequest = inFlightRequests.get(key)
+        if (existingRequest) {
+            try {
+                const result = await existingRequest
+                setData(result)
+                setIsStale(false)
+                setIsLoading(false)
+                onSuccess?.(result)
+                return
+            } catch {
+                // If shared request failed, we'll make our own below
+            }
+        }
+
         setIsFetching(true)
         setIsError(false)
         setError(null)
 
+        // Create the fetch promise and store it for deduplication
+        const fetchPromise = fetcherRef.current()
+        inFlightRequests.set(key, fetchPromise)
+
         try {
-            const result = await fetcherRef.current()
+            const result = await fetchPromise
 
             // Update cache
             cache.set(key, { data: result, timestamp: Date.now() })
@@ -99,6 +120,7 @@ export function useApi<T>(
             setError(error)
             onError?.(error)
         } finally {
+            inFlightRequests.delete(key)
             setIsFetching(false)
             setIsLoading(false)
         }

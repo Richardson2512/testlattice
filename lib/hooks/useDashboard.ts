@@ -104,8 +104,9 @@ export function useTestRun(runId: string | null, pollInterval?: number) {
 
 /**
  * Hook for fetching tier information
+ * @param enabled - Set to true when user is authenticated
  */
-export function useTierInfo() {
+export function useTierInfo(enabled: boolean = true) {
     return useApi(
         'tierInfo',
         async () => {
@@ -113,6 +114,7 @@ export function useTierInfo() {
             return response
         },
         {
+            enabled,
             staleTime: 5 * 60 * 1000, // 5 minutes (rarely changes)
             cacheTime: 10 * 60 * 1000, // 10 minutes
         }

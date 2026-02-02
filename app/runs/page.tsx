@@ -5,12 +5,21 @@ import Link from 'next/link'
 import { useDashboardData, useTierInfo } from '@/lib/hooks'
 import { api, TestRun } from '@/lib/api'
 import { FetchingIndicator } from '@/components/Skeleton'
+import { CancelTestModal } from '@/components/CancelTestModal'
 
 export default function RunsPage() {
     const { testRuns, projects, isLoading, isFetching, refetch } = useDashboardData()
     const { data: tierInfo } = useTierInfo()
     const [downloadingId, setDownloadingId] = useState<string | null>(null)
     const [sharingId, setSharingId] = useState<string | null>(null)
+
+    // Cancel modal state
+    const [cancelModal, setCancelModal] = useState<{
+        isOpen: boolean
+        runId: string | null
+        testUrl?: string
+        testStatus?: string
+    }>({ isOpen: false, runId: null })
 
     // Handle retention logic
     const getRetentionDays = () => {
@@ -52,13 +61,23 @@ export default function RunsPage() {
         }
     }
 
-    const handleCancelRun = async (runId: string) => {
-        if (!confirm('Are you sure you want to cancel this test run?')) return
+    const handleCancelClick = (run: TestRun) => {
+        setCancelModal({
+            isOpen: true,
+            runId: run.id,
+            testUrl: run.build?.url,
+            testStatus: run.status,
+        })
+    }
+
+    const handleConfirmCancel = async () => {
+        if (!cancelModal.runId) return
         try {
-            await api.cancelTestRun(runId)
+            await api.cancelTestRun(cancelModal.runId)
             refetch()
         } catch (error: any) {
             alert(`Failed to cancel run: ${error.message}`)
+            throw error
         }
     }
 
@@ -197,7 +216,7 @@ export default function RunsPage() {
                                                     {['running', 'queued', 'pending', 'diagnosing'].includes(run.status) &&
                                                         !['completed', 'failed', 'cancelled', 'timed_out'].includes(run.status) ? (
                                                         <button
-                                                            onClick={() => handleCancelRun(run.id)}
+                                                            onClick={() => handleCancelClick(run)}
                                                             className="btn"
                                                             style={{
                                                                 padding: '0.4rem 0.8rem',
@@ -255,6 +274,15 @@ export default function RunsPage() {
                     )}
                 </div>
             </div>
+
+            {/* Cancel Test Modal */}
+            <CancelTestModal
+                isOpen={cancelModal.isOpen}
+                onClose={() => setCancelModal({ ...cancelModal, isOpen: false })}
+                onConfirm={handleConfirmCancel}
+                testUrl={cancelModal.testUrl}
+                testStatus={cancelModal.testStatus}
+            />
         </div>
     )
 }

@@ -1,6 +1,7 @@
 'use client'
 
 import { usePathname } from 'next/navigation'
+import { useState, useEffect } from 'react'
 import Navigation from './Navigation'
 
 export default function LayoutShell({
@@ -11,6 +12,12 @@ export default function LayoutShell({
     userAuthenticated: boolean
 }) {
     const pathname = usePathname()
+    const [mounted, setMounted] = useState(false)
+
+    // Wait for client-side hydration to complete before showing sidebar
+    useEffect(() => {
+        setMounted(true)
+    }, [])
 
     // Routes where sidebar should ALWAYS be hidden, even if authenticated
     // This addresses the issue where password reset/update flows show the dashboard sidebar
@@ -22,8 +29,8 @@ export default function LayoutShell({
         pathname?.startsWith('/signup') ||
         pathname?.startsWith('/auth/callback')
 
-    // Show sidebar only if authenticated AND not on an excluded route
-    const showSidebar = userAuthenticated && !isExcludedRoute
+    // Show sidebar only if authenticated AND not on an excluded route AND mounted
+    const showSidebar = mounted && userAuthenticated && !isExcludedRoute
 
     return (
         <>
