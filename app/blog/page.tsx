@@ -115,7 +115,7 @@ export default function BlogPage() {
 
             {/* Hero */}
             <section style={{ paddingTop: '160px', paddingBottom: '40px', textAlign: 'center' }}>
-                <div className="container" style={{ maxWidth: '800px' }}>
+                <div className="container" style={{ maxWidth: '900px' }}>
                     <h1 style={{ fontSize: '3rem', marginBottom: '1rem' }}>
                         Rihario <span className="text-gradient">Blog</span>
                     </h1>

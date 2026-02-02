@@ -36,7 +36,7 @@ export default function BestVibeTestingToolsPost() {
 
             <LandingHeader />
 
-            <article className="container" style={{ maxWidth: '800px', paddingTop: '160px', paddingBottom: '80px' }}>
+            <article className="container" style={{ maxWidth: '900px', paddingTop: '160px', paddingBottom: '80px' }}>
 
                 {/* Header */}
                 <header style={{ marginBottom: '3rem', textAlign: 'center' }}>

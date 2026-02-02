@@ -35,7 +35,7 @@ export default function HowToTestMvpPage() {
                 <LandingHeader />
 
                 <article style={{ paddingTop: '160px', paddingBottom: '5rem' }}>
-                    <div className="container" style={{ maxWidth: '800px' }}>
+                    <div className="container" style={{ maxWidth: '900px' }}>
 
                         <nav style={{ marginBottom: '2rem', fontSize: '0.9rem' }}>
                             <Link href="/" style={{ color: 'var(--text-muted)', textDecoration: 'none' }}>Home</Link>

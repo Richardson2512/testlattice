@@ -13,7 +13,7 @@ export default function BehaviorAnalysisEnginePage() {
     return (
         <main style={{ minHeight: '100vh', background: 'var(--bg-primary)' }}>
             <LandingHeader />
-            <div className="container" style={{ paddingTop: '120px', paddingBottom: '80px', maxWidth: '800px' }}>
+            <div className="container" style={{ paddingTop: '120px', paddingBottom: '80px', maxWidth: '900px' }}>
                 <h1 style={{ marginBottom: '2rem', fontSize: '2.5rem' }}>Behavior Analysis Engine: How AI Detects Security Vulnerabilities Without Test Scripts</h1>
 
                 <p className="lead" style={{ fontSize: '1.2rem', lineHeight: 1.6, marginBottom: '2rem', color: 'var(--text-secondary)' }}>

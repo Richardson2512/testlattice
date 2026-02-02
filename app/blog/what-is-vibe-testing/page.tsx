@@ -12,7 +12,7 @@ export default function WhatIsVibeTestingPage() {
     return (
         <main style={{ minHeight: '100vh', background: 'var(--bg-primary)' }}>
             <LandingHeader />
-            <div className="container" style={{ paddingTop: '120px', paddingBottom: '80px', maxWidth: '800px' }}>
+            <div className="container" style={{ paddingTop: '120px', paddingBottom: '80px', maxWidth: '900px' }}>
                 <h1 style={{ marginBottom: '2rem' }}>What is Vibe Testing?</h1>
 
                 <div style={{ padding: '1.5rem', background: 'var(--bg-secondary)', borderRadius: '8px', marginBottom: '2rem', borderLeft: '4px solid var(--primary)' }}>
