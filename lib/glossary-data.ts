@@ -88,5 +88,55 @@ export const glossaryTerms: GlossaryTerm[] = [
         definition: 'Google\'s metrics for measuring user experience: LCP (loading), FID (interactivity), and CLS (visual stability). Rihario measures all three automatically.',
         category: 'Performance',
         relatedTerms: ['Performance Testing', 'SEO Testing']
+    },
+    {
+        term: 'Rage Bait',
+        slug: 'rage-bait',
+        definition: 'A stress-testing method that deliberately triggers 8 specific edge cases (like double-clicks, session timeouts, and input overflow) to see if your forms break under pressure.',
+        category: 'Features',
+        relatedTerms: ['Monkey Testing', 'Functional Testing'],
+        canonicalUrl: '/docs/rage-bait-test'
+    },
+    {
+        term: 'Monkey Testing',
+        slug: 'monkey-testing',
+        definition: 'A chaos testing technique where random inputs (clicks, scrolls, keypresses) are thrown at your application to find crashes and stability issues.',
+        category: 'Testing Types',
+        relatedTerms: ['Rage Bait', 'Stress Testing']
+    },
+    {
+        term: 'Trace',
+        slug: 'trace',
+        definition: 'A complete recording of every step in a test run, including console logs, network requests, screenshots, and DOM snapshots. Essential for debugging why a test failed.',
+        category: 'Concepts',
+        relatedTerms: ['DOM Snapshot', 'Evidence']
+    },
+    {
+        term: 'DOM Snapshot',
+        slug: 'dom-snapshot',
+        definition: 'A capture of the entire HTML structure of your page at a specific moment in time. This allows AI to "see" your page code exactly as it was during the test.',
+        category: 'Concepts',
+        relatedTerms: ['Trace', 'AI Testing']
+    },
+    {
+        term: 'Network Throttling',
+        slug: 'network-throttling',
+        definition: 'Simulating slow internet conditions (like 3G or offline mode) to test how your application handles loading states and network failures.',
+        category: 'Features',
+        relatedTerms: ['Rage Bait', 'Performance Testing']
+    },
+    {
+        term: 'Testability Score',
+        slug: 'testability-score',
+        definition: 'A metric that rates how easy it is for AI (and humans) to test your app. Low scores usually mean you have missing accessibility labels, unstable selectors, or hidden elements.',
+        category: 'Concepts',
+        relatedTerms: ['Accessibility Checks', 'AI Testing']
+    },
+    {
+        term: 'Smart Selector Learning',
+        slug: 'smart-selector-learning',
+        definition: 'A God Mode feature where the AI learns the best way to identify an element (e.g., ID vs. text vs. data-testid) based on your manual corrections, improving future test stability.',
+        category: 'Features',
+        relatedTerms: ['God Mode', 'Self-Healing Tests']
     }
 ];

@@ -178,6 +178,17 @@ export default function HowAIExploresContent() {
         Traditional testing requires selectors like <code>#submit-button</code> or <code>.checkout-form</code>. If those change, tests break. Rihario doesn't rely on selectors - it finds elements by understanding what they are and what they do.
       </p>
 
+      <h3>Smart Selector Learning</h3>
+
+      <p>
+        When a test <em>does</em> fail because of a changed selector, Rihario's "God Mode" kicks in. It analyzes the page, identifies the correct element using 20+ heuristics (like text content, nearby labels, etc.), and <strong>auto-corrects</strong> the selector for future runs.
+      </p>
+
+      <ul>
+        <li><strong>Learns from failure:</strong> If <code>#submit-btn</code> vanishes but "Save" button remains, it updates.</li>
+        <li><strong>Prioritizes stability:</strong> Learns to prefer <code>data-testid</code> over dynamic classes like <code>.css-1x2y3z</code>.</li>
+      </ul>
+
       <h3>Adapts to UI Changes</h3>
 
       <p>

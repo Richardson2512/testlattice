@@ -1,10 +1,10 @@
 export default function CookieBannersContent() {
   return (
     <article>
-      <h1>How Cookie Banners Are Handled</h1>
-      
+      <h1>Cookie Banners & Popups</h1>
+
       <p style={{ fontSize: '1.125rem', color: 'var(--text-secondary)', marginBottom: '2rem', lineHeight: 1.7 }}>
-        <strong>Rihario automatically detects cookie banners and attempts to dismiss them during exploration.</strong> The AI looks for common cookie consent patterns and clicks "Accept" or "OK" buttons. If it can't dismiss the banner automatically, exploration may be marked as BLOCKED.
+        <strong>Rihario automatically detects and dismisses cookie banners, newsletter popups, and marketing overlays.</strong> The AI actively hunts for anything blocking your UI—whether it's a GDPR consent form or a "10% Off" modal—and clears it so testing can continue.
       </p>
 
       <h2>How Cookie Banner Detection Works</h2>
@@ -102,6 +102,19 @@ export default function CookieBannersContent() {
         <li>Status shows as BLOCKED</li>
         <li>You can see what blocked it (cookie banner)</li>
         <li>You can manually dismiss and retry</li>
+      </ul>
+
+      <h2>Marketing & Non-Cookie Popups</h2>
+
+      <p>
+        Rihario isn't just for cookies. It also handles the "marketing noise" that often blocks tests:
+      </p>
+
+      <ul>
+        <li><strong>Newsletter Signups:</strong> Detects "Subscribe" modals and clicks "No Thanks" or "X".</li>
+        <li><strong>Chat Widgets:</strong> closes full-screen Intercom/Drift welcomes that obscure the UI.</li>
+        <li><strong>Feature Announcements:</strong> Dismisses "What's New" tooltips and overlays.</li>
+        <li><strong>Age Verification:</strong> (Experimental) attempts to click "I am over 18" or enter birth year.</li>
       </ul>
 
       <h2>Cookie Preferences</h2>

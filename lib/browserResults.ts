@@ -51,12 +51,12 @@ export function aggregateBrowserRuns(testRun: TestRun): AggregatedResults {
 
   steps.forEach(step => {
     const browser = getStepBrowser(step)
-    if (browser) {
-      if (!stepsByBrowser.has(browser)) {
-        stepsByBrowser.set(browser, [])
-      }
-      stepsByBrowser.get(browser)!.push(step)
+    // If step has no browser info, assign to first selected browser (default for guest tests)
+    const assignedBrowser = browser || selectedBrowsers[0] || 'chromium'
+    if (!stepsByBrowser.has(assignedBrowser)) {
+      stepsByBrowser.set(assignedBrowser, [])
     }
+    stepsByBrowser.get(assignedBrowser)!.push(step)
   })
 
   // Create browser runs
@@ -110,11 +110,22 @@ export function aggregateBrowserRuns(testRun: TestRun): AggregatedResults {
   const allPassed = browserRuns.every(r => r.status === 'PASSED')
   const anyFailed = browserRuns.some(r => r.status === 'FAILED')
   const anyBlocked = browserRuns.some(r => r.status === 'BLOCKED')
+  const hasAnySteps = browserRuns.some(r => r.stepsCount > 0)
+
+  // Check if testRun has an explicit status (e.g., 'COMPLETED', 'FAILED')
+  const runStatus = (testRun.status || '').toUpperCase()
+  const isCompleted = runStatus === 'COMPLETED' || runStatus === 'PASSED'
+  const isExplicitlyFailed = runStatus === 'FAILED'
 
   let overallStatus: 'PASSED' | 'PARTIAL' | 'FAILED' | 'BLOCKED'
-  if (allPassed) {
+  if (isCompleted && hasAnySteps) {
+    // If testRun says COMPLETED and we have steps, trust it
+    overallStatus = allPassed ? 'PASSED' : (anyFailed ? 'PARTIAL' : 'PASSED')
+  } else if (isExplicitlyFailed) {
+    overallStatus = 'FAILED'
+  } else if (allPassed) {
     overallStatus = 'PASSED'
-  } else if (anyBlocked) {
+  } else if (anyBlocked && !hasAnySteps) {
     overallStatus = 'BLOCKED'
   } else if (anyFailed) {
     // Check if failures are browser-specific

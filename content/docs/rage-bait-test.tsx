@@ -142,6 +142,48 @@ export default function RageBaitTestContent() {
                         <strong>Real user scenario:</strong> User copies their entire resume into a "Bio" field.
                     </p>
                 </div>
+
+                <div style={{
+                    background: 'var(--bg-card)',
+                    border: '1px solid var(--border-light)',
+                    padding: '1.5rem',
+                    borderRadius: 'var(--radius-md)',
+                }}>
+                    <div style={{ fontWeight: 600, marginBottom: '0.5rem' }}>6. 👯 Double Submit</div>
+                    <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                        <strong>What it does:</strong> Clicks the submit button twice rapidly (50ms gap).<br />
+                        <strong>What could break:</strong> Duplicate database entries. Race conditions. Error pages.<br />
+                        <strong>Real user scenario:</strong> "Why is this loading so slow? I'll click again."
+                    </p>
+                </div>
+
+                <div style={{
+                    background: 'var(--bg-card)',
+                    border: '1px solid var(--border-light)',
+                    padding: '1.5rem',
+                    borderRadius: 'var(--radius-md)',
+                }}>
+                    <div style={{ fontWeight: 600, marginBottom: '0.5rem' }}>7. 🔄 Refresh Persistence</div>
+                    <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                        <strong>What it does:</strong> Types into a form, reloads page, checks if data stays.<br />
+                        <strong>What could break:</strong> Frustration (users lose all work).<br />
+                        <strong>Real user scenario:</strong> Browser crashes or user accidentally hits refresh.
+                    </p>
+                </div>
+
+                <div style={{
+                    background: 'var(--bg-card)',
+                    border: '1px solid var(--border-light)',
+                    padding: '1.5rem',
+                    borderRadius: 'var(--radius-md)',
+                }}>
+                    <div style={{ fontWeight: 600, marginBottom: '0.5rem' }}>8. 🐌 Network Throttle</div>
+                    <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                        <strong>What it does:</strong> Simulates slow 3G connection during interaction.<br />
+                        <strong>What could break:</strong> Buttons clicked before JS loads. Loading states missing.<br />
+                        <strong>Real user scenario:</strong> User on subways or spotty Wi-Fi.
+                    </p>
+                </div>
             </div>
 
             <h2>Why Do I Need This?</h2>
@@ -208,7 +250,7 @@ export default function RageBaitTestContent() {
                     <tbody>
                         <tr>
                             <td style={{ padding: '0.25rem 0', fontWeight: 500 }}>Approach</td>
-                            <td style={{ padding: '0.25rem 0' }}>Targeted, 5 specific edge cases</td>
+                            <td style={{ padding: '0.25rem 0' }}>Targeted, 8 specific edge cases</td>
                             <td style={{ padding: '0.25rem 0' }}>Random clicks and scrolls</td>
                         </tr>
                         <tr>
@@ -244,7 +286,7 @@ export default function RageBaitTestContent() {
             </ol>
 
             <p>
-                The AI will find your form, run all 5 edge-case tests, and report any issues.
+                The AI will find your form, run all 8 edge-case tests, and report any issues.
             </p>
 
             <h2>Understanding Your Results</h2>
@@ -272,9 +314,9 @@ export default function RageBaitTestContent() {
                     </div>
                 </div>
                 <div style={{ marginBottom: '1rem' }}>
-                    <div style={{ fontWeight: 600, marginBottom: '0.25rem', color: 'var(--warning)' }}>⚠️ Input Overflow: WARNING</div>
+                    <div style={{ fontWeight: 600, marginBottom: '0.25rem', color: 'var(--warning)' }}>⚠️ Double Submit: WARNING</div>
                     <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-                        Large text accepted but layout shifted. No crash detected.
+                        Button not disabled on click. Multiple requests sent.
                     </div>
                 </div>
             </div>
@@ -309,6 +351,19 @@ export default function RageBaitTestContent() {
                 <li>Add <code>maxLength</code> attributes to inputs</li>
                 <li>Validate input length on the server too</li>
                 <li>Show user-friendly error when limit exceeded</li>
+            </ul>
+
+            <h3>Double Submit</h3>
+            <ul>
+                <li>Disable submit button immediately after click (<code>isLoading</code> state)</li>
+                <li>Use debounce on submit handler</li>
+                <li>Implement idempotency keys on backend</li>
+            </ul>
+
+            <h3>Refresh Data Loss</h3>
+            <ul>
+                <li>Save draft data to LocalStorage on change</li>
+                <li>Warn user ("Are you sure you want to leave?") using <code>beforeunload</code> event</li>
             </ul>
 
             <h2>Next Steps</h2>

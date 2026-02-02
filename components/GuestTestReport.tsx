@@ -44,6 +44,7 @@ const TEST_TYPE_STEP_MAP: Record<string, string[]> = {
 
 // Human-readable names for actions
 const ACTION_LABELS: Record<string, { name: string; what: string; why: string }> = {
+    // Visual Test Actions
     viewport_desktop: {
         name: 'Desktop View Check',
         what: 'Captured screenshot at 1920x1080 (desktop) resolution',
@@ -104,15 +105,410 @@ const ACTION_LABELS: Record<string, { name: string; what: string; why: string }>
         what: 'Monitored network requests for failures (4xx, 5xx)',
         why: 'Failed requests indicate broken features or APIs'
     },
+    check_console: {
+        name: 'Console Error Check',
+        what: 'Monitored browser console for JavaScript errors',
+        why: 'Console errors often indicate bugs in your site'
+    },
     network_idle: {
         name: 'Network Stability Wait',
         what: 'Waited for network activity to stabilize',
         why: 'Ensures page is fully loaded before testing'
     },
+    popup_dismiss: {
+        name: 'Popup Dismissal',
+        what: 'Attempted to close any modal popups or overlays',
+        why: 'Popups can block testing and annoy users'
+    },
     final_snapshot: {
         name: 'Final Snapshot',
         what: 'Captured final state of the page after all tests',
         why: 'Provides a baseline for future comparison'
+    },
+    // Navigation Test Actions
+    extract_primary_nav: {
+        name: 'Extract Primary Navigation',
+        what: 'Identified all links in your site header/navigation area',
+        why: 'Understanding your navigation structure is key to testing it'
+    },
+    count_total_nav_items: {
+        name: 'Count Navigation Items',
+        what: 'Counted total navigation elements on the page',
+        why: 'Provides context about your site structure'
+    },
+    detect_placeholders: {
+        name: 'Detect Placeholder Links',
+        what: 'Checked for links with # or javascript:void() href',
+        why: 'Placeholder links indicate unfinished navigation'
+    },
+    click_first_link: {
+        name: 'Test First Navigation Link',
+        what: 'Clicked the first valid navigation link',
+        why: 'Verifies primary navigation is functional'
+    },
+    verify_nav_success_1: {
+        name: 'Verify First Navigation',
+        what: 'Verified the page correctly navigated after clicking',
+        why: 'Ensures links lead to valid pages'
+    },
+    return_home: {
+        name: 'Return to Home',
+        what: 'Navigated back to the starting page',
+        why: 'Tests the ability to return to home'
+    },
+    click_second_link: {
+        name: 'Test Second Navigation Link',
+        what: 'Clicked the second valid navigation link',
+        why: 'Verifies secondary navigation is functional'
+    },
+    verify_nav_success_2: {
+        name: 'Verify Second Navigation',
+        what: 'Verified the page correctly navigated after second click',
+        why: 'Ensures multiple links work correctly'
+    },
+    validate_logo_home: {
+        name: 'Logo Home Link Check',
+        what: 'Verified clicking the logo returns to home page',
+        why: 'Users expect logo to link home'
+    },
+    check_external_link_safety: {
+        name: 'External Link Safety',
+        what: 'Checked that external links have rel="noopener"',
+        why: 'Prevents security vulnerabilities from target="_blank"'
+    },
+    detect_broken_anchors: {
+        name: 'Broken Anchor Detection',
+        what: 'Scanned for malformed or broken anchor links',
+        why: 'Broken links frustrate users and hurt SEO'
+    },
+    record_navigation_consistency: {
+        name: 'Navigation Quality Score',
+        what: 'Calculated overall navigation health score',
+        why: 'Summarizes navigation test results'
+    },
+    no_nav_links_found: {
+        name: 'No Navigation Found',
+        what: 'Could not find any navigation links on the page',
+        why: 'Sites need clear navigation for usability'
+    },
+    // Accessibility Test Actions
+    inject_accessibility_scanner: {
+        name: 'Inject Accessibility Scanner',
+        what: 'Loaded axe-core accessibility testing library',
+        why: 'Enables automated WCAG compliance checking'
+    },
+    csp_protection_detected: {
+        name: 'CSP Protection Detected',
+        what: 'Site has Content Security Policy blocking external scripts',
+        why: 'Security feature - not an error, but blocks automated scanning'
+    },
+    run_critical_rule_set: {
+        name: 'Run Accessibility Scan',
+        what: 'Executed WCAG 2.0 A/AA rule set against the page',
+        why: 'Identifies accessibility violations'
+    },
+    count_critical_violations: {
+        name: 'Critical Violations',
+        what: 'Counted accessibility issues that block users',
+        why: 'Critical issues prevent disabled users from using your site'
+    },
+    count_serious_violations: {
+        name: 'Serious Violations',
+        what: 'Counted accessibility issues that cause major barriers',
+        why: 'Serious issues significantly impact disabled users'
+    },
+    detect_missing_alt_attributes: {
+        name: 'Missing Alt Text',
+        what: 'Checked images for alt attribute descriptions',
+        why: 'Screen readers need alt text to describe images'
+    },
+    detect_unlabeled_inputs: {
+        name: 'Unlabeled Form Inputs',
+        what: 'Checked form fields for associated labels',
+        why: 'Unlabeled inputs are unusable for screen reader users'
+    },
+    detect_icon_only_buttons: {
+        name: 'Icon-Only Buttons',
+        what: 'Found buttons with icons but no text labels',
+        why: 'Icon-only buttons need aria-labels for accessibility'
+    },
+    automated_accessibility_scan: {
+        name: 'Automated Scan',
+        what: 'Ran automated accessibility analysis',
+        why: 'Catches common WCAG violations'
+    },
+    automated_checks_skipped: {
+        name: 'Automated Checks Skipped',
+        what: 'Skipped automated checks due to CSP or injection failure',
+        why: 'Manual keyboard tests were still performed'
+    },
+    perform_keyboard_tab_navigation: {
+        name: 'Keyboard Navigation Test',
+        what: 'Tested Tab key navigation through page elements',
+        why: 'Users without mice rely on keyboard navigation'
+    },
+    check_focus_visibility: {
+        name: 'Focus Indicator Check',
+        what: 'Verified focus outline is visible on active elements',
+        why: 'Keyboard users need to see which element is focused'
+    },
+    detect_aria_role_misuse: {
+        name: 'ARIA Role Audit',
+        what: 'Checked for incorrect ARIA role usage',
+        why: 'Incorrect ARIA can confuse assistive technologies'
+    },
+    capture_accessibility_overlay_snapshot: {
+        name: 'Accessibility Snapshot',
+        what: 'Captured accessibility state of the page',
+        why: 'Documents accessibility findings'
+    },
+    summarize_top_risks: {
+        name: 'Accessibility Risk Summary',
+        what: 'Summarized the most severe accessibility issues',
+        why: 'Prioritizes what to fix first'
+    },
+    summarize_results: {
+        name: 'Results Summary',
+        what: 'Completed keyboard navigation analysis',
+        why: 'Summarizes manual testing findings'
+    },
+    keyboard_navigation_test: {
+        name: 'Keyboard Test Failed',
+        what: 'Keyboard navigation test encountered an error',
+        why: 'May indicate JavaScript issues blocking keyboard events'
+    },
+    // Form Test Actions
+    detect_primary_form: {
+        name: 'Detect Form',
+        what: 'Located the primary form on the page',
+        why: 'Forms are the main way users interact with your site'
+    },
+    enumerate_input_fields: {
+        name: 'Count Input Fields',
+        what: 'Identified all input fields in the form',
+        why: 'Understanding form structure is key to testing it'
+    },
+    no_visible_inputs: {
+        name: 'No Visible Inputs',
+        what: 'Form exists but has no visible input fields',
+        why: 'May indicate hidden fields or JavaScript-rendered inputs'
+    },
+    check_input_type_correctness: {
+        name: 'Input Type Check',
+        what: 'Verified email fields use type="email", etc.',
+        why: 'Correct input types enable mobile keyboards and validation'
+    },
+    attempt_empty_submit: {
+        name: 'Empty Submit Test',
+        what: 'Attempted to submit the form with empty fields',
+        why: 'Forms should validate and block empty submissions'
+    },
+    capture_validation_messages: {
+        name: 'Validation Messages',
+        what: 'Captured form validation error messages',
+        why: 'Good validation helps users correct mistakes'
+    },
+    inject_safe_dummy_data: {
+        name: 'Fill Test Data',
+        what: 'Filled form fields with safe test data',
+        why: 'Tests form with realistic input'
+    },
+    submit_form: {
+        name: 'Submit Form',
+        what: 'Submitted the form with test data',
+        why: 'Tests the form submission flow'
+    },
+    detect_outcome: {
+        name: 'Detect Outcome',
+        what: 'Analyzed page for success/error indicators',
+        why: 'Classifies form submission result'
+    },
+    capture_confirmation_clarity: {
+        name: 'Confirmation Clarity',
+        what: 'Captured post-submission page state',
+        why: 'Users need clear confirmation after submitting'
+    },
+    refresh_page_post_submit: {
+        name: 'Refresh After Submit',
+        what: 'Refreshed page after form submission',
+        why: 'Tests form reset behavior'
+    },
+    detect_state_persistence: {
+        name: 'State Persistence',
+        what: 'Checked if form data persists after refresh',
+        why: 'Some forms should persist, others should reset'
+    },
+    final_form_state_capture: {
+        name: 'Final Form State',
+        what: 'Captured final state of form after testing',
+        why: 'Documents form test completion'
+    },
+    form_test_error: {
+        name: 'Form Test Error',
+        what: 'An error occurred during form testing',
+        why: 'May indicate JavaScript errors or form issues'
+    },
+    // Auth Flow Actions (Login/Signup)
+    detect_signup_form: {
+        name: 'Detect Signup Form',
+        what: 'Located signup/registration form on the page',
+        why: 'Tests user registration flow'
+    },
+    no_form_found: {
+        name: 'No Form Found',
+        what: 'Could not locate a login/signup form',
+        why: 'Page may not have expected authentication UI'
+    },
+    count_total_fields: {
+        name: 'Count Total Fields',
+        what: 'Counted all input fields on the page',
+        why: 'Provides context about form complexity'
+    },
+    count_required_fields: {
+        name: 'Count Required Fields',
+        what: 'Counted fields marked as required',
+        why: 'Tests validation requirements'
+    },
+    detect_password_field: {
+        name: 'Detect Password Field',
+        what: 'Located password input field',
+        why: 'Password field is essential for auth forms'
+    },
+    test_weak_password_feedback: {
+        name: 'Weak Password Test',
+        what: 'Tested form response to weak password',
+        why: 'Good UX warns users about weak passwords'
+    },
+    inject_credentials: {
+        name: 'Enter Credentials',
+        what: 'Filled in test credentials',
+        why: 'Tests credential input flow'
+    },
+    verify_terms_link: {
+        name: 'Terms Link Check',
+        what: 'Verified Terms/Privacy links are present',
+        why: 'Legal links are required for user consent'
+    },
+    check_forgot_password: {
+        name: 'Forgot Password Link',
+        what: 'Checked for password reset link',
+        why: 'Users need a way to recover forgotten passwords'
+    },
+    check_pre_input_button_state: {
+        name: 'Button State (Pre-Input)',
+        what: 'Checked if submit is disabled before input',
+        why: 'Some forms disable submit until fields are filled'
+    },
+    test_blank_submission: {
+        name: 'Blank Submit Test',
+        what: 'Tested form with empty credentials',
+        why: 'Forms should block empty submissions'
+    },
+    test_invalid_credentials: {
+        name: 'Invalid Credentials Test',
+        what: 'Tested form with wrong credentials',
+        why: 'Forms should show clear error messages'
+    },
+    waiting_for_mfa: {
+        name: 'Waiting for MFA',
+        what: 'Waiting for user to complete verification',
+        why: 'MFA/OTP requires human input'
+    },
+    mfa_complete: {
+        name: 'MFA Completed',
+        what: 'Multi-factor authentication was successful',
+        why: 'User verified their identity'
+    },
+    mfa_failed: {
+        name: 'MFA Failed',
+        what: 'Multi-factor authentication failed or timed out',
+        why: 'User did not complete verification'
+    },
+    detect_verification: {
+        name: 'Detect Verification',
+        what: 'Checked if email/phone verification is required',
+        why: 'Many signups require email verification'
+    },
+    verification_not_completed: {
+        name: 'Verification Incomplete',
+        what: 'Email verification was required but not completed',
+        why: 'Signup flow cannot complete without verification'
+    },
+    verify_creation: {
+        name: 'Verify Account Creation',
+        what: 'Checked if account was successfully created',
+        why: 'Tests the full signup flow'
+    },
+    capture_snapshot: {
+        name: 'Capture Final State',
+        what: 'Saved screenshot of final page state',
+        why: 'Documents auth flow completion'
+    },
+    auth_flow_error: {
+        name: 'Auth Flow Error',
+        what: 'An error occurred during authentication testing',
+        why: 'May indicate site issues or test failures'
+    },
+    // Rage Bait / Chaos Test Actions
+    find_form: {
+        name: 'Hunt for Forms',
+        what: 'Searched page for interactive forms',
+        why: 'Forms are the main target for chaos testing'
+    },
+    back_button_zombie: {
+        name: 'Back Button Test',
+        what: 'Tested browser back button behavior',
+        why: 'Some sites break when users press back'
+    },
+    enter_key_trap: {
+        name: 'Enter Key Test',
+        what: 'Tested if Enter key submits forms correctly',
+        why: 'Users expect Enter to submit forms'
+    },
+    special_char_attack: {
+        name: 'Special Character Test',
+        what: 'Tested form with emojis and special characters',
+        why: 'Forms should handle all valid input'
+    },
+    input_overflow: {
+        name: 'Input Overflow Test',
+        what: 'Tested form with extremely long input',
+        why: 'Forms should handle or limit long input'
+    },
+    double_submit: {
+        name: 'Double Submit Test',
+        what: 'Tested rapid double-clicking submit button',
+        why: 'Forms should prevent duplicate submissions'
+    },
+    session_timeout: {
+        name: 'Session Timeout Test',
+        what: 'Simulated session expiration mid-form',
+        why: 'Tests how form handles expired sessions'
+    },
+    refresh_persistence: {
+        name: 'Refresh Persistence Test',
+        what: 'Tested if form data survives page refresh',
+        why: 'Accidental refresh should not lose user data'
+    },
+    network_throttle: {
+        name: 'Slow Network Test',
+        what: 'Tested form behavior on slow 3G connection',
+        why: 'Forms should handle slow connections gracefully'
+    },
+    observe_ux: {
+        name: 'Error UX Analysis',
+        what: 'Analyzed loading and error handling patterns',
+        why: 'Good UX provides clear feedback'
+    },
+    frustration_signals: {
+        name: 'Frustration Signals',
+        what: 'Analyzed console for error patterns',
+        why: 'Console errors often indicate user-facing issues'
+    },
+    final_capture: {
+        name: 'Chaos Test Complete',
+        what: 'Captured final state after all chaos tests',
+        why: 'Documents chaos testing completion'
     }
 }
 
@@ -154,12 +550,9 @@ const TEST_TYPE_INFO: Record<string, { title: string; description: string; icon:
 
 export function GuestTestReport({ testType, steps, targetUrl }: GuestTestReportProps) {
     const info = TEST_TYPE_INFO[testType] || TEST_TYPE_INFO.full
-    const relevantActions = TEST_TYPE_STEP_MAP[testType] || []
-
-    // Filter steps based on test type (or show all for 'full')
-    const relevantSteps = testType === 'full'
-        ? steps
-        : steps.filter(s => relevantActions.includes(s.action))
+    // Show ALL steps - backend already filters based on test type
+    // No frontend filtering needed
+    const relevantSteps = steps
 
     // Group steps by status
     const issues = relevantSteps.filter(s => !s.success || s.severity === 'RED')

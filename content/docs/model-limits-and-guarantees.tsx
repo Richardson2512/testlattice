@@ -2,7 +2,7 @@ export default function ModelLimitsAndGuaranteesContent() {
   return (
     <article>
       <h1>Model Limits & Guarantees</h1>
-      
+
       <p style={{ fontSize: '1.125rem', color: 'var(--text-secondary)', marginBottom: '2rem', lineHeight: 1.7 }}>
         <strong>Explicit, honest information about how AI models are used in Rihario.</strong> This document explains what guarantees exist, what happens when things fail, and what the models can and cannot do.
       </p>
@@ -95,6 +95,69 @@ export default function ModelLimitsAndGuaranteesContent() {
         <li>Same model used for retry (no model switching)</li>
         <li>Same prompt used (deterministic behavior)</li>
         <li>Maximum 1 retry (bounded latency - 200-400ms)</li>
+      </ul>
+
+      <h2>Tier-Based Usage Limits</h2>
+
+      <p>
+        To ensure fair usage and prevent abuse, each test run has specific limits based on your subscription tier. These limits apply to every single run.
+      </p>
+
+      <div style={{
+        background: 'var(--beige-100)',
+        padding: '1.5rem',
+        borderRadius: 'var(--radius-md)',
+        marginBottom: '2rem',
+        overflowX: 'auto',
+      }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
+          <thead>
+            <tr style={{ borderBottom: '2px solid var(--border-light)' }}>
+              <th style={{ padding: '0.75rem', textAlign: 'left' }}>Tier</th>
+              <th style={{ padding: '0.75rem', textAlign: 'left' }}>Step Limit (LLM Calls)</th>
+              <th style={{ padding: '0.75rem', textAlign: 'left' }}>Vision Limit (Screenshots)</th>
+              <th style={{ padding: '0.75rem', textAlign: 'left' }}>Retry Limit</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style={{ borderBottom: '1px solid var(--border-light)' }}>
+              <td style={{ padding: '0.75rem', fontWeight: 600 }}>Guest</td>
+              <td style={{ padding: '0.75rem' }}>25 steps</td>
+              <td style={{ padding: '0.75rem' }}>1 check</td>
+              <td style={{ padding: '0.75rem' }}>1 retry</td>
+            </tr>
+            <tr style={{ borderBottom: '1px solid var(--border-light)' }}>
+              <td style={{ padding: '0.75rem', fontWeight: 600 }}>Starter</td>
+              <td style={{ padding: '0.75rem' }}>35 steps</td>
+              <td style={{ padding: '0.75rem' }}>1 check</td>
+              <td style={{ padding: '0.75rem' }}>1 retry</td>
+            </tr>
+            <tr style={{ borderBottom: '1px solid var(--border-light)' }}>
+              <td style={{ padding: '0.75rem', fontWeight: 600 }}>Indie</td>
+              <td style={{ padding: '0.75rem' }}>55 steps</td>
+              <td style={{ padding: '0.75rem' }}>3 checks</td>
+              <td style={{ padding: '0.75rem' }}>1 retry</td>
+            </tr>
+            <tr style={{ borderBottom: '1px solid var(--border-light)' }}>
+              <td style={{ padding: '0.75rem', fontWeight: 600 }}>Pro</td>
+              <td style={{ padding: '0.75rem' }}>75 steps</td>
+              <td style={{ padding: '0.75rem' }}>5 checks</td>
+              <td style={{ padding: '0.75rem' }}>1 retry</td>
+            </tr>
+            <tr style={{ borderBottom: '1px solid var(--border-light)' }}>
+              <td style={{ padding: '0.75rem', fontWeight: 600 }}>Agency</td>
+              <td style={{ padding: '0.75rem' }}>100 steps</td>
+              <td style={{ padding: '0.75rem' }}>10 checks</td>
+              <td style={{ padding: '0.75rem' }}>1 retry</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Limit Definitions</h3>
+      <ul>
+        <li><strong>Step Limit:</strong> The maximum number of actions (clicks, types, scrolls) the AI can take in one test. If reached, the test stops and is marked as "Exhausted" or "Completed" depending on outcome.</li>
+        <li><strong>Vision Limit:</strong> How many times the AI can use GPT-4o analysis on a screenshot. Used for visual checks and complex debugging.</li>
       </ul>
 
       <h2>Token Budgets</h2>

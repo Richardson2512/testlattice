@@ -187,7 +187,33 @@ export default function DeepInsightsPage() {
   if (!aggregated) return <div style={{ background: 'var(--bg-primary)', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-primary)' }}>Unable to process test results</div>
 
   const failedSteps = filteredSteps.filter(s => !s.success)
-  const duration = testRun.duration ? (testRun.duration / 1000).toFixed(1) + 's' : 'N/A'
+
+  // Calculate duration - try multiple sources
+  let calculatedDuration: number | null = testRun.duration || null
+
+  if (!calculatedDuration && testRun.steps && testRun.steps.length > 0) {
+    // Try to calculate from step timestamps
+    const stepTimestamps = testRun.steps
+      .map(s => s.timestamp ? new Date(s.timestamp).getTime() : null)
+      .filter((t): t is number => t !== null)
+
+    if (stepTimestamps.length >= 2) {
+      const minTime = Math.min(...stepTimestamps)
+      const maxTime = Math.max(...stepTimestamps)
+      calculatedDuration = maxTime - minTime
+    }
+  }
+
+  if (!calculatedDuration && testRun.createdAt && testRun.updatedAt) {
+    // Fallback to createdAt/updatedAt difference
+    const startTime = new Date(testRun.createdAt).getTime()
+    const endTime = new Date(testRun.updatedAt).getTime()
+    if (endTime > startTime) {
+      calculatedDuration = endTime - startTime
+    }
+  }
+
+  const duration = calculatedDuration ? (calculatedDuration / 1000).toFixed(1) + 's' : 'N/A'
 
   // Overall status badge
   const overallStatusColor = getStatusColor(aggregated.overallStatus)
