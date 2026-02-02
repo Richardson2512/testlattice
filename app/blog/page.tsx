@@ -51,20 +51,20 @@ const blogPosts = [
         readTime: '7 min'
     },
     {
+        slug: 'best-vibe-testing-tools',
+        title: 'Best Vibe Testing Tools for Vibe Coders in 2026',
+        description: 'A curated list of AI-powered vibe testing tools. Pure UX checks, not unit tests.',
+        category: 'Comparison',
+        date: 'February 2026',
+        readTime: '8 min'
+    },
+    {
         slug: 'top-10-ai-testing-tools',
         title: 'Top 10 Best AI Testing Tools in 2026',
         description: 'A comprehensive comparison of AI-powered testing tools—from indie-friendly to enterprise-grade.',
         category: 'Comparison',
         date: 'December 2025',
         readTime: '12 min'
-    },
-    {
-        slug: 'best-ai-testing-tools',
-        title: 'Best AI Testing Tools 2026: Complete Buyer\'s Guide',
-        description: 'We tested every major AI testing tool. Here\'s which one to choose based on your needs.',
-        category: 'Buyer\'s Guide',
-        date: 'June 2025',
-        readTime: '8 min'
     },
     {
         slug: 'top-10-software-testing-tools',
