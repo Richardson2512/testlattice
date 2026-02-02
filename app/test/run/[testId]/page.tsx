@@ -89,6 +89,7 @@ export default function TestRunPage() {
   const [isConnected, setIsConnected] = useState(false)
   const [frameData, setFrameData] = useState<string | null>(null)
   const wsRef = useRef<WebSocket | null>(null)
+  const lastFrameTime = useRef(0)
 
   // Cancel modal state
   const [cancelModal, setCancelModal] = useState<{
@@ -179,8 +180,22 @@ export default function TestRunPage() {
       try {
         const data = JSON.parse(event.data)
 
+
         // Handle page state (video frames)
         if (data.payload?.type === 'page_state' && data.payload.state?.screenshot) {
+          // OPTIMIZATION: Skip frame updates if:
+          // 1. We are in diagnosing/waiting_approval mode (video hidden)
+          // 2. We are currently navigating/loading (unless blocked)
+          if (testRun.status === 'diagnosing' || testRun.status === 'waiting_approval') {
+            return
+          }
+
+          // OPTIMIZATION: Throttle to ~20fps to prevent main thread blocking properties
+          // The human eye is fine with 20-24fps for monitoring
+          const now = Date.now()
+          if (now - lastFrameTime.current < 50) return // 50ms = 20fps
+          lastFrameTime.current = now
+
           const stateBrowser = data.payload.state.browser
           const currentSelection = selectedBrowserRef.current
 

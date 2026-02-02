@@ -10,6 +10,7 @@ import { FixPromptButton } from '../../../../components/FixPromptButton'
 import { FixPromptDisplay } from '../../../../components/FixPromptDisplay'
 import { SuccessRuleCard } from '../../../../components/SuccessRuleCard'
 import { PerformanceVitals } from '../../../../components/PerformanceVitals'
+import { GuestTestReport } from '../../../../components/GuestTestReport'
 import {
   aggregateBrowserRuns,
   filterStepsByBrowser,
@@ -136,6 +137,10 @@ export default function DeepInsightsPage() {
   // Determine if this is a multi-browser test
   const isMultiBrowser = aggregated && aggregated.selectedBrowsers.length > 1
 
+  // Determine if this is a guest test (show different report format)
+  const isGuestTest = testRun?.options?.isGuestRun || testRun?.options?.testMode === 'guest'
+  const guestTestType = (testRun?.options?.guestTestType || 'visual') as 'visual' | 'navigation' | 'accessibility' | 'performance' | 'full'
+
   // Comprehensive Data Extraction (Safe Access)
   const results = testRun?.diagnosis?.comprehensiveTests
   // Calculate Success Rules data (Mock data placeholders where backend data might be missing)
@@ -143,6 +148,23 @@ export default function DeepInsightsPage() {
   const accessScore = results?.wcagScore?.score || 100
   const securityIssues = results?.security || []
   const visualIssues = results?.visualIssues || []
+
+  async function handleShare() {
+    if (!testRun) return
+    try {
+      if (testRun.visibility !== 'public') {
+        // Make public if not already
+        const updated = await api.updateTestRun(testId, { visibility: 'public' })
+        setTestRun(updated.testRun)
+      }
+      // Copy current URL to clipboard
+      await navigator.clipboard.writeText(window.location.href)
+      alert('Public link copied to clipboard! Anyone with this link can view this report.')
+    } catch (error) {
+      console.error('Failed to share:', error)
+      alert('Failed to generate share link')
+    }
+  }
 
   async function handleSaveName() {
     if (!testRun || !editedName.trim()) return
@@ -284,8 +306,9 @@ export default function DeepInsightsPage() {
           </div>
           <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
             <button
-              onClick={() => window.open(`/api/tests/${testId}/download`, '_blank')} // Assuming download endpoint exists, need to verify
+              onClick={() => window.print()}
               className="btn btn-outline"
+              title="Save as PDF"
               style={{
                 background: 'transparent',
                 border: '1px solid var(--border-medium)',
@@ -304,7 +327,33 @@ export default function DeepInsightsPage() {
                 <polyline points="7 10 12 15 17 10"></polyline>
                 <line x1="12" y1="15" x2="12" y2="3"></line>
               </svg>
-              Download
+              Download PDF
+            </button>
+            <button
+              onClick={handleShare}
+              className="btn btn-outline"
+              title="Share Report"
+              style={{
+                background: 'transparent',
+                border: '1px solid var(--border-medium)',
+                color: 'var(--text-primary)',
+                padding: '0.5rem 1rem',
+                borderRadius: 'var(--radius-md)',
+                fontWeight: 600,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
+              }}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="18" cy="5" r="3"></circle>
+                <circle cx="6" cy="12" r="3"></circle>
+                <circle cx="18" cy="19" r="3"></circle>
+                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+              </svg>
+              Share
             </button>
             <FixPromptButton
               testRunId={testId}
@@ -343,54 +392,64 @@ export default function DeepInsightsPage() {
           />
         </div>
 
-        {/* --- NEW SECTION: Standard Success Rules (Natural English) --- */}
-        <section style={{ marginBottom: '2rem' }}>
-          <h2 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '1rem' }}>Quality & Health Check</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem' }}>
+        {/* --- Test Report Section --- */}
+        {isGuestTest ? (
+          /* Guest Test: Show focused report based on test type */
+          <GuestTestReport
+            testType={guestTestType}
+            steps={filteredSteps as any}
+            targetUrl={testRun.build?.url || ''}
+          />
+        ) : (
+          /* Registered Test: Show comprehensive Quality & Health Check */
+          <section style={{ marginBottom: '2rem' }}>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '1rem' }}>Quality & Health Check</h2>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem' }}>
 
-            {/* 1. Performance (Speed) */}
-            <SuccessRuleCard
-              category="Performance"
-              status={(lcpValue || 0) > 2500 ? 'warning' : 'pass'}
-              metrics={[
-                { label: 'Loading Speed', value: lcpValue ? `${(lcpValue / 1000).toFixed(2)}s` : 'N/A', status: (lcpValue || 0) > 2500 ? 'warning' : 'pass' },
-                { label: 'Visual Stability', value: clsValue?.toFixed(3) || '0', status: (clsValue || 0) > 0.1 ? 'warning' : 'pass' }
-              ]}
-            />
+              {/* 1. Performance (Speed) */}
+              <SuccessRuleCard
+                category="Performance"
+                status={(lcpValue || 0) > 2500 ? 'warning' : 'pass'}
+                metrics={[
+                  { label: 'Loading Speed', value: lcpValue ? `${(lcpValue / 1000).toFixed(2)}s` : 'N/A', status: (lcpValue || 0) > 2500 ? 'warning' : 'pass' },
+                  { label: 'Visual Stability', value: clsValue?.toFixed(3) || '0', status: (clsValue || 0) > 0.1 ? 'warning' : 'pass' }
+                ]}
+              />
 
-            {/* 2. Accessibility */}
-            <SuccessRuleCard
-              category="Accessibility"
-              status={accessScore < 90 ? 'warning' : 'pass'}
-              score={accessScore}
-              metrics={[
-                { label: 'Critical Issues', value: results?.accessibility?.filter(i => i.impact === 'high' || (i.impact as string) === 'critical').length || 0, status: (results?.accessibility?.filter(i => i.impact === 'high').length || 0) > 0 ? 'fail' : 'pass' },
-                { label: 'Minor Improvements', value: results?.accessibility?.filter(i => i.type === 'warning').length || 0, status: 'warning' }
-              ]}
-            />
+              {/* 2. Accessibility */}
+              <SuccessRuleCard
+                category="Accessibility"
+                status={accessScore < 90 ? 'warning' : 'pass'}
+                score={accessScore}
+                metrics={[
+                  { label: 'Critical Issues', value: results?.accessibility?.filter(i => i.impact === 'high' || (i.impact as string) === 'critical').length || 0, status: (results?.accessibility?.filter(i => i.impact === 'high').length || 0) > 0 ? 'fail' : 'pass' },
+                  { label: 'Minor Improvements', value: results?.accessibility?.filter(i => i.type === 'warning').length || 0, status: 'warning' }
+                ]}
+              />
 
-            {/* 3. Security */}
-            <SuccessRuleCard
-              category="Security"
-              status={securityIssues.length > 0 ? 'fail' : 'pass'}
-              metrics={[
-                { label: 'Vulnerabilities', value: securityIssues.length, status: securityIssues.length > 0 ? 'fail' : 'pass' },
-                { label: 'Safe Connection', value: 'Verified', status: 'pass' }
-              ]}
-            />
+              {/* 3. Security */}
+              <SuccessRuleCard
+                category="Security"
+                status={securityIssues.length > 0 ? 'fail' : 'pass'}
+                metrics={[
+                  { label: 'Vulnerabilities', value: securityIssues.length, status: securityIssues.length > 0 ? 'fail' : 'pass' },
+                  { label: 'Safe Connection', value: 'Verified', status: 'pass' }
+                ]}
+              />
 
-            {/* 4. Visual */}
-            <SuccessRuleCard
-              category="Visual"
-              status={visualIssues.length > 0 ? 'warning' : 'pass'}
-              metrics={[
-                { label: 'Visual Bugs', value: visualIssues.length, status: visualIssues.length > 0 ? 'warning' : 'pass' },
-                { label: 'Layout Shifts', value: 'None Detected', status: 'pass' }
-              ]}
-            />
+              {/* 4. Visual */}
+              <SuccessRuleCard
+                category="Visual"
+                status={visualIssues.length > 0 ? 'warning' : 'pass'}
+                metrics={[
+                  { label: 'Visual Bugs', value: visualIssues.length, status: visualIssues.length > 0 ? 'warning' : 'pass' },
+                  { label: 'Layout Shifts', value: 'None Detected', status: 'pass' }
+                ]}
+              />
 
-          </div>
-        </section>
+            </div>
+          </section>
+        )}
 
 
         {/* Video & Timeline Section */}

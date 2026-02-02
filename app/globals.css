@@ -928,3 +928,82 @@ h3 {
 .hover-text-primary:hover {
   color: var(--primary) !important;
 }
+
+/* Print Styles */
+@media print {
+  /* Hide UI elements */
+  header, 
+  button, 
+  .no-print,
+  .print-hidden,
+  nav,
+  footer {
+    display: none !important;
+  }
+
+  /* Reset layout constraints */
+  body {
+    background: white !important;
+    color: black !important;
+    font-size: 12pt;
+  }
+
+  main {
+    margin: 0 !important;
+    padding: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+
+  /* Ensure content fits */
+  .container, 
+  .glass-card, 
+  .glass-panel {
+    box-shadow: none !important;
+    border: none !important;
+    background: white !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+
+  /* Typography */
+  h1, h2, h3 {
+    color: black !important;
+    break-after: avoid;
+  }
+
+  /* Grid adjustments */
+  div[style*="gridTemplateColumns"] {
+    display: block !important;
+  }
+  
+  /* Cards become blocks */
+  .glass-card {
+    border: 1px solid #ddd !important;
+    margin-bottom: 1rem !important;
+    break-inside: avoid;
+  }
+
+  /* Links */
+  a {
+    text-decoration: none !important;
+    color: black !important;
+  }
+
+  /* Fix Video/Canvas areas */
+  canvas, video {
+    display: none !important; /* Hide videos in print */
+  }
+
+  /* Show a print header */
+  body::before {
+    content: "Test Report - Rihario";
+    display: block;
+    text-align: center;
+    font-weight: bold;
+    font-size: 18pt;
+    margin-bottom: 2rem;
+  }
+}
