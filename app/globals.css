@@ -61,7 +61,7 @@
   --font-mono: 'JetBrains Mono', monospace;
 
   /* Layout */
-  --sidebar-width: 280px;
+  --sidebar-width: 220px;
   --max-width: 1400px;
 }
 
@@ -931,9 +931,10 @@ h3 {
 
 /* Print Styles */
 @media print {
+
   /* Hide UI elements */
-  header, 
-  button, 
+  header,
+  button,
   .no-print,
   .print-hidden,
   nav,
@@ -956,8 +957,8 @@ h3 {
   }
 
   /* Ensure content fits */
-  .container, 
-  .glass-card, 
+  .container,
+  .glass-card,
   .glass-panel {
     box-shadow: none !important;
     border: none !important;
@@ -969,7 +970,9 @@ h3 {
   }
 
   /* Typography */
-  h1, h2, h3 {
+  h1,
+  h2,
+  h3 {
     color: black !important;
     break-after: avoid;
   }
@@ -978,7 +981,7 @@ h3 {
   div[style*="gridTemplateColumns"] {
     display: block !important;
   }
-  
+
   /* Cards become blocks */
   .glass-card {
     border: 1px solid #ddd !important;
@@ -993,8 +996,10 @@ h3 {
   }
 
   /* Fix Video/Canvas areas */
-  canvas, video {
-    display: none !important; /* Hide videos in print */
+  canvas,
+  video {
+    display: none !important;
+    /* Hide videos in print */
   }
 
   /* Show a print header */

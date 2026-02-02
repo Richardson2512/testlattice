@@ -33,7 +33,7 @@ export default function Navigation() {
   // Tooltip state
   const [hoveredItem, setHoveredItem] = useState<{ label: string, top: number } | null>(null)
 
-  const expandedWidth = 280
+  const expandedWidth = 220
   const collapsedWidth = 72
   const sidebarWidth = isCollapsed ? collapsedWidth : expandedWidth
 
@@ -208,9 +208,9 @@ export default function Navigation() {
               fontSize: '0.7rem',
               color: 'var(--text-muted)',
               boxShadow: 'var(--shadow-sm)',
-              opacity: isHovered ? 1 : 0,
+              opacity: 1,
               transition: 'opacity 0.2s ease',
-              pointerEvents: isHovered ? 'auto' : 'none',
+              pointerEvents: 'auto',
             }}
           >
             ›

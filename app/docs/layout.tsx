@@ -13,7 +13,7 @@ export default function DocsLayout({ children }: { children: ReactNode }) {
         {/* Left Sidebar - Navigation */}
         <aside
           style={{
-            width: '280px',
+            width: '220px',
             background: 'var(--bg-card)',
             borderRight: '1px solid var(--border-light)',
             position: 'fixed',
@@ -46,7 +46,7 @@ export default function DocsLayout({ children }: { children: ReactNode }) {
         {/* Main Content Area */}
         <div
           style={{
-            marginLeft: '280px',
+            marginLeft: '220px',
             flex: 1,
             display: 'flex',
             justifyContent: 'center',
