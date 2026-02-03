@@ -331,6 +331,52 @@ export default function DeepInsightsPage() {
             )}
           </div>
           <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+            {/* Visibility Toggle */}
+            <button
+              onClick={async () => {
+                if (!testRun) return
+                try {
+                  const newVisibility = testRun.visibility === 'public' ? 'private' : 'public'
+                  const updated = await api.updateTestRun(testId, { visibility: newVisibility })
+                  setTestRun(updated.testRun)
+                } catch (error) {
+                  console.error('Failed to toggle visibility:', error)
+                  alert('Failed to update visibility')
+                }
+              }}
+              title={testRun?.visibility === 'public' ? 'Report is public (click to make private)' : 'Report is private (click to make public)'}
+              style={{
+                background: testRun?.visibility === 'public' ? 'rgba(34, 197, 94, 0.1)' : 'var(--bg-secondary)',
+                border: `1px solid ${testRun?.visibility === 'public' ? 'rgba(34, 197, 94, 0.3)' : 'var(--border-medium)'}`,
+                color: testRun?.visibility === 'public' ? '#22c55e' : 'var(--text-secondary)',
+                padding: '0.5rem 0.75rem',
+                borderRadius: 'var(--radius-md)',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.4rem',
+                fontSize: '0.85rem',
+                fontWeight: 500,
+              }}
+            >
+              {testRun?.visibility === 'public' ? (
+                <>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                  Public
+                </>
+              ) : (
+                <>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                    <line x1="1" y1="1" x2="23" y2="23"></line>
+                  </svg>
+                  Private
+                </>
+              )}
+            </button>
             <button
               onClick={() => window.print()}
               className="btn btn-outline"

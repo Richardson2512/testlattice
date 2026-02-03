@@ -392,11 +392,22 @@ export default function DashboardPage() {
 
   // Derived Stats
   const totalRuns = testRuns.length
-  const passRate = totalRuns > 0 ? Math.round((testRuns.filter(r => r.status === 'completed').length / totalRuns) * 100) : 0
-  const activeNow = testRuns.filter(r => r.status === 'running' || r.status === 'queued').length
-  const avgDuration = testRuns.filter(r => r.duration).length > 0
-    ? Math.round(testRuns.filter(r => r.duration).reduce((acc, r) => acc + (r.duration || 0), 0) / testRuns.filter(r => r.duration).length / 1000)
+  const completedRuns = testRuns.filter(r => r.status === 'completed')
+  const passedRuns = completedRuns.filter(r => !r.error)
+  const healthScore = completedRuns.length > 0
+    ? Math.round((passedRuns.length / completedRuns.length) * 100)
     : 0
+  const pendingTests = testRuns.filter(r => r.status === 'queued' || r.status === 'diagnosing' || r.status === 'pending').length
+  const activeNow = testRuns.filter(r => r.status === 'running').length
+  const avgDurationMs = testRuns.filter(r => r.duration).length > 0
+    ? testRuns.filter(r => r.duration).reduce((acc, r) => acc + (r.duration || 0), 0) / testRuns.filter(r => r.duration).length
+    : 0
+  const avgDurationSec = Math.round(avgDurationMs / 1000)
+  const avgDurationMin = Math.floor(avgDurationSec / 60)
+  const avgDurationRemSec = avgDurationSec % 60
+  const formattedDuration = avgDurationSec > 0
+    ? (avgDurationMin > 0 ? `${avgDurationMin}m ${avgDurationRemSec}s` : `${avgDurationSec}s`)
+    : '-'
 
   function handleCancelClick(e: React.MouseEvent, run: TestRun) {
     e.stopPropagation()
@@ -508,16 +519,16 @@ export default function DashboardPage() {
         {/* Stats Grid */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(4, 1fr)',
+          gridTemplateColumns: 'repeat(5, 1fr)',
           gap: '1rem',
           marginBottom: '2rem',
         }}>
           <StatCard
             title="Health Score"
-            value={`${passRate}%`}
-            subtext="Last 30 days"
+            value={`${healthScore}%`}
+            subtext="Tests passed"
             icon="💚"
-            color={passRate > 80 ? 'var(--success)' : 'var(--error)'}
+            color={healthScore > 80 ? 'var(--success)' : healthScore > 50 ? 'var(--warning)' : 'var(--error)'}
           />
           <StatCard
             title="Total Runs"
@@ -527,15 +538,22 @@ export default function DashboardPage() {
             color="var(--text-secondary)"
           />
           <StatCard
+            title="Pending"
+            value={pendingTests}
+            subtext="In queue"
+            icon="⏳"
+            color={pendingTests > 0 ? 'var(--warning)' : 'var(--text-muted)'}
+          />
+          <StatCard
             title="Active Tests"
             value={activeNow}
             subtext="Running now"
             icon="⚡"
-            color="var(--warning)"
+            color={activeNow > 0 ? 'var(--primary)' : 'var(--text-muted)'}
           />
           <StatCard
             title="Avg Duration"
-            value={avgDuration > 0 ? `${avgDuration}s` : '-'}
+            value={formattedDuration}
             subtext="Per test"
             icon="⏱️"
             color="var(--info)"
@@ -1376,7 +1394,28 @@ export default function DashboardPage() {
                       />
                     </div>
                   </div>
-                  <BrowserMatrixSelector value={browserMatrix} onChange={setBrowserMatrix} />
+                  {/* Cross-Browser (Indie/Pro Only) */}
+                  {(currentTier === 'indie' || currentTier === 'pro') ? (
+                    <BrowserMatrixSelector value={browserMatrix} onChange={setBrowserMatrix} />
+                  ) : (
+                    <div style={{
+                      padding: '1rem',
+                      background: 'var(--bg-muted)',
+                      borderRadius: 'var(--radius-md)',
+                      border: '1px dashed var(--border-medium)',
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                        <span>🌐</span>
+                        <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>Cross-Browser Testing</span>
+                      </div>
+                      <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: 0 }}>
+                        Test on Chrome, Firefox & Safari simultaneously.
+                        <a href="/pricing" style={{ color: 'var(--primary)', marginLeft: '0.25rem' }}>
+                          Upgrade to Indie or Pro →
+                        </a>
+                      </p>
+                    </div>
+                  )}
                 </div>
               )}
 

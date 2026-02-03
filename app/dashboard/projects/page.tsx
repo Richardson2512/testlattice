@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { api, Project } from '@/lib/api'
 import { useDashboardData, invalidateProjects, useTierInfo } from '@/lib/hooks'
 import { FetchingIndicator } from '@/components/Skeleton'
+import { PRICING_TIERS, PricingTier } from '@/lib/pricing'
 
 export default function ProjectsPage() {
     const router = useRouter()
@@ -22,14 +23,22 @@ export default function ProjectsPage() {
     useEffect(() => {
         if (!tierLoading && tierInfo) {
             const tier = tierInfo.tier
-            if (tier === 'free' || tier === 'guest') {
+            if (['free', 'guest'].includes(tier)) {
                 router.replace('/dashboard')
             }
         }
     }, [tierInfo, tierLoading, router])
 
+    // Get tier limits
+    const tierKey = (tierInfo?.tier as PricingTier) || 'starter'
+    const tierLimits = PRICING_TIERS[tierKey]?.limits || PRICING_TIERS.starter.limits
+    const maxProjects = tierLimits.maxProjects
+    const currentProjectCount = projects.length
+    const canCreateProject = maxProjects === 'unlimited' || currentProjectCount < maxProjects
+    const projectsRemaining = maxProjects === 'unlimited' ? '∞' : Math.max(0, maxProjects - currentProjectCount)
+
     // Don't render page for free users while redirecting
-    if (tierLoading || tierInfo?.tier === 'free' || tierInfo?.tier === 'guest') {
+    if (tierLoading || ['free', 'guest'].includes(tierInfo?.tier || '')) {
         return (
             <div style={{ padding: '4rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
                 Loading...
@@ -39,6 +48,10 @@ export default function ProjectsPage() {
 
     async function handleCreateProject(e: React.FormEvent) {
         e.preventDefault()
+        if (!canCreateProject) {
+            alert(`You've reached your project limit (${maxProjects}). Upgrade to create more projects.`)
+            return
+        }
         setIsCreating(true)
         try {
             const { project } = await api.createProject({
@@ -65,24 +78,29 @@ export default function ProjectsPage() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
                 <div>
                     <h1 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '0.5rem' }}>Projects</h1>
-                    <p style={{ color: 'var(--text-secondary)' }}>Manage your test suites and configurations</p>
+                    <p style={{ color: 'var(--text-secondary)' }}>
+                        Manage your test suites • {currentProjectCount}/{maxProjects === 'unlimited' ? '∞' : maxProjects} projects used
+                    </p>
                 </div>
                 <button
-                    onClick={() => setShowCreateModal(true)}
+                    onClick={() => canCreateProject && setShowCreateModal(true)}
+                    disabled={!canCreateProject}
                     style={{
                         padding: '0.75rem 1.5rem',
-                        background: 'var(--primary)',
-                        color: 'white',
+                        background: canCreateProject ? 'var(--primary)' : 'var(--bg-muted)',
+                        color: canCreateProject ? 'white' : 'var(--text-muted)',
                         border: 'none',
                         borderRadius: 'var(--radius-md)',
                         fontWeight: 600,
-                        cursor: 'pointer',
+                        cursor: canCreateProject ? 'pointer' : 'not-allowed',
                         display: 'flex',
                         alignItems: 'center',
                         gap: '0.5rem',
+                        opacity: canCreateProject ? 1 : 0.7,
                     }}
+                    title={!canCreateProject ? `Project limit reached (${maxProjects}). Upgrade for more.` : ''}
                 >
-                    <span>+</span> New Project
+                    <span>+</span> {canCreateProject ? 'New Project' : 'Upgrade for More'}
                 </button>
             </div>
 
