@@ -956,23 +956,56 @@ export default function DashboardPage() {
                   <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', fontWeight: 500, color: 'var(--text-secondary)' }}>
                     Select Project
                   </label>
-                  <select
-                    value={selectedProject}
-                    onChange={e => setSelectedProject(e.target.value)}
-                    required
-                    style={{
-                      width: '100%',
-                      padding: '0.75rem',
-                      background: 'var(--bg-primary)',
-                      border: '1px solid var(--border-medium)',
+                  {projects.length === 0 ? (
+                    <div style={{
+                      padding: '1rem',
+                      background: 'rgba(59, 130, 246, 0.08)',
+                      border: '1px solid rgba(59, 130, 246, 0.2)',
                       borderRadius: 'var(--radius-md)',
-                      color: 'var(--text-primary)',
-                      fontSize: '0.9rem',
-                    }}
-                  >
-                    <option value="none">Choose Project...</option>
-                    {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-                  </select>
+                      textAlign: 'center'
+                    }}>
+                      <p style={{ margin: '0 0 0.75rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                        No projects yet. Create one to organize your tests.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowCreateTestModal(false)
+                          setShowCreateProjectModal(true)
+                        }}
+                        style={{
+                          padding: '0.5rem 1rem',
+                          background: 'var(--primary)',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: 'var(--radius-md)',
+                          fontWeight: 600,
+                          fontSize: '0.85rem',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        + Create First Project
+                      </button>
+                    </div>
+                  ) : (
+                    <select
+                      value={selectedProject}
+                      onChange={e => setSelectedProject(e.target.value)}
+                      required
+                      style={{
+                        width: '100%',
+                        padding: '0.75rem',
+                        background: 'var(--bg-primary)',
+                        border: '1px solid var(--border-medium)',
+                        borderRadius: 'var(--radius-md)',
+                        color: 'var(--text-primary)',
+                        fontSize: '0.9rem',
+                      }}
+                    >
+                      <option value="none">Choose Project...</option>
+                      {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                    </select>
+                  )}
                 </div>
 
                 {/* Test Mode Selector - Hidden for Free Tier */}

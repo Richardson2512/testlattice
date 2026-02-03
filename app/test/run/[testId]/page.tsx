@@ -10,6 +10,7 @@ import { DiagnosisProgressBar } from '@/components/DiagnosisProgressBar'
 import { filterStepsByBrowser, getBrowserDisplayName, aggregateBrowserRuns, type BrowserType } from '../../../../lib/browserResults'
 import { LiveTestControl } from '../../../../components/LiveTestControl'
 import { CancelTestModal } from '@/components/CancelTestModal'
+import { TestCompletionPopup } from '@/components/TestCompletionPopup'
 
 // --- ICONS ---
 const Icons = {
@@ -91,12 +92,16 @@ export default function TestRunPage() {
   const wsRef = useRef<WebSocket | null>(null)
   const lastFrameTime = useRef(0)
 
-  // Cancel modal state
   const [cancelModal, setCancelModal] = useState<{
     isOpen: boolean
     testUrl?: string
     testStatus?: string
   }>({ isOpen: false })
+
+  // Completion popup state
+  const [showCompletionPopup, setShowCompletionPopup] = useState(false)
+  const [completionStatus, setCompletionStatus] = useState<'completed' | 'failed'>('completed')
+  const hasShownCompletionRef = useRef(false)
 
   // Ref for selectedBrowser to access in WS callback without reconnecting
   const selectedBrowserRef = useRef(selectedBrowser)
@@ -145,8 +150,18 @@ export default function TestRunPage() {
 
   async function loadData() {
     try {
-      const { testRun } = await api.getTestRun(testId)
-      setTestRun(testRun)
+      const { testRun: newTestRun } = await api.getTestRun(testId)
+
+      // Check if test just completed/failed (trigger popup once)
+      if (!hasShownCompletionRef.current &&
+        (newTestRun.status === 'completed' || newTestRun.status === 'failed') &&
+        testRun?.status && ['running', 'diagnosing', 'waiting_approval'].includes(testRun.status)) {
+        setCompletionStatus(newTestRun.status as 'completed' | 'failed')
+        setShowCompletionPopup(true)
+        hasShownCompletionRef.current = true
+      }
+
+      setTestRun(newTestRun)
     } catch (e) { console.error('Load failed', e); }
     finally { setLoading(false) }
   }
@@ -721,6 +736,15 @@ export default function TestRunPage() {
         </aside>
 
       </div>
+
+      {/* Test Completion Popup */}
+      <TestCompletionPopup
+        isOpen={showCompletionPopup}
+        testRunId={testId}
+        testStatus={completionStatus}
+        testName={testRun?.name}
+        onClose={() => setShowCompletionPopup(false)}
+      />
 
       {/* Share Modal */}
       {showShareModal && testRun && (
