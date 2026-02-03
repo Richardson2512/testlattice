@@ -146,6 +146,7 @@ export default function DashboardPage() {
   // Map backend tier to pricing tier
   const tierMap: Record<string, PricingTier> = {
     'guest': 'free',
+    'free': 'free',  // Explicit mapping for free tier
     'starter': 'starter',
     'indie': 'indie',
     'pro': 'pro',

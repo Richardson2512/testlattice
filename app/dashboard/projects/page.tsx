@@ -1,21 +1,41 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { api, Project } from '@/lib/api'
-import { useDashboardData, invalidateProjects } from '@/lib/hooks'
+import { useDashboardData, invalidateProjects, useTierInfo } from '@/lib/hooks'
 import { FetchingIndicator } from '@/components/Skeleton'
 
 export default function ProjectsPage() {
     const router = useRouter()
     const { projects, isLoading, isFetching, refetch } = useDashboardData()
+    const { data: tierInfo, isLoading: tierLoading } = useTierInfo(true)
     const [showCreateModal, setShowCreateModal] = useState(false)
     const [isCreating, setIsCreating] = useState(false)
 
     // Create Project State
     const [newProjectName, setNewProjectName] = useState('')
     const [newProjectDescription, setNewProjectDescription] = useState('')
+
+    // Redirect free tier users to dashboard - they don't have project access
+    useEffect(() => {
+        if (!tierLoading && tierInfo) {
+            const tier = tierInfo.tier
+            if (tier === 'free' || tier === 'guest') {
+                router.replace('/dashboard')
+            }
+        }
+    }, [tierInfo, tierLoading, router])
+
+    // Don't render page for free users while redirecting
+    if (tierLoading || tierInfo?.tier === 'free' || tierInfo?.tier === 'guest') {
+        return (
+            <div style={{ padding: '4rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
+                Loading...
+            </div>
+        )
+    }
 
     async function handleCreateProject(e: React.FormEvent) {
         e.preventDefault()
