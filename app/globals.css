@@ -118,6 +118,12 @@ button {
   border-color: var(--primary);
 }
 
+.glass-card:active {
+  transform: translateY(-1px) scale(0.99);
+  box-shadow: var(--shadow-md);
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
 /* Typography Utilities */
 h1,
 h2,
@@ -179,6 +185,12 @@ h3 {
   box-shadow: var(--shadow-lg);
 }
 
+.btn-primary:active {
+  transform: translateY(1px) scale(0.98);
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
 .btn-secondary {
   background: transparent;
   border: 2px solid var(--border-medium);
@@ -190,6 +202,12 @@ h3 {
   border-color: var(--primary);
 }
 
+.btn-secondary:active {
+  transform: scale(0.98);
+  background: var(--beige-200);
+  transition: transform 0.1s ease;
+}
+
 .btn-outline {
   background: transparent;
   border: 2px solid var(--primary);
@@ -199,6 +217,12 @@ h3 {
 .btn-outline:hover {
   background: var(--primary);
   color: var(--text-inverse);
+}
+
+.btn-outline:active {
+  transform: scale(0.98);
+  background: var(--primary-hover);
+  transition: transform 0.1s ease;
 }
 
 .btn-large {
@@ -270,22 +294,21 @@ h3 {
   animation-delay: 300ms;
 }
 
-/* Custom Scrollbar */
+/* Hidden Scrollbar - Allows scrolling but hides the scrollbar UI */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 0;
+  height: 0;
+  display: none;
 }
 
-::-webkit-scrollbar-track {
-  background: transparent;
+/* Firefox */
+* {
+  scrollbar-width: none;
 }
 
-::-webkit-scrollbar-thumb {
-  background: var(--beige-400);
-  border-radius: var(--radius-full);
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--beige-500);
+/* IE/Edge */
+* {
+  -ms-overflow-style: none;
 }
 
 /* Documentation Navigation */

@@ -49,7 +49,6 @@ export function LandingHeader() {
   }, [supabase])
 
   if (!mounted) return <header className="glass-panel" style={{ height: '70px', position: 'fixed', top: 0, width: '100%', zIndex: 100 }} />
-  if (user) return null
 
   return (
     <header
@@ -169,14 +168,22 @@ export function LandingHeader() {
           </Link>
         </div>
 
-        {/* Auth Buttons */}
+        {/* Auth Buttons - Show Dashboard for logged-in users, Login/Signup for guests */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <Link href="/login" className="btn btn-secondary" style={{ padding: '0.5rem 1.25rem', fontSize: '0.9rem' }}>
-            Sign In
-          </Link>
-          <Link href="/signup" className="btn btn-primary" style={{ padding: '0.5rem 1.25rem', fontSize: '0.9rem' }}>
-            Get Started
-          </Link>
+          {user ? (
+            <Link href="/dashboard" className="btn btn-primary" style={{ padding: '0.5rem 1.25rem', fontSize: '0.9rem' }}>
+              Dashboard
+            </Link>
+          ) : (
+            <>
+              <Link href="/login" className="btn btn-secondary" style={{ padding: '0.5rem 1.25rem', fontSize: '0.9rem' }}>
+                Sign In
+              </Link>
+              <Link href="/signup" className="btn btn-primary" style={{ padding: '0.5rem 1.25rem', fontSize: '0.9rem' }}>
+                Get Started
+              </Link>
+            </>
+          )}
         </div>
       </nav>
       <style jsx>{`

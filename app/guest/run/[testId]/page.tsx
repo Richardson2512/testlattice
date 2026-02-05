@@ -9,11 +9,23 @@ import { SignupPromptModal } from '../../../../components/SignupPromptModal'
 import { StepLog } from '../../../../components/StepLog'
 import { EnhancedReportSummary } from '../../../../components/EnhancedReportSummary'
 import { useGuestTestRun } from '../../../../lib/hooks/useGuestTestRun'
+import { GuestProgressIndicator } from '../../../../components/GuestProgressIndicator'
 
 // --- ICONS ---
 const Icons = {
     Terminal: () => <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>,
     Globe: () => <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" /></svg>,
+}
+
+// Step counts per guest test type (matches backend executors)
+const GUEST_TEST_STEP_COUNTS: Record<string, number> = {
+    visual: 16,        // 16-Step Visual Test Contract
+    navigation: 12,    // Navigation links + validations
+    form: 15,          // Form detection + validation + submission
+    accessibility: 10, // WCAG checks + keyboard navigation
+    rage_bait: 12,     // Chaos testing steps
+    login: 12,         // Auth flow steps
+    signup: 14         // Auth flow with verification
 }
 
 export default function GuestTestRunPage() {
@@ -294,14 +306,16 @@ export default function GuestTestRunPage() {
 
                         {/* Real-time Progress Bar */}
                         {testRun?.steps?.length ? (() => {
-                            const maxSteps = (testRun?.options as any)?.maxSteps || 16
+                            const guestTestType = (testRun as any)?.testType || (testRun?.options as any)?.testType || (testRun?.options as any)?.guestTestType || 'visual'
+                            const maxSteps = GUEST_TEST_STEP_COUNTS[guestTestType] || 16
                             const progress = testRun.steps.length
                             const percent = Math.min((progress / maxSteps) * 100, 100)
+                            const testTypeName = guestTestType.charAt(0).toUpperCase() + guestTestType.slice(1).replace('_', ' ')
 
                             return (
                                 <div style={{ flex: 1, marginLeft: '16px', marginRight: '16px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px', color: 'var(--text-muted)' }}>
-                                        <span>Visual Inspection</span>
+                                        <span>{testTypeName} Inspection</span>
                                         <span>{progress}/{maxSteps} Checks</span>
                                     </div>
                                     <div style={{ width: '100%', height: '4px', background: 'var(--beige-200)', borderRadius: '2px', overflow: 'hidden' }}>
@@ -331,6 +345,13 @@ export default function GuestTestRunPage() {
                         padding: '16px',
                         background: 'var(--bg-card)'
                     }}>
+                        {/* Guest Progress Indicator - Shows step limit approaching */}
+                        {testRun && (testRun.status === 'running' || testRun.status === 'diagnosing') && (
+                            <GuestProgressIndicator
+                                testRun={testRun}
+                                currentStep={testRun?.steps?.length || 0}
+                            />
+                        )}
                         <StepLog steps={testRun?.steps || []} status={testRun?.status} />
                     </div>
                 </div>

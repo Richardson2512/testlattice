@@ -20,16 +20,39 @@ export default function LayoutShell({
     }, [])
 
     // Routes where sidebar should ALWAYS be hidden, even if authenticated
-    // This addresses the issue where password reset/update flows show the dashboard sidebar
+    // This allows logged-in users to view public pages with the normal header
     const isExcludedRoute =
+        // Auth routes
         pathname?.startsWith('/update-password') ||
         pathname?.startsWith('/reset-password') ||
         pathname?.startsWith('/forgot-password') ||
         pathname?.startsWith('/login') ||
         pathname?.startsWith('/signup') ||
-        pathname?.startsWith('/auth/callback')
+        pathname?.startsWith('/auth/callback') ||
+        // Public pages - logged-in users should see these with normal header (not dashboard sidebar)
+        pathname === '/' ||
+        pathname?.startsWith('/blog') ||
+        pathname?.startsWith('/about') ||
+        pathname?.startsWith('/pricing') ||
+        pathname?.startsWith('/features') ||
+        pathname?.startsWith('/contact') ||
+        pathname?.startsWith('/docs') ||
+        pathname?.startsWith('/faq') ||
+        pathname?.startsWith('/whitepaper') ||
+        pathname?.startsWith('/privacy-policy') ||
+        pathname?.startsWith('/terms-of-service') ||
+        pathname?.startsWith('/community') ||
+        pathname?.startsWith('/how-rihario-works') ||
+        pathname?.startsWith('/why-rihario') ||
+        pathname?.startsWith('/glossary') ||
+        pathname?.startsWith('/compare') ||
+        pathname?.startsWith('/vibe-coding') ||
+        pathname?.startsWith('/testing-types') ||
+        pathname?.startsWith('/what-is-') ||
+        pathname?.startsWith('/rage-bait-testing') ||
+        pathname?.startsWith('/behavior-test')
 
-    // Show sidebar only if authenticated AND not on an excluded route AND mounted
+    // Show sidebar only on dashboard/app routes when authenticated
     const showSidebar = mounted && userAuthenticated && !isExcludedRoute
 
     return (

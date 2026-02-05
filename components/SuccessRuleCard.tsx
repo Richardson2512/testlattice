@@ -1,7 +1,7 @@
 'use client'
 
 interface SuccessRuleCardProps {
-    category: 'Performance' | 'Accessibility' | 'Security' | 'Visual'
+    category: 'Performance' | 'Accessibility' | 'Security' | 'Visual' | 'Navigation' | 'Frustration'
     status: 'pass' | 'warning' | 'fail' | 'soft-fail'
     score?: number
     metrics: Array<{
@@ -17,7 +17,9 @@ export function SuccessRuleCard({ category, status, score, metrics }: SuccessRul
         Performance: { title: 'Speed & Experience', icon: '⚡' },
         Accessibility: { title: 'Accessibility', icon: '♿' },
         Security: { title: 'Security Check', icon: '🛡️' },
-        Visual: { title: 'Visual Polish', icon: '🎨' }
+        Visual: { title: 'Visual Polish', icon: '🎨' },
+        Navigation: { title: 'Navigation Health', icon: '🧭' },
+        Frustration: { title: 'User Frustration', icon: '😤' }
     }[category]
 
     // Map status to friendly badges

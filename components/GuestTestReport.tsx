@@ -1,6 +1,10 @@
 'use client'
 
 import React from 'react'
+import { ContextualCTA } from './ContextualCTA'
+import { UrgencyTimer } from './UrgencyTimer'
+import { IronManHUD } from './IronManHUD'
+import { TestRun } from '@/lib/api'
 
 // Step data from the test run
 interface TestStep {
@@ -21,6 +25,9 @@ interface GuestTestReportProps {
     testType: 'visual' | 'navigation' | 'accessibility' | 'performance' | 'full'
     steps: TestStep[]
     targetUrl: string
+    testRun?: TestRun  // Optional testRun for contextual CTAs
+    testCompleted?: boolean
+    maxSteps?: number
 }
 
 // Map test types to relevant step actions
@@ -548,7 +555,7 @@ const TEST_TYPE_INFO: Record<string, { title: string; description: string; icon:
     }
 }
 
-export function GuestTestReport({ testType, steps, targetUrl }: GuestTestReportProps) {
+export function GuestTestReport({ testType, steps, targetUrl, testRun, testCompleted, maxSteps = 10 }: GuestTestReportProps) {
     const info = TEST_TYPE_INFO[testType] || TEST_TYPE_INFO.full
     // Show ALL steps - backend already filters based on test type
     // No frontend filtering needed
@@ -559,8 +566,28 @@ export function GuestTestReport({ testType, steps, targetUrl }: GuestTestReportP
     const warnings = relevantSteps.filter(s => s.success && s.severity === 'YELLOW')
     const passed = relevantSteps.filter(s => s.success && (!s.severity || s.severity === 'GREEN'))
 
+    // Calculate contextual CTA metrics
+    const criticalIssues = issues.filter(s => s.severity === 'RED').length
+    const hitStepLimit = steps.length >= maxSteps
+
     return (
         <div style={{ marginBottom: '2rem' }}>
+            {/* Urgency Timer - Guest results expire */}
+            {testRun?.expiresAt && (
+                <UrgencyTimer expiresAt={testRun.expiresAt} />
+            )}
+
+            {/* Contextual CTA - Smart signup prompts */}
+            {testRun && (
+                <ContextualCTA
+                    testRun={testRun}
+                    issuesFound={issues.length}
+                    criticalIssues={criticalIssues}
+                    hitStepLimit={hitStepLimit}
+                    testCompleted={testCompleted}
+                />
+            )}
+
             {/* Header */}
             <div style={{
                 background: 'var(--bg-secondary)',
@@ -748,20 +775,17 @@ function StepCard({ step }: { step: TestStep }) {
                         </div>
                     )}
 
-                    {/* Screenshot */}
+                    {/* Screenshot with IronManHUD */}
                     {step.screenshotUrl && (
-                        <div style={{ marginTop: '1rem' }}>
-                            <img
-                                src={step.screenshotUrl}
-                                alt={`Screenshot for ${label.name}`}
-                                style={{
-                                    maxWidth: '100%',
-                                    borderRadius: '4px',
-                                    border: '1px solid var(--border-medium)',
-                                    maxHeight: '300px',
-                                    objectFit: 'contain',
-                                    display: 'block'
-                                }}
+                        <div style={{ marginTop: '1rem', position: 'relative', height: '300px' }}>
+                            <IronManHUD
+                                screenshotUrl={step.screenshotUrl}
+                                targetElementBounds={step.success === false ? {
+                                    selector: step.note || step.action,
+                                    bounds: { x: 0, y: 0, width: 0, height: 0 },
+                                    interactionType: 'failed'
+                                } : undefined}
+                                showAll={false}
                             />
                         </div>
                     )}

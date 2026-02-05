@@ -5,6 +5,8 @@ import { useParams, useRouter } from 'next/navigation'
 import { api, TestRun, TestArtifact } from '../../../../lib/api'
 import Link from 'next/link'
 import VideoPlayer from '../../../../components/VideoPlayer'
+import VirtualDisplay from '../../../../components/VirtualDisplay'
+import { IronManHUD } from '../../../../components/IronManHUD'
 import { TraceViewer } from '../../../../components/TraceViewer'
 import { FixPromptButton } from '../../../../components/FixPromptButton'
 import { FixPromptDisplay } from '../../../../components/FixPromptDisplay'
@@ -67,6 +69,7 @@ export default function DeepInsightsPage() {
   const [selectedBrowser, setSelectedBrowser] = useState<BrowserType | 'all'>('all')
   const [isEditingName, setIsEditingName] = useState(false)
   const [editedName, setEditedName] = useState('')
+  const [replayMode, setReplayMode] = useState<'video' | 'steps'>('video')
 
   useEffect(() => {
     loadData()
@@ -140,6 +143,9 @@ export default function DeepInsightsPage() {
   // Determine if this is a guest test (show different report format)
   const isGuestTest = testRun?.options?.isGuestRun || testRun?.options?.testMode === 'guest'
   const guestTestType = (testRun?.options?.guestTestType || 'visual') as 'visual' | 'navigation' | 'accessibility' | 'performance' | 'full'
+
+  // Extract selected test types for paid users (used to conditionally show report sections)
+  const selectedTestTypes: string[] = testRun?.options?.selectedTestTypes || ['visual', 'navigation', 'accessibility', 'rage_bait']
 
   // Comprehensive Data Extraction (Safe Access)
   const results = testRun?.diagnosis?.comprehensiveTests
@@ -471,53 +477,91 @@ export default function DeepInsightsPage() {
             testType={guestTestType}
             steps={filteredSteps as any}
             targetUrl={testRun.build?.url || ''}
+            testRun={testRun}
+            testCompleted={testRun.status === 'completed'}
+            maxSteps={testRun.options?.maxSteps || 10}
           />
         ) : (
-          /* Registered Test: Show comprehensive Quality & Health Check */
+          /* Registered Test: Show comprehensive Quality & Health Check - Dynamic based on test types */
           <section style={{ marginBottom: '2rem' }}>
             <h2 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '1rem' }}>Quality & Health Check</h2>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem' }}>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>
+              Showing results for: {selectedTestTypes.map(t => t.charAt(0).toUpperCase() + t.slice(1).replace('_', ' ')).join(', ')}
+            </p>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem' }}>
 
-              {/* 1. Performance (Speed) */}
-              <SuccessRuleCard
-                category="Performance"
-                status={(lcpValue || 0) > 2500 ? 'warning' : 'pass'}
-                metrics={[
-                  { label: 'Loading Speed', value: lcpValue ? `${(lcpValue / 1000).toFixed(2)}s` : 'N/A', status: (lcpValue || 0) > 2500 ? 'warning' : 'pass' },
-                  { label: 'Visual Stability', value: clsValue?.toFixed(3) || '0', status: (clsValue || 0) > 0.1 ? 'warning' : 'pass' }
-                ]}
-              />
+              {/* Performance Card - Show for 'performance' test type */}
+              {selectedTestTypes.includes('performance') && (
+                <SuccessRuleCard
+                  category="Performance"
+                  status={(lcpValue || 0) > 2500 ? 'warning' : 'pass'}
+                  metrics={[
+                    { label: 'Loading Speed (LCP)', value: lcpValue ? `${(lcpValue / 1000).toFixed(2)}s` : 'N/A', status: (lcpValue || 0) > 2500 ? 'warning' : 'pass' },
+                    { label: 'Visual Stability (CLS)', value: clsValue ? clsValue.toFixed(3) : '0.000', status: (clsValue || 0) > 0.1 ? 'warning' : 'pass' }
+                  ]}
+                />
+              )}
 
-              {/* 2. Accessibility */}
-              <SuccessRuleCard
-                category="Accessibility"
-                status={accessScore < 90 ? 'warning' : 'pass'}
-                score={accessScore}
-                metrics={[
-                  { label: 'Critical Issues', value: results?.accessibility?.filter(i => i.impact === 'high' || (i.impact as string) === 'critical').length || 0, status: (results?.accessibility?.filter(i => i.impact === 'high').length || 0) > 0 ? 'fail' : 'pass' },
-                  { label: 'Minor Improvements', value: results?.accessibility?.filter(i => i.type === 'warning').length || 0, status: 'warning' }
-                ]}
-              />
+              {/* Accessibility Card - Show for 'accessibility' test type */}
+              {selectedTestTypes.includes('accessibility') && (
+                <SuccessRuleCard
+                  category="Accessibility"
+                  status={accessScore < 90 ? 'warning' : 'pass'}
+                  score={accessScore}
+                  metrics={[
+                    { label: 'Critical Issues', value: results?.accessibility?.filter(i => i.impact === 'high' || (i.impact as string) === 'critical').length || 0, status: (results?.accessibility?.filter(i => i.impact === 'high').length || 0) > 0 ? 'fail' : 'pass' },
+                    { label: 'Minor Improvements', value: results?.accessibility?.filter(i => i.type === 'warning').length || 0, status: 'warning' }
+                  ]}
+                />
+              )}
 
-              {/* 3. Security */}
-              <SuccessRuleCard
-                category="Security"
-                status={securityIssues.length > 0 ? 'fail' : 'pass'}
-                metrics={[
-                  { label: 'Vulnerabilities', value: securityIssues.length, status: securityIssues.length > 0 ? 'fail' : 'pass' },
-                  { label: 'Safe Connection', value: 'Verified', status: 'pass' }
-                ]}
-              />
+              {/* Security Card - Show for 'security' test type */}
+              {selectedTestTypes.includes('security') && (
+                <SuccessRuleCard
+                  category="Security"
+                  status={securityIssues.length > 0 ? 'fail' : 'pass'}
+                  metrics={[
+                    { label: 'Vulnerabilities', value: securityIssues.length, status: securityIssues.length > 0 ? 'fail' : 'pass' },
+                    { label: 'HTTPS Connection', value: testRun?.build?.url?.startsWith('https') ? 'Secure' : 'Not Secure', status: testRun?.build?.url?.startsWith('https') ? 'pass' : 'warning' }
+                  ]}
+                />
+              )}
 
-              {/* 4. Visual */}
-              <SuccessRuleCard
-                category="Visual"
-                status={visualIssues.length > 0 ? 'warning' : 'pass'}
-                metrics={[
-                  { label: 'Visual Bugs', value: visualIssues.length, status: visualIssues.length > 0 ? 'warning' : 'pass' },
-                  { label: 'Layout Shifts', value: 'None Detected', status: 'pass' }
-                ]}
-              />
+              {/* Visual Card - Show for 'visual' test type */}
+              {selectedTestTypes.includes('visual') && (
+                <SuccessRuleCard
+                  category="Visual"
+                  status={visualIssues.length > 0 ? 'warning' : 'pass'}
+                  metrics={[
+                    { label: 'Visual Bugs', value: visualIssues.length, status: visualIssues.length > 0 ? 'warning' : 'pass' },
+                    { label: 'Layout Shifts', value: (clsValue || 0) > 0 ? `${(clsValue || 0).toFixed(3)} CLS` : 'None Detected', status: (clsValue || 0) > 0.1 ? 'warning' : 'pass' }
+                  ]}
+                />
+              )}
+
+              {/* Navigation Card - Show for 'navigation' test type */}
+              {selectedTestTypes.includes('navigation') && (
+                <SuccessRuleCard
+                  category="Navigation"
+                  status={filteredSteps.filter(s => s.action?.includes('navigate') && !s.success).length > 0 ? 'warning' : 'pass'}
+                  metrics={[
+                    { label: 'Pages Visited', value: filteredSteps.filter(s => s.action?.includes('navigate')).length, status: 'pass' },
+                    { label: 'Broken Links', value: filteredSteps.filter(s => s.action?.includes('navigate') && !s.success).length, status: filteredSteps.filter(s => s.action?.includes('navigate') && !s.success).length > 0 ? 'fail' : 'pass' }
+                  ]}
+                />
+              )}
+
+              {/* Rage Bait Card - Show for 'rage_bait' test type */}
+              {selectedTestTypes.includes('rage_bait') && (
+                <SuccessRuleCard
+                  category="Frustration"
+                  status={filteredSteps.filter(s => s.action === 'rage_click_detected').length > 0 ? 'fail' : 'pass'}
+                  metrics={[
+                    { label: 'Frustration Triggers', value: filteredSteps.filter(s => s.action === 'rage_click_detected').length, status: filteredSteps.filter(s => s.action === 'rage_click_detected').length > 0 ? 'fail' : 'pass' },
+                    { label: 'Dead Click Areas', value: filteredSteps.filter(s => s.action === 'dead_click').length, status: filteredSteps.filter(s => s.action === 'dead_click').length > 0 ? 'warning' : 'pass' }
+                  ]}
+                />
+              )}
 
             </div>
           </section>
@@ -528,13 +572,82 @@ export default function DeepInsightsPage() {
         {/* Video & Timeline Section - Hidden for Guest Tests */}
         {!isGuestTest && (
           <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem', marginBottom: '2rem', height: '600px' }}>
-            {/* Video Player Box */}
-            <div style={{ background: '#000', borderRadius: 'var(--radius-lg)', overflow: 'hidden', border: '1px solid var(--border-medium)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              {videoUrl ? (
-                <VideoPlayer videoUrl={videoUrl} title={`Test Replay`} />
-              ) : (
-                <div style={{ color: 'var(--text-muted)' }}>No video recording available</div>
-              )}
+            {/* Video/Step Replay Player Box */}
+            <div style={{ display: 'flex', flexDirection: 'column', borderRadius: 'var(--radius-lg)', overflow: 'hidden', border: '1px solid var(--border-medium)' }}>
+              {/* Mode Toggle */}
+              <div style={{
+                display: 'flex',
+                gap: '0.5rem',
+                padding: '0.75rem 1rem',
+                background: 'var(--bg-secondary)',
+                borderBottom: '1px solid var(--border-light)'
+              }}>
+                <button
+                  onClick={() => setReplayMode('video')}
+                  style={{
+                    padding: '0.5rem 1rem',
+                    borderRadius: 'var(--radius-md)',
+                    border: 'none',
+                    background: replayMode === 'video' ? 'var(--primary)' : 'var(--bg-tertiary)',
+                    color: replayMode === 'video' ? '#fff' : 'var(--text-secondary)',
+                    fontWeight: 600,
+                    fontSize: '0.85rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.4rem'
+                  }}
+                >
+                  🎬 Video
+                </button>
+                <button
+                  onClick={() => setReplayMode('steps')}
+                  style={{
+                    padding: '0.5rem 1rem',
+                    borderRadius: 'var(--radius-md)',
+                    border: 'none',
+                    background: replayMode === 'steps' ? 'var(--primary)' : 'var(--bg-tertiary)',
+                    color: replayMode === 'steps' ? '#fff' : 'var(--text-secondary)',
+                    fontWeight: 600,
+                    fontSize: '0.85rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.4rem'
+                  }}
+                >
+                  📸 Step Replay
+                </button>
+              </div>
+
+              {/* Content Area */}
+              <div style={{ flex: 1, background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {replayMode === 'video' ? (
+                  videoUrl ? (
+                    <VideoPlayer videoUrl={videoUrl} title={`Test Replay`} />
+                  ) : (
+                    <div style={{ color: 'var(--text-muted)' }}>No video recording available</div>
+                  )
+                ) : (
+                  /* VirtualDisplay - Step by Step Replay with Screenshots */
+                  filteredSteps.length > 0 ? (
+                    <VirtualDisplay
+                      steps={filteredSteps.map((step, idx) => ({
+                        id: step.id || `step-${idx}`,
+                        stepNumber: idx + 1,
+                        action: step.action,
+                        target: step.target || step.selector,
+                        value: step.value,
+                        timestamp: step.timestamp || new Date().toISOString(),
+                        screenshotUrl: step.screenshotUrl,
+                        success: step.success !== false
+                      }))}
+                    />
+                  ) : (
+                    <div style={{ color: 'var(--text-muted)' }}>No steps recorded</div>
+                  )
+                )}
+              </div>
             </div>
 
             {/* Steps Timeline (The Story) */}
@@ -614,7 +727,7 @@ export default function DeepInsightsPage() {
               <TabButton active={activeTab === 'diffs'} onClick={() => setActiveTab('diffs')}>Visual Changes</TabButton>
             </div>
 
-            <div style={{ padding: '2rem', minHeight: '300px' }}>
+            <div style={{ padding: '1.5rem', maxHeight: '500px', overflowY: 'auto' }}>
               {activeTab === 'timeline' && (
                 <div style={{ height: '400px' }}>
                   {traceUrl ? (
@@ -628,18 +741,128 @@ export default function DeepInsightsPage() {
               )}
 
               {activeTab === 'console' && (
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.9rem' }}>
-                  {/* Logic to map console logs would go here - for now placeholder */}
-                  <div style={{ color: 'var(--text-muted)' }}>No system logs captured for this session.</div>
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem' }}>
+                  {results?.consoleErrors && results.consoleErrors.length > 0 ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                      {results.consoleErrors.map((err, i) => (
+                        <div key={i} style={{
+                          padding: '0.75rem',
+                          background: err.type === 'error' ? 'rgba(239, 68, 68, 0.1)' : err.type === 'warning' ? 'rgba(245, 158, 11, 0.1)' : 'rgba(59, 130, 246, 0.1)',
+                          borderRadius: 'var(--radius-md)',
+                          borderLeft: `3px solid ${err.type === 'error' ? 'var(--error)' : err.type === 'warning' ? 'var(--warning)' : 'var(--info)'}`
+                        }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
+                            <span style={{
+                              fontWeight: 600,
+                              color: err.type === 'error' ? 'var(--error)' : err.type === 'warning' ? 'var(--warning)' : 'var(--info)',
+                              textTransform: 'uppercase',
+                              fontSize: '0.7rem'
+                            }}>
+                              {err.type}
+                            </span>
+                            <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                              {err.source ? `${err.source}:${err.line || '?'}` : err.timestamp}
+                            </span>
+                          </div>
+                          <div style={{ color: 'var(--text-primary)', wordBreak: 'break-word' }}>
+                            {err.message}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
+                      ✓ No console errors captured during this test session.
+                    </div>
+                  )}
                 </div>
               )}
 
               {activeTab === 'network' && (
-                <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--text-muted)' }}>Network activity visualization.</div>
+                <div>
+                  {results?.networkErrors && results.networkErrors.length > 0 ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                      {results.networkErrors.map((err, i) => (
+                        <div key={i} style={{
+                          padding: '0.75rem',
+                          background: err.status >= 500 ? 'rgba(239, 68, 68, 0.1)' : err.status >= 400 ? 'rgba(245, 158, 11, 0.1)' : 'var(--bg-tertiary)',
+                          borderRadius: 'var(--radius-md)',
+                          fontFamily: 'var(--font-mono)',
+                          fontSize: '0.8rem'
+                        }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.25rem' }}>
+                            <span style={{
+                              padding: '2px 6px',
+                              borderRadius: '4px',
+                              background: err.status >= 500 ? 'var(--error)' : err.status >= 400 ? 'var(--warning)' : 'var(--success)',
+                              color: 'white',
+                              fontSize: '0.7rem',
+                              fontWeight: 600
+                            }}>
+                              {err.status}
+                            </span>
+                            <span style={{ fontWeight: 500, color: 'var(--text-primary)' }}>{err.method}</span>
+                            <span style={{ color: 'var(--text-muted)', fontSize: '0.7rem' }}>{err.resourceType || 'request'}</span>
+                          </div>
+                          <div style={{ color: 'var(--text-secondary)', wordBreak: 'break-all', fontSize: '0.75rem' }}>
+                            {err.url}
+                          </div>
+                          {err.errorText && (
+                            <div style={{ color: 'var(--error)', marginTop: '0.25rem', fontSize: '0.75rem' }}>
+                              {err.errorText}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
+                      ✓ No network errors detected during this test session.
+                    </div>
+                  )}
+                </div>
               )}
 
               {activeTab === 'diffs' && (
-                <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--text-muted)' }}>No visual changes detected.</div>
+                <div>
+                  {visualIssues && visualIssues.length > 0 ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                      {visualIssues.map((issue, i) => (
+                        <div key={i} style={{
+                          padding: '1rem',
+                          background: 'var(--bg-tertiary)',
+                          borderRadius: 'var(--radius-md)',
+                          borderLeft: `3px solid ${issue.severity === 'high' ? 'var(--error)' : issue.severity === 'medium' ? 'var(--warning)' : 'var(--info)'}`
+                        }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                            <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{issue.type}</span>
+                            <span style={{
+                              padding: '2px 8px',
+                              borderRadius: '999px',
+                              background: issue.severity === 'high' ? 'rgba(239, 68, 68, 0.1)' : issue.severity === 'medium' ? 'rgba(245, 158, 11, 0.1)' : 'rgba(59, 130, 246, 0.1)',
+                              color: issue.severity === 'high' ? 'var(--error)' : issue.severity === 'medium' ? 'var(--warning)' : 'var(--info)',
+                              fontSize: '0.75rem',
+                              fontWeight: 600,
+                              textTransform: 'uppercase'
+                            }}>
+                              {issue.severity}
+                            </span>
+                          </div>
+                          <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+                            {issue.description}
+                          </div>
+                          {issue.screenshot && (
+                            <img src={issue.screenshot} alt="Visual issue" style={{ marginTop: '0.75rem', maxWidth: '100%', borderRadius: 'var(--radius-sm)' }} />
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
+                      ✓ No visual changes or issues detected.
+                    </div>
+                  )}
+                </div>
               )}
             </div>
           </div>

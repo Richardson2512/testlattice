@@ -11,6 +11,7 @@ import { filterStepsByBrowser, getBrowserDisplayName, aggregateBrowserRuns, type
 import { LiveTestControl } from '../../../../components/LiveTestControl'
 import { CancelTestModal } from '@/components/CancelTestModal'
 import { TestCompletionPopup } from '@/components/TestCompletionPopup'
+import { useProgressStream } from '@/lib/hooks/useProgressStream'
 
 // --- ICONS ---
 const Icons = {
@@ -140,11 +141,14 @@ export default function TestRunPage() {
   // Polling & Data Load
   useEffect(() => {
     loadData()
+    // Poll more frequently during diagnosis (1.5s) to catch all 5 steps
+    // Use slower polling (5s) for running tests to reduce API load
+    const pollInterval = testRun?.status === 'diagnosing' ? 1500 : 5000
     const interval = setInterval(() => {
       if (testRun?.status === 'running' || testRun?.status === 'queued' || testRun?.status === 'diagnosing') {
         loadData()
       }
-    }, 5000)
+    }, pollInterval)
     return () => clearInterval(interval)
   }, [testId, testRun?.status])
 
@@ -281,6 +285,9 @@ export default function TestRunPage() {
   )
 
   // Show Testability Contract Report during diagnosis/waiting approval
+  // Use real-time progress stream if diagnosing
+  const streamedProgress = useProgressStream(testId as string, testRun?.status === 'diagnosing')
+
   if (testRun?.status === 'diagnosing' || testRun?.status === 'waiting_approval') {
     const { TestabilityContractReport } = require('@/components/TestabilityContractReport')
 
@@ -290,7 +297,7 @@ export default function TestRunPage() {
         <div style={{ background: 'var(--bg-primary)', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px 20px' }}>
           {/* Enhanced Progress Bar with Live Commentary */}
           <DiagnosisProgressBar
-            progress={testRun.diagnosisProgress}
+            progress={streamedProgress || testRun.diagnosisProgress}
           />
         </div>
       )
@@ -593,6 +600,7 @@ export default function TestRunPage() {
                 onResume={() => api.resumeTestRun(testId)}
                 isPaused={testRun?.paused}
                 currentStep={testRun?.steps?.length || 0}
+                totalSteps={testRun?.options?.maxSteps || testRun?.steps?.length || 15}
                 style={{ width: '100%', height: '100%' }}
                 minimal={true}
                 className="no-print"
