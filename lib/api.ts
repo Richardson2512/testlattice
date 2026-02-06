@@ -787,6 +787,7 @@ export const api = {
   async approveTestRun(runId: string): Promise<{ success: boolean; testRun: TestRun }> {
     return request(`/api/tests/${runId}/approve`, {
       method: 'POST',
+      body: JSON.stringify({}),
     })
   },
 
@@ -794,6 +795,7 @@ export const api = {
   async generateReport(runId: string): Promise<{ success: boolean; testRun: TestRun; reportUrl: string; message: string }> {
     return request(`/api/tests/${runId}/report`, {
       method: 'POST',
+      body: JSON.stringify({}),
     })
   },
 
@@ -801,6 +803,7 @@ export const api = {
   async stopTestRun(runId: string): Promise<{ success: boolean; testRun: TestRun; message: string }> {
     return request(`/api/tests/${runId}/stop`, {
       method: 'POST',
+      body: JSON.stringify({}),
     })
   },
 
@@ -1066,7 +1069,7 @@ export const api = {
     tier: string
     message?: string
   }> {
-    return request('/api/billing/reconcile', { method: 'POST' })
+    return request('/api/billing/reconcile', { method: 'POST', body: JSON.stringify({}) })
   },
 
   async checkUsage(): Promise<{
