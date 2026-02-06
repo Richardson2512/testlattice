@@ -125,6 +125,9 @@ export default function TestRunPage() {
     return aggregateBrowserRuns(testRun)
   }, [testRun])
 
+  // SSE Progress stream for real-time diagnosis updates (must be called before early returns)
+  const streamedProgress = useProgressStream(testId as string, testRun?.status === 'diagnosing')
+
   const handleDownloadPDF = async () => {
     if (!testRun) return
     // Simple alert for now -> proper toast later
@@ -284,9 +287,7 @@ export default function TestRunPage() {
     </div>
   )
 
-  // Show Testability Contract Report during diagnosis/waiting approval
-  // Use real-time progress stream if diagnosing
-  const streamedProgress = useProgressStream(testId as string, testRun?.status === 'diagnosing')
+  // Use real-time progress stream if diagnosing (hook called above, before early returns)
 
   if (testRun?.status === 'diagnosing' || testRun?.status === 'waiting_approval') {
     const { TestabilityContractReport } = require('@/components/TestabilityContractReport')
