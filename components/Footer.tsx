@@ -55,6 +55,11 @@ export function Footer() {
                     </div>
                 </div>
                 <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '2rem', textAlign: 'center', color: 'var(--beige-400)', fontSize: '0.85rem' }}>
+                    <div style={{ marginBottom: '1.5rem' }}>
+                        <a href="https://www.puthusu.com/products/rihario" target="_blank" rel="noopener">
+                            <img src="https://www.puthusu.com/products/rihario/badge" alt="Rihario - Featured on Puthusu" width={236} height={54} />
+                        </a>
+                    </div>
                     © {new Date().getFullYear()} Rihario Inc. All rights reserved.
                 </div>
             </div>
